@@ -1,4 +1,4 @@
-import {SONGS2} from './songs2';
+import {SONGS2} from './songs2';import {SONGS3} from './songs3';
 import {XTF,XTL,XCL,XSONG,XWHO,XLIKE,XMIME,XWORDS,XSPY,XSELFIE,XFIB} from './extra';
 const L=(s:string)=>s.trim().split('\n').map(x=>x.split('|'));
 const TF0=L(`Sverige har över 200 000 öar|1
@@ -289,7 +289,7 @@ export const MEL:any=[{n:'Grattis på födelsedagen',s:[[60,1],[60,1],[62,2],[60
 export const TF=[...TF0,...XTF];
 export const TIMELINE=[...TIMELINE0,...XTL];
 export const CLOSEST=[...CLOSEST0,...XCL];
-export const SONGS=[...SONGS0,...XSONG,...SONGS2].filter((s,i,a)=>a.findIndex(x=>x.t===s.t&&x.a===s.a)===i);
+export const SONGS=[...SONGS0,...XSONG,...SONGS2,...SONGS3].filter((s,i,a)=>a.findIndex(x=>x.t===s.t&&x.a===s.a)===i);
 export const WORDS=[...WORDS0,...XWORDS];
 export const FIB=[...FIB0,...XFIB];
 export const WHO=[...WHO0,...XWHO];

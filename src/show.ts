@@ -112,7 +112,7 @@ export class Show{
     after:(ms,f)=>{s.timers.push(setTimeout(s.safe(f),ms/FAST))},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
     countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),say:t=>say(t),quip:ok=>{if(Math.random()<.45)say(ok?LINES.right():LINES.wrong())},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
     mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
-    used(k,n,pool){let u=s.usedPools[k]||[];const free=[...Array(pool).keys()].filter(i=>!u.includes(i));let list=free.sort(()=>Math.random()-.5).slice(0,n);if(list.length<n){u=[];list=[...list,...[...Array(pool).keys()].filter(i=>!list.includes(i)).sort(()=>Math.random()-.5).slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];return list},
+    used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];let free=all.filter(i=>!u.includes(i)).sort(()=>Math.random()-.5);let list=free.slice(0,n);if(list.length<n){u=u.filter(i=>!all.includes(i));free=all.filter(i=>!list.includes(i)).sort(()=>Math.random()-.5);list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
   }}
   teamList(){return Array.from({length:this.teamCount},(_,i)=>({id:i,...TEAM[i],members:this.players.filter(p=>p.team===i)})).filter(t=>t.members.length)}
   finalRows(){

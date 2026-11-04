@@ -9,7 +9,7 @@ const FastTv=({g,show}:any)=>{const q=g.cur;if(!q)return null;return <Stage kick
 class Big extends RB{qms=20000;revealMs=5000;step=0;catV:any={};cat='';setup(){this.items=[0,1,2,3,4,5,6,7,8].map(i=>({i}))}
  voting=true;cats:string[]=[];
  begin(){if(this.idx%3===0){this.voting=true;this.cats=shuffle(CATS).slice(0,3);this.qms=10000;this.t=null}else this.loadQ()}
- t:any=null;loadQ(){this.voting=false;this.qms=20000;this.t=mc(pick(this.api,'big:'+this.cat,QUIZ.filter(x=>x.cat===this.cat),1)[0])}
+ t:any=null;loadQ(){this.voting=false;this.qms=20000;this.t=mc(QUIZ[this.api.used('quiz',1,QUIZ.length,(i:number)=>QUIZ[i].cat===this.cat)[0]])}
  get qq(){return this.t}
  ask(p:string){return this.voting?{k:'choice',prompt:'Välj kategori',opts:this.cats.map(c=>({id:c,label:c})),sel:this.sel(p)}:{k:'choice',prompt:'Dubbla med snabbhet',opts:this.t.o.map((o:string)=>({id:o,label:o})),sel:this.sel(p)}}
  close(){if(this.phase!=='q')return;if(this.voting){const c:any={};Object.values(this.ans).forEach((a:any)=>c[a.v]=(c[a.v]||0)+1);this.cat=Object.keys(c).sort((a,b)=>c[b]-c[a])[0]||this.cats[0];this.ans={};this.t0=this.api.now();this.loadQ();this.api.countdown(this.qms,()=>this.close());this.api.refresh();return}super.close()}
@@ -56,8 +56,8 @@ class TFG extends RB{qms=14000;revealMs=4500;bank:any={};stage='bet';
  result(p:string){return{k:'wait',msg:this.ans[p]?.ok?'Rätt!':'Fel',big:this.cur.a?'👍':'👎',sub:`Du har ${this.bank[p]}`,key:'r'+this.idx}}}
 const TFTv=({g,show}:any)=><Stage kicker={`Sant eller falskt ${g.idx+1}/${g.items.length}`} title={g.cur.q}>{g.phase==='reveal'&&<div className={'tf '+(g.cur.a?'t':'f')}>{g.cur.a?'SANT':'FALSKT'}</div>}<div className="ansrow">{show.players.map((p:any)=><span key={p.id} className={p.id in g.ans?'in':''} style={{borderColor:p.color}}><Av p={p}/><small>{g.bank[p.id]}</small></span>)}</div></Stage>;
 class AllIn extends RB{qms=30000;revealMs=8000;bets:any={};bet=true;base=(p:string)=>this.api.total(p)||1000;
- setup(){this.items=[{}];this.qms=25000;this.mood='reveal'}
- q=mc(HARD[Math.random()*HARD.length|0]);
+ setup(){this.items=[{}];this.qms=25000;this.mood='reveal';this.q=mc(HARD[this.api.used('hard',1,HARD.length)[0]])}
+ q:any=null;
  ask(p:string){return this.bet?{k:'slider',prompt:'Hur stor andel av dina poäng satsar du? Ingen ser ditt val.',min:0,max:100,step:5,unit:'%',val:50,sel:this.sel(p),btn:'Satsa'}:{k:'choice',prompt:'Sista frågan',opts:this.q.o.map((o:string)=>({id:o,label:o})),sel:this.sel(p)}}
  close(){if(this.phase!=='q')return;if(this.bet){this.bets=Object.fromEntries(Object.entries(this.ans).map(([k,v]:any)=>[k,v.v]));this.ans={};this.bet=false;this.t0=this.api.now();this.api.countdown(20000,()=>this.close());this.api.refresh();return}super.close()}
  score(){this.api.players().forEach(p=>{const pct=(this.bets[p.id]||0)/100,w=Math.round(this.base(p.id)*pct),ok=this.ans[p.id]?.v===this.q.a;this.api.award(p.id,ok?w:-w)})}

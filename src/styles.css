@@ -109,3 +109,5 @@ button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:p
 .backbtn{width:auto;padding:1.4vh 2.4vw;font-size:2.4vh;margin-top:1vh;z-index:40;position:relative}.reveal .podium>div{max-height:36vh}.p0{height:36vh}.p1{height:30vh}.p2{height:24vh}
 
 .soundbtn{position:fixed;top:2vh;left:50%;transform:translateX(-50%);z-index:60;padding:1.6vh 2.4vw;border-radius:14px;background:var(--coral);color:var(--ink);font-weight:800;font-size:2.6vh;animation:pulse 1s infinite}
+
+.meb{display:flex;align-items:center;gap:8px;font-weight:600;padding:4px 8px 4px 0}.meb img{width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px var(--me)}.meb i{font-style:normal;color:var(--gold)}.tip{background:var(--gold);color:var(--ink);font-weight:800;padding:12px;border-radius:12px;margin-bottom:10px}

@@ -6,7 +6,7 @@ export interface Api{
   countdown(ms:number,fn:()=>void):void; deadline():number; stopCountdown():void;
   now():number; say(t:string):void; quip(ok:boolean):void; sfx(n:string):void; music(n:string|null):void; end():void;
   mode():'solo'|'team'; teams():{id:number;name:string;color:string;members:Player[]}[]; 
-  used(key:string,n:number,pool:number):number[]; isFinal():boolean; total(pid:string):number;
+  used(key:string,n:number,pool:number,only?:(i:number)=>boolean):number[]; isFinal():boolean; total(pid:string):number;
 }
 export interface Inst{start():void;onInput?(pid:string,d:any):void;onStream?(pid:string,d:any):void;tick?(dt:number):void;phone(pid:string):PV;onLeave?(pid:string):void}
 export interface GameDef{id:string;title:string;tag:string;how:string;cat:string;icon:string;min?:number;max?:number;humans?:number;even?:boolean;mins:number;needs?:string;make:(a:Api)=>Inst;Tv:any;finalOnly?:boolean}
