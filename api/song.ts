@@ -1,0 +1,9 @@
+// Hämtar ett 30-sekundersklipp via servern så att tv:ns webbläsare slipper blockeras.
+const pick=(a:any[],artist:string)=>a.find(x=>(x.artistName||x.artist?.name||'').toLowerCase().includes(artist.toLowerCase().slice(0,4)))||a[0];
+export default async function handler(req:any,res:any){
+  const t=String(req.query.t||'').slice(0,80),a=String(req.query.a||'').slice(0,60);if(!t)return res.status(400).end();
+  const q=encodeURIComponent(`${a} ${t}`);let url:string|null=null,src='';
+  try{const r=await fetch(`https://api.deezer.com/search?q=${q}&limit=5`);if(r.ok){const j:any=await r.json();const m=pick((j.data||[]).filter((x:any)=>x.preview),a);if(m){url=m.preview;src='deezer'}}}catch{}
+  if(!url)try{const r=await fetch(`https://itunes.apple.com/search?term=${q}&media=music&entity=song&limit=5&country=SE`);if(r.ok){const j:any=await r.json();const m=pick((j.results||[]).filter((x:any)=>x.previewUrl),a);if(m){url=m.previewUrl;src='itunes'}}}catch{}
+  res.setHeader('cache-control','public, s-maxage=1800');res.status(url?200:404).json({url,src});
+}

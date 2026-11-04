@@ -8,7 +8,8 @@ export class Show{
   dl=0;dlFn:any=null;timers:any[]=[];room:Pipe|null=null;pipes=new Map<string,{p:Pipe,last:string,seq:number,ids:Set<number>,lastSend:number}>();lastRes:any=null;loop:any=0;lastTick=0;dirty=false;usedPools:Record<string,number[]>={};revealStep=-1;error='';
   constructor(){
     let s:any=null;try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
-    if(s&&Date.now()-s.at<6*3600e3){this.code=s.code;this.players=s.players.filter((p:Player)=>!p.bot).map((p:Player)=>({...p,connected:false}));this.mode=s.mode;this.teamCount=s.teamCount;this.total=s.total;this.queue=s.queue;this.qi=s.qi;this.match=s.match;this.history=s.history;this.usedPools=s.used||{}}
+    if(s&&Date.now()-s.at<6*3600e3){this.code=s.code;this.players=s.players.filter((p:Player)=>!p.bot).map((p:Player)=>({...p,connected:false}));this.mode=s.mode;this.teamCount=s.teamCount;this.total=s.total;this.queue=s.queue;this.qi=s.qi;this.match=s.match;this.history=s.history}
+    try{this.usedPools=JSON.parse(localStorage.getItem('ks-used-v1')||'{}')}catch{}
     else this.code=rnd('ABCDEFGHJKLMNPQRSTUVWXYZ');
     this.room=openPipe('r:'+this.code,m=>this.onRoom(m));
     this.players.forEach(p=>this.pipe(p.id));
@@ -16,7 +17,7 @@ export class Show{
     this.loop=setInterval(()=>this.frame(),33);
     if(this.match&&this.queue.length&&this.qi<this.queue.length)setTimeout(()=>this.intro(this.queue[this.qi]),1200);
   }
-  save(){try{localStorage.setItem(KEY,JSON.stringify({at:Date.now(),code:this.code,players:this.players,mode:this.mode,teamCount:this.teamCount,total:this.total,queue:this.queue,qi:this.qi,match:this.match,history:this.history,used:this.usedPools}))}catch{}}
+  save(){try{localStorage.setItem(KEY,JSON.stringify({at:Date.now(),code:this.code,players:this.players,mode:this.mode,teamCount:this.teamCount,total:this.total,queue:this.queue,qi:this.qi,match:this.match,history:this.history}));localStorage.setItem('ks-used-v1',JSON.stringify(this.usedPools))}catch{}}
   bump(){this.ver++;this.subs.forEach(f=>f());this.dirty=true}
   sub=(f:()=>void)=>{this.subs.add(f);return()=>{this.subs.delete(f)}};
   frame(){
