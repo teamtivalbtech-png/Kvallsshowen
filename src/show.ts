@@ -85,8 +85,8 @@ export class Show{
     this.clear();const d=byId(id);this.def=d;this.stage='intro';this.inst=null;snd.music(null);snd.sfx('stinger');
     const n=this.players.filter(p=>p.connected&&!p.bot).length;
     if(n<(d.humans||1)){const m=`${d.title} kräver minst ${d.humans} riktiga personer.`;if(this.match){this.qi++;if(this.qi<this.queue.length)return this.intro(this.queue[this.qi]);return this.reveal()}this.toLobby();say(m);return}
-    this.fit(d);
-    say(LINES.intro(d.title,d.how));this.setCd(this.match?15000:20000,()=>this.beginGame());this.bump();
+    const before=this.players.length;this.fit(d);
+    say(LINES.intro(d.title,d.how));if(this.players.length>before)setTimeout(()=>{},0);this.setCd(this.match?15000:20000,()=>this.beginGame());this.bump();
   }
   beginGame(){
     if(!this.def)return;this.clear();resetBots();this.rawS={};this.players.forEach(p=>this.rawS[p.id]=0);this.stage='game';
@@ -97,7 +97,7 @@ export class Show{
     const mx=Math.max(1,...Object.values(this.rawS));const rows=this.players.map(p=>{const pts=final?(this.rawS[p.id]||0):Math.round(Math.max(0,this.rawS[p.id]||0)/mx*1000);return{p,pts}}).sort((a,b)=>b.pts-a.pts);
     rows.forEach(r=>this.total[r.p.id]=Math.max(0,(this.total[r.p.id]||0)+r.pts));
     if(this.match&&!final)this.history.push({game:d.title,winner:rows[0]?.p.name,avatar:rows[0]?.p.avatar,pts:rows[0]?.pts});
-    this.lastRes={rows:rows.map(r=>({id:r.p.id,name:r.p.name,avatar:r.p.avatar,color:r.p.color,pts:r.pts}))};this.stage='result';if(rows[0])say(LINES.win(rows[0].p.name,d.title)+(this.match&&!final?' '+LINES.secret():''));this.inst=null;snd.sfx('fanfare');this.qi++;this.save();
+    this.lastRes={rows:rows.map(r=>({id:r.p.id,name:r.p.name,avatar:r.p.avatar,color:r.p.color,pts:r.pts}))};this.stage='result';if(rows[0]){const w=LINES.winSp(),e=this.match&&!final?' '+LINES.secret():'';say(`${rows[0].p.avatar} ${rows[0].p.name} vann ${d.title}!`+e,w)}this.inst=null;snd.sfx('fanfare');this.qi++;this.save();
     this.setCd(this.match?10000:600000,()=>this.afterResult());this.bump();
   }
   afterResult(){if(this.match&&this.qi<this.queue.length)this.intro(this.queue[this.qi]);else if(this.match)this.reveal();else this.toLobby()}
