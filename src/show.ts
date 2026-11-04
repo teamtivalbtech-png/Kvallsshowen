@@ -59,9 +59,9 @@ export class Show{
     }
   }
   vip(){return this.players.find(p=>p.connected&&!p.bot)}
-  addBot(){const n=this.players.filter(p=>p.bot).length;if(this.players.length>=12)return;const taken=new Set(this.players.map(x=>x.color)),i=botInfo(n),c=this.players.filter(p=>!p.bot).length;const sizes=Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);this.players.push({id:'bot'+n+Math.random().toString(36).slice(2,6),...i,color:COL.find(x=>!taken.has(x))||COL[0],team:sizes.indexOf(Math.min(...sizes)),connected:true,seen:Date.now(),bot:true});this.total[this.players[this.players.length-1].id]=this.total[this.players[this.players.length-1].id]||0;void c}
+  addBot(auto=false){if(this.players.length>=12)return;const used=new Set(this.players.map(p=>p.name));let n=0;while(n<10&&used.has(botInfo(n).name))n++;const taken=new Set(this.players.map(x=>x.color)),i=botInfo(n);const sizes=Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);this.players.push({id:'bot'+n+Math.random().toString(36).slice(2,6),...i,color:COL.find(x=>!taken.has(x))||COL[0],team:sizes.indexOf(Math.min(...sizes)),connected:true,seen:Date.now(),bot:true,auto} as any);this.total[this.players[this.players.length-1].id]=this.total[this.players[this.players.length-1].id]||0;}
   dropBot(){const i=this.players.map(p=>!!p.bot).lastIndexOf(true);if(i>=0)this.players.splice(i,1)}
-  fit(d:GameDef){while(this.players.length<(d.min||2))this.addBot();if(this.mode==='team'||d.even)if(d.even&&this.players.length%2)this.addBot();if(this.mode==='team'){const t=this.teamList();const small=Math.min(...t.map(x=>x.members.length)),big=Math.max(...t.map(x=>x.members.length));if(big>small||t.length<this.teamCount)this.addBot()}}
+  fit(d:GameDef){let guard=12;while(this.players.length<(d.min||2)&&guard--)this.addBot(true);if(d.even&&this.players.length%2)this.addBot(true);if(this.mode==='team'){const sz=()=>Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);while(Math.max(...sz())>Math.min(...sz())&&this.players.length<12&&guard--)this.addBot(true)}}
   vipCmd(d:any){
     if(d.vip==='mode'){this.mode=d.v;this.assignTeams()}
     if(d.vip==='teams'){this.teamCount=d.v;this.assignTeams()}
@@ -102,7 +102,7 @@ export class Show{
   }
   afterResult(){if(this.match&&this.qi<this.queue.length)this.intro(this.queue[this.qi]);else if(this.match)this.reveal();else this.toLobby()}
   reveal(){this.clear();this.stage='reveal';this.revealStep=-1;this.match=false;this.queue=[];this.save();this.bump()}
-  toLobby(){this.clear();this.stage='lobby';this.inst=null;this.def=null;this.match=false;this.queue=[];snd.music('lobby');this.save();this.bump()}
+  toLobby(){this.clear();this.stage='lobby';this.players=this.players.filter(p=>!(p as any).auto);this.inst=null;this.def=null;this.match=false;this.queue=[];snd.music('lobby');this.save();this.bump()}
   clear(){this.timers.forEach(t=>{clearTimeout(t);clearInterval(t)});this.timers=[];this.dl=0;this.dlFn=null}
   setCd(ms:number,f:()=>void){this.dl=Date.now()+ms/FAST;this.dlFn=f}
   safe(f:()=>void){return()=>{try{f();this.bump()}catch(e){this.fail(e)}}}

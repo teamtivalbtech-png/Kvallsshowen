@@ -1,8 +1,8 @@
 // Botar spelar via samma telefonvy som människor, så varje spel fungerar utan särskild kod.
 const R=Math.random,TXT=['Pizza','Kaffe','Hemligt','Banan','Kaninen','Ingen aning','Något med ost','Mormors recept','Vatten','Ikea'];
 const FAKE=['En gammal fransk fisksoppa','Ett slags tysk hatt','Det uppfanns i Skåne','En sorts sydamerikansk fågel','Ett medeltida straff','Rädsla för skor'];
-export const BOTN=['Bot-Britta','Bot-Bengt','Bot-Birgitta','Bot-Börje','Bot-Berit'];const BOTA=['🤖','🦾','🛸','🧠','👾'];
-export const botInfo=(i:number)=>({name:BOTN[i%5],avatar:BOTA[i%5]});
+export const BOTN=['Bot-Britta','Bot-Bengt','Bot-Birgitta','Bot-Börje','Bot-Berit','Bot-Bosse','Bot-Bibbi','Bot-Bruno','Bot-Bella','Bot-Benny','Bot-Blenda'];const BOTA=['🤖','🦾','🛸','🧠','👾','🔋','📡','⚙️','💾','🕹️','🔧'];
+export const botInfo=(i:number)=>({name:BOTN[i],avatar:BOTA[i]});
 const st=new Map<string,any>();export const resetBots=()=>st.clear();
 function hint(g:any){return [g.right,g.cur?.a,g.cur?.name,g.t?.a,g.q?.a,g.qs?.[g.idx]?.a].find(v=>typeof v==='string')}
 function selfie(){const c=document.createElement('canvas');c.width=c.height=300;const x=c.getContext('2d')!;x.fillStyle=`hsl(${R()*360|0} 70% 60%)`;x.fillRect(0,0,300,300);x.font='170px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(['🤖','🦾','😎','🤳'][R()*4|0],150,155);return c.toDataURL('image/jpeg',.6)}
