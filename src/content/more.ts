@@ -1,5 +1,6 @@
 import {WHO2,LIKE2,SPY2,MIME2,WORDS2,SELFIE2,BOXES2} from './extra2';
 import {SONGS2} from './songs2';import {SONGS3} from './songs3';
+import {SONGS4} from './songs4';
 import {TF3,TL3,CL3,FIB3,PR3} from './batch3';
 import {XTF,XTL,XCL,XSONG,XWHO,XLIKE,XMIME,XWORDS,XSPY,XSELFIE,XFIB} from './extra';
 const L=(s:string)=>s.trim().split('\n').map(x=>x.split('|'));
@@ -288,11 +289,12 @@ export const SCENES=[
 ];
 export const MEL:any=[{n:'Grattis på födelsedagen',s:[[60,1],[60,1],[62,2],[60,2],[65,2],[64,4],[60,1],[60,1],[62,2],[60,2],[67,2],[65,4]]},{n:'Bä bä vita lamm',s:[[60,2],[60,2],[67,2],[67,2],[69,2],[69,2],[67,4],[65,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,4]]},{n:'Gubben Noak',s:[[60,2],[60,2],[60,2],[64,2],[62,2],[62,2],[62,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,4]]},{n:'Broder Jakob',s:[[60,2],[62,2],[64,2],[60,2],[60,2],[62,2],[64,2],[60,2],[64,2],[65,2],[67,4],[64,2],[65,2],[67,4]]}].slice(0);
 
+const NOAUDIO=/^(Jag Vill Ha Dig|Ängel|Sommar och sol|Dansa pausa)$/;
 export const PRICES=[...PRICES0,...PR3];
 export const TF=[...TF0,...XTF,...TF3];
 export const TIMELINE=[...TIMELINE0,...XTL,...TL3];
 export const CLOSEST=[...CLOSEST0,...XCL,...CL3];
-export const SONGS=[...SONGS0,...XSONG,...SONGS2,...SONGS3].filter((s,i,a)=>a.findIndex(x=>x.t===s.t&&x.a===s.a)===i);
+export const SONGS=[...SONGS0,...XSONG,...SONGS2,...SONGS3,...SONGS4].filter((s,i,a)=>!NOAUDIO.test(s.t)&&a.findIndex(x=>x.t===s.t&&x.a===s.a)===i);
 export const WORDS=[...WORDS0,...XWORDS,...WORDS2];
 export const FIB=[...FIB0,...XFIB,...FIB3];
 export const WHO=[...WHO0,...XWHO,...WHO2];
