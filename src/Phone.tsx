@@ -94,4 +94,4 @@ const WID:any={
  fleet:({grid,canShoot,prompt,ready})=>{const n=8;return <div className="fleet"><h3>{prompt}</h3><div className="bs" style={{gridTemplateColumns:`repeat(${n},1fr)`}}>{grid.map((c:string,i:number)=><button key={i} className={'c-'+c} disabled={!canShoot||c==='h'||c==='m'} onClick={()=>send({a:i})}>{c==='h'?'✹':c==='m'?'•':''}</button>)}</div>{ready===false&&<div className="lr"><button onClick={()=>send({a:'shuffle'})}>Slumpa</button><button className="ok" onClick={()=>send({a:'ready'})}>Klar</button></div>}</div>},
  aim:(p:any)=><Aim {...p} link={L()} rate={p.rate}/>,
 };
-function pick(n:number){return GAMES.filter(g=>!['allin','sing','duck','selfie'].includes(g.id)).map(g=>g.id).sort(()=>Math.random()-.5).slice(0,n)}
+function pick(n:number){return GAMES.filter(g=>!['allin','duck','selfie'].includes(g.id)).map(g=>g.id).sort(()=>Math.random()-.5).slice(0,n)}
