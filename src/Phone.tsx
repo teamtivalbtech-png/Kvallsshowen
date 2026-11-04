@@ -39,7 +39,7 @@ export function Phone({code}:{code:string}){
     <header className="bar"><span>{v.me.avatar} {v.me.name}</span>{v.me.team&&<span className="tm">{v.me.team}</span>}{v.dl>0&&<Clock dl={v.dl}/>}</header>
     {!link!.up&&<div className="lost">Återansluter…</div>}
     <main className="body"><W p={v.pv} rate={v.rate}/></main>
-    {v.canSkip&&v.pv?.k!=='vipLobby'&&<footer className="vipbar"><button onClick={()=>L().input({vip:'skip'})}>Hoppa vidare ⏭</button>{v.stage==='result'&&<button onClick={()=>L().input({vip:'lobby'})}>Till menyn</button>}</footer>}
+    {v.canSkip&&v.pv?.k!=='vipLobby'&&<footer className="vipbar">{v.stage!=='reveal'&&<button onClick={()=>L().input({vip:'skip'})}>Hoppa vidare ⏭</button>}<button onClick={()=>L().input({vip:'lobby'})}>Till menyn</button></footer>}
   </div>;
 }
 function Clock({dl}:{dl:number}){const [,f]=useState(0);useEffect(()=>{const i=setInterval(()=>f(n=>n+1),300);return()=>clearInterval(i)},[]);const s=Math.max(0,Math.ceil((dl-L().host())/1000));return s<300?<b className="clk">{s}</b>:null}
@@ -48,6 +48,7 @@ function W({p,rate}:{p:any,rate:number}){
 }
 const send=(d:any)=>{buzz();L().input(d)};
 const WID:any={
+ vipEnd:()=><div className="center"><div className="waitmark">🏆</div><h2>Tack för i kväll!</h2><button className="big" onClick={()=>send({vip:'lobby'})}>Till menyn</button></div>,
  wait:({msg,sub,big}:any)=><div className="center"><div className="waitmark">{big||'📺'}</div><h2>{msg}</h2>{sub&&<p>{sub}</p>}</div>,
  intro:({title,how,needs}:any)=>{const [ok,set]=useState('');async function allow(){try{if(needs==='tilt'||needs==='shake'){set(await askMotion()?'yes':'no')}if(needs==='camera'||needs==='aim'){await getCam(needs==='aim'?'environment':'user');set('yes')}if(needs==='mic'){await getMic();set('yes')}}catch{set('no')}}
    return <div className="center"><h2>{title}</h2><p>{how}</p>{needs&&!ok&&<button className="big" onClick={allow}>{{tilt:'Tillåt rörelsesensor',shake:'Tillåt rörelsesensor',camera:'Tillåt kamera',aim:'Tillåt kamera',mic:'Tillåt mikrofon'}[needs]}</button>}{ok==='yes'&&<p className="good">Klart ✓</p>}{ok==='no'&&<p className="bad">Inte tillåtet. Du kan spela ändå med knapparna på skärmen{isIOS?'. Ändra i Inställningar › Safari om du vill använda sensorn':''}.</p>}</div>},

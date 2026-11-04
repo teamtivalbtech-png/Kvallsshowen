@@ -1,4 +1,4 @@
-import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {say,LINES} from './host';import {botAct,botInfo,resetBots} from './games/bots';
+import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {say,LINES} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
@@ -75,7 +75,7 @@ export class Show{
     this.save();this.bump();
   }
   next(){
-    if(this.stage==='intro')this.beginGame();else if(this.stage==='game')this.endGame();else if(this.stage==='result')this.afterResult();else if(this.stage==='reveal'){this.revealStep++;this.bump()}
+    if(this.stage==='intro')this.beginGame();else if(this.stage==='game')this.endGame();else if(this.stage==='result')this.afterResult();else if(this.stage==='reveal')this.toLobby()
   }
   startSingle(id:string){this.match=false;this.queue=[id];this.qi=0;this.intro(id)}
   startMatch(ids:string[]){
@@ -103,7 +103,7 @@ export class Show{
   }
   afterResult(){if(this.match&&this.qi<this.queue.length)this.intro(this.queue[this.qi]);else if(this.match)this.reveal();else this.toLobby()}
   reveal(){this.clear();this.stage='reveal';this.revealStep=-1;this.match=false;this.queue=[];this.save();this.bump()}
-  toLobby(){this.clear();this.stage='lobby';this.players=this.players.filter(p=>!(p as any).auto);this.inst=null;this.def=null;this.match=false;this.queue=[];snd.music('lobby');this.save();this.bump()}
+  toLobby(){this.clear();stopSong();this.stage='lobby';this.players=this.players.filter(p=>!(p as any).auto);this.inst=null;this.def=null;this.match=false;this.queue=[];snd.music('lobby');this.save();this.bump()}
   clear(){this.timers.forEach(t=>{clearTimeout(t);clearInterval(t)});this.timers=[];this.dl=0;this.dlFn=null}
   setCd(ms:number,f:()=>void){this.dl=Date.now()+ms/FAST;this.dlFn=f}
   safe(f:()=>void){return()=>{try{f();this.bump()}catch(e){this.fail(e)}}}
@@ -126,7 +126,7 @@ export class Show{
     else if(this.stage==='intro')pv={k:'intro',title:this.def?.title,how:this.def?.how,needs:this.def?.needs};
     else if(this.stage==='game'&&this.inst)try{pv=this.inst.phone(id)}catch(e){console.error(e);pv={k:'wait',msg:'Ett ögonblick'}}
     else if(this.stage==='result')pv={k:'wait',msg:this.match?'Delresultat':'Resultat',sub:(()=>{const r=this.lastRes?.rows?.find((x:any)=>x.id===id);return r?`${r.pts} poäng i ${this.def?.title}`:''})()};
-    else pv={k:'wait',msg:'Titta på tv:n',sub:'Sanningens ögonblick'};
+    else pv=isV?{k:'vipEnd'}:{k:'wait',msg:'Titta på tv:n',sub:'Sanningens ögonblick'};
     const team=this.mode==='team'?TEAM[p.team]:null;
     return{stage:this.stage,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby'};
   }
