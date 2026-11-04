@@ -11,6 +11,7 @@ export const REELS=[
  {id:'mnd7sFt5c3A',a:'Stranger Things',w:['Dark','The OA','Wednesday','Riverdale','The Umbrella Academy'],fq:'Vad älskar Eleven att äta?',fa:'Eggo-våfflor',fw:['Pizza','Pannkakor','Kanelbullar']},
  {id:'VaOt6tXyf2Y',a:'Breaking Bad',w:['Better Call Saul','Ozark','Narcos','The Wire','Fargo'],fq:'Vad jobbade Walter White med från början?',fa:'Kemilärare',fw:['Läkare','Polis','Advokat']},
 ];
+import {EMOJI2} from './extra2';
 const E=`🧙⚡🦉|Harry Potter|Sagan om ringen|Narnia|Merlin
 👹💚🏰|Shrek|Hulken|Grinchen|Trolls
 🧊👸⛄|Frost|Snövit|Modig|Vaiana
@@ -48,4 +49,4 @@ const E=`🧙⚡🦉|Harry Potter|Sagan om ringen|Narnia|Merlin
 📎🏢😐|The Office|Silicon Valley|Parks and Rec|Suits
 🧽🍍🌊|Svampbob Fyrkant|Hitta Nemo|Kalle Anka|Moana
 🔵⚡🐭|Pokémon|Digimon|Tom och Jerry|Musse Pigg`;
-export const EMOJI=E.split('\n').map(l=>{const[e,a,...w]=l.split('|');return{emoji:e,a,w}});
+export const EMOJI=[...E.split('\n').map(l=>{const[e,a,...w]=l.split('|');return{emoji:e,a,w}}),...EMOJI2];
