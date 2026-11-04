@@ -50,6 +50,7 @@ export class Show{
   onPlayer(id:string,m:any){
     const p=this.players.find(x=>x.id===id);if(!p)return;p.seen=Date.now();const x=this.pipes.get(id)!;
     if(m.t==='ping'){x.p.send({t:'pong',c:m.c,h:Date.now()});return}
+    if(m.t==='rtc'){this.rtc(id,x,m);return}
     if(m.t==='s'){if(this.stage==='game')try{this.inst?.onStream?.(id,m.d)}catch(e){console.error(e)}return}
     if(m.t==='in'){
       x.p.send({t:'ack',id:m.id});if(x.ids.has(m.id))return;x.ids.add(m.id);if(x.ids.size>300)x.ids=new Set([...x.ids].slice(-100));
@@ -59,6 +60,8 @@ export class Show{
       this.dirty=true;
     }
   }
+  rtcs=new Map<string,RTCPeerConnection>();
+  async rtc(id:string,x:any,m:any){try{if(m.sdp){this.rtcs.get(id)?.close();const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});this.rtcs.set(id,pc);pc.onicecandidate=e=>{if(e.candidate)x.p.send({t:'rtc',ice:e.candidate})};pc.ondatachannel=e=>{e.channel.onmessage=v=>{const p=this.players.find(q=>q.id===id);if(p)p.seen=Date.now();if(this.stage==='game')try{this.inst?.onStream?.(id,JSON.parse(v.data))}catch{}}};await pc.setRemoteDescription(m.sdp);await pc.setLocalDescription(await pc.createAnswer());x.p.send({t:'rtc',sdp:pc.localDescription})}else if(m.ice)await this.rtcs.get(id)?.addIceCandidate(m.ice)}catch(e){console.warn('rtc',e)}}
   vip(){return this.players.find(p=>p.connected&&!p.bot)}
   addBot(auto=false){if(this.players.length>=12)return;const used=new Set(this.players.map(p=>p.name));let n=0;while(n<10&&used.has(botInfo(n).name))n++;const taken=new Set(this.players.map(x=>x.color)),i=botInfo(n);const sizes=Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);this.players.push({id:'bot'+n+Math.random().toString(36).slice(2,6),...i,color:COL.find(x=>!taken.has(x))||COL[0],team:sizes.indexOf(Math.min(...sizes)),connected:true,seen:Date.now(),bot:true,auto} as any);this.total[this.players[this.players.length-1].id]=this.total[this.players[this.players.length-1].id]||0;}
   dropBot(){const i=this.players.map(p=>!!p.bot).lastIndexOf(true);if(i>=0)this.players.splice(i,1)}

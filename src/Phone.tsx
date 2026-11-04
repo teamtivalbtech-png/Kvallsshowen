@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake} from './net';import {buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {GAMES} from './games';import {Aim} from './ui/aim';
+import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake,LOCAL} from './net';import {buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {GAMES} from './games';import {Aim} from './ui/aim';
 const AV='🦊 🐸 🦉 🐙 🦄 🐯 🐼 🐵 🦁 🐧 🦖 🐢 🦩 🐝 👽 🤖 👻 🌶️ 🍕 🍷'.split(' ');
 let inId=Date.now()%1e6;
 class Link{
@@ -13,14 +13,18 @@ class Link{
   update(n:string,ph?:string){this.name=n;this.photo=ph;this.hello()}
   hello(){this.room.send({t:'hello',pid:this.pid,name:this.name,avatar:this.avatar,photo:this.photo})}
   n=0;
-  beat(){this.n++;if(Date.now()-this.lastHost>4000)this.hello();if(this.n%4===0)this.pipe.send({t:'ping',c:Date.now()});
+  beat(){this.n++;if(this.lastHost&&!this.fast()&&Date.now()-this.rtcAt>12000)this.rtc();if(Date.now()-this.lastHost>4000)this.hello();if(this.n%4===0)this.pipe.send({t:'ping',c:Date.now()});
     this.pend.forEach((x,id)=>{if(++x.n>12){this.pend.delete(id);return}this.pipe.send({t:'in',id,d:x.d})});this.up=Date.now()-this.lastHost<6000;this.on(this.v)}
   msg(m:any){this.lastHost=Date.now();
     if(m.t==='v'){if(m.seq<this.seq&&m.seq>3)return;this.seq=m.seq;this.v=m.v;this.up=true;this.on(m.v);if(!this.n||this.n<3)this.pipe.send({t:'ping',c:Date.now()})}
+    if(m.t==='rtc'&&this.pc){if(m.sdp)this.pc.setRemoteDescription(m.sdp).catch(()=>{});if(m.ice)this.pc.addIceCandidate(m.ice).catch(()=>{})}
     if(m.t==='ack')this.pend.delete(m.id);
     if(m.t==='pong'){const r=Date.now()-m.c;if(!this.rtt||r<this.rtt*1.3){this.rtt=r;this.off=m.h+r/2-Date.now()}}}
+  pc:RTCPeerConnection|null=null;dc:RTCDataChannel|null=null;rtcAt=0;
+  async rtc(){if(LOCAL||typeof RTCPeerConnection==='undefined')return;this.rtcAt=Date.now();try{this.pc?.close()}catch{};const pc=this.pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});const dc=this.dc=pc.createDataChannel('s',{ordered:false,maxRetransmits:0});dc.onopen=()=>{(window as any).__direct=true};dc.onclose=()=>{(window as any).__direct=false};pc.onicecandidate=e=>{if(e.candidate)this.pipe.send({t:'rtc',ice:e.candidate})};await pc.setLocalDescription(await pc.createOffer());this.pipe.send({t:'rtc',sdp:pc.localDescription})}
+  fast(){return this.dc?.readyState==='open'}
   input(d:any){const id=++inId;this.pend.set(id,{d,n:0});this.pipe.send({t:'in',id,d})}
-  stream(d:any){this.pipe.send({t:'s',d})}
+  stream(d:any){if(this.dc?.readyState==='open'){try{this.dc.send(JSON.stringify(d));return}catch{}}this.pipe.send({t:'s',d})}
   host(){return Date.now()+this.off}
 }
 let link:Link|null=null;
