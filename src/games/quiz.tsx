@@ -1,10 +1,11 @@
-import React from 'react';import {Av,RB,shuffle,pts,Stage,Answered,Opts,nameOf} from './base';import {QUIZ,CATS,HARD} from '../content/quiz';import {TF,TIMELINE,CLOSEST,PRICES} from '../content/more';
+import React from 'react';import {Av,RB,shuffle,pts,Stage,Answered,Opts,nameOf} from './base';import {QUIZ,CATS,HARD} from '../content/quiz';import {NOS} from '../content/nostalgi';import {TF,TIMELINE,CLOSEST,PRICES} from '../content/more';
 const pick=(api:any,k:string,arr:any[],n:number)=>api.used(k,n,arr.length).map((i:number)=>arr[i]);
 const mc=(q:any)=>({...q,o:shuffle([q.a,...q.w])});
 class Fast extends RB{qms=15000;revealMs=5000;setup(){this.items=pick(this.api,'quiz',QUIZ,10).map(mc)}
  ask(p:string){return{k:'choice',prompt:this.cur.cat,opts:this.cur.o.map((o:string)=>({id:o,label:o})),sel:this.sel(p)}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(a?.v===this.cur.a)this.api.award(p.id,pts(a.t,this.qms))})}
  result(p:string){const a=this.ans[p];return{k:'wait',msg:a?.v===this.cur.a?'Rätt!':'Fel',big:a?.v===this.cur.a?'✅':'❌',sub:`Rätt svar: ${this.cur.a}`,key:'r'+this.idx}}}
+class Nostalgi extends Fast{setup(){this.items=this.api.used('nos',12,NOS.length).map((i:number)=>mc(NOS[i]))}}
 const FastTv=({g,show}:any)=>{const q=g.cur;if(!q)return null;return <Stage kicker={`${q.cat} · ${g.idx+1}/${g.items.length}`} title={q.q}><Opts list={q.o} right={g.phase==='reveal'?q.a:null}/><Answered g={g} show={show}/></Stage>};
 class Big extends RB{qms=20000;revealMs=5000;step=0;catV:any={};cat='';setup(){this.items=[0,1,2,3,4,5,6,7,8].map(i=>({i}))}
  voting=true;cats:string[]=[];
@@ -65,6 +66,7 @@ class AllIn extends RB{qms=30000;revealMs=8000;bets:any={};bet=true;base=(p:stri
 const AllInTv=({g,show}:any)=>g.bet?<Stage kicker="Finalen" title="Allt eller inget"><p className="lead">Satsa i hemlighet. Rätt svar ökar din poäng, fel svar kostar din insats.</p><Answered g={g} show={show}/></Stage>:<Stage kicker="Sista frågan" title={g.q.q}><Opts list={g.q.o} right={g.phase==='reveal'?g.q.a:null}/><Answered g={g} show={show}/></Stage>;
 export const QUIZG=[
 {id:'fast',title:'Snabbast vinner',tag:'Frågesport där varje sekund kostar',how:'Svara rätt så snabbt du kan. Tio frågor.',cat:'Kunskap',icon:'⚡',mins:5,make:(a:any)=>new Fast(a),Tv:FastTv},
+{id:'nos',title:'Nostalgikampen',tag:'För dig född runt år 2000',how:'Minns du Club Penguin, MSN och High School Musical? Tolv frågor om uppväxten.',cat:'Kunskap',icon:'📼',mins:5,make:(a:any)=>new Nostalgi(a),Tv:FastTv},
 {id:'ladder',title:'Stegen',tag:'Säkra eller satsa vidare',how:'Poängen dubblas för varje steg. Säkra när du vill, men ett fel kostar allt osäkrat.',cat:'Kunskap',icon:'🪜',mins:6,make:(a:any)=>new Ladder(a),Tv:LadderTv},
 {id:'timeline',title:'Tidslinjen',tag:'Vad hände först?',how:'Sortera händelserna från äldst till nyast.',cat:'Kunskap',icon:'🕰️',mins:5,make:(a:any)=>new Timeline(a),Tv:TimelineTv},
 {id:'closest',title:'Närmast vinner',tag:'Ingen vet, alla gissar',how:'Skriv en siffra. Närmast får flest poäng.',cat:'Kunskap',icon:'🎯',mins:5,make:(a:any)=>new Num(a),Tv:NumTv},
