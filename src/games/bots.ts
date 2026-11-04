@@ -1,3 +1,4 @@
+import {CAPS} from './extras';
 // Botar spelar via samma telefonvy som människor, så varje spel fungerar utan särskild kod.
 const R=Math.random,TXT=['Pizza','Kaffe','Hemligt','Banan','Kaninen','Ingen aning','Något med ost','Mormors recept','Vatten','Ikea'];
 const FAKE=['En gammal fransk fisksoppa','Ett slags tysk hatt','Det uppfanns i Skåne','En sorts sydamerikansk fågel','Ett medeltida straff','Rädsla för skor'];
@@ -13,7 +14,7 @@ export function botAct(g:any,id:string,now:number,fast:number){
   if(s.done||now<s.at)return;s.done=true;const send=(a:any,x:any={})=>g.onInput?.(id,{a,...x});
   if(k==='choice'){if(pv.sel!=null)return;const o=pv.opts.filter((x:any)=>!x.off).map((x:any,i:number)=>x.id??i);const h=hint(g);send(h&&o.includes(h)&&R()<.3?h:o[R()*o.length|0])}
   else if(k==='actions'){const b=pv.btns.map((x:any)=>x.id);if(b.includes('vote')||b.includes('tidigare'))return;if(typeof b[0]==='number'){if(g.bid<900&&R()<.6)send(b[0]);return}send(b[R()*b.length|0])}
-  else if(k==='text'){if(pv.sel)return;send(g.stage==='write'?FAKE[R()*FAKE.length|0]:TXT[R()*TXT.length|0])}
+  else if(k==='text'){if(pv.sel)return;send(g.o!==undefined&&g.items?.[0]?.src?CAPS[R()*CAPS.length|0]:g.stage==='write'?FAKE[R()*FAKE.length|0]:TXT[R()*TXT.length|0])}
   else if(k==='guess'){if(R()<.08&&g.word)send(g.word)}
   else if(k==='number'){if(pv.sel!=null)return;const t=g.target?.()??100;send(Math.max(1,Math.round(t*(.45+R()*1.1))))}
   else if(k==='slider'){if(pv.sel!=null)return;send(g.cur?.y?Math.min(pv.max,Math.max(pv.min,g.cur.y+Math.round((R()-.5)*30))):Math.round((pv.min+(pv.max-pv.min)*R())/pv.step)*pv.step)}

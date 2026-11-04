@@ -1,4 +1,4 @@
-import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {say,LINES} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';
+import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {say,LINES} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';import {MISSIONS,ROASTS} from './games/extras';
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
@@ -55,14 +55,17 @@ export class Show{
     if(m.t==='in'){
       x.p.send({t:'ack',id:m.id});if(x.ids.has(m.id))return;x.ids.add(m.id);if(x.ids.size>300)x.ids=new Set([...x.ids].slice(-100));
       const d=m.d;
+      if(d?.ask){const a=d.ask;if(a.q&&a.a&&a.w?.length===3){this.customQ.push({cat:`Från ${p.name}`,q:String(a.q).slice(0,140),a:String(a.a).slice(0,50),w:a.w.map((x:any)=>String(x).slice(0,50))});this.bump()}return}
       if(d?.vip!==undefined){if(id===this.vip()?.id)this.vipCmd(d);return}
       if(this.stage==='game')try{this.inst?.onInput?.(id,d)}catch(e){console.error(e)}
       this.dirty=true;
     }
   }
+  stats:Record<string,any>={};album:any[]=[];customQ:any[]=[];sips=false;missions:Record<string,string>={};lastSip='';
   rtcs=new Map<string,RTCPeerConnection>();
   async rtc(id:string,x:any,m:any){try{if(m.sdp){this.rtcs.get(id)?.close();const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});this.rtcs.set(id,pc);pc.onicecandidate=e=>{if(e.candidate)x.p.send({t:'rtc',ice:e.candidate})};pc.ondatachannel=e=>{e.channel.onmessage=v=>{const p=this.players.find(q=>q.id===id);if(p)p.seen=Date.now();if(this.stage==='game')try{this.inst?.onStream?.(id,JSON.parse(v.data))}catch{}}};await pc.setRemoteDescription(m.sdp);await pc.setLocalDescription(await pc.createAnswer());x.p.send({t:'rtc',sdp:pc.localDescription})}else if(m.ice)await this.rtcs.get(id)?.addIceCandidate(m.ice)}catch(e){console.warn('rtc',e)}}
   vip(){return this.players.find(p=>p.connected&&!p.bot)}
+  stat(p:string,k:string,n:number){const x=this.stats[p]||(this.stats[p]={});x[k]=(x[k]||0)+n}
   addBot(auto=false){if(this.players.length>=12)return;const used=new Set(this.players.map(p=>p.name));let n=0;while(n<10&&used.has(botInfo(n).name))n++;const taken=new Set(this.players.map(x=>x.color)),i=botInfo(n);const sizes=Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);this.players.push({id:'bot'+n+Math.random().toString(36).slice(2,6),...i,color:COL.find(x=>!taken.has(x))||COL[0],team:sizes.indexOf(Math.min(...sizes)),connected:true,seen:Date.now(),bot:true,auto} as any);this.total[this.players[this.players.length-1].id]=this.total[this.players[this.players.length-1].id]||0;}
   dropBot(){const i=this.players.map(p=>!!p.bot).lastIndexOf(true);if(i>=0)this.players.splice(i,1)}
   fit(d:GameDef){let guard=12;while(this.players.length<(d.min||2)&&guard--)this.addBot(true);if(d.even&&this.players.length%2)this.addBot(true);if(this.mode==='team'){const sz=()=>Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);while(Math.max(...sz())>Math.min(...sz())&&this.players.length<12&&guard--)this.addBot(true)}}
@@ -70,6 +73,7 @@ export class Show{
     if(d.vip==='mode'){this.mode=d.v;this.assignTeams()}
     if(d.vip==='teams'){this.teamCount=d.v;this.assignTeams()}
     if(d.vip==='bot+')this.addBot();if(d.vip==='bot-')this.dropBot();
+    if(d.vip==='sips')this.sips=!this.sips;
     if(d.vip==='swap'){const p=this.players.find(x=>x.id===d.p);if(p)p.team=(p.team+1)%this.teamCount}
     if(d.vip==='single')this.startSingle(d.v);
     if(d.vip==='match')this.startMatch(d.v);
@@ -82,8 +86,8 @@ export class Show{
   }
   startSingle(id:string){this.match=false;this.queue=[id];this.qi=0;this.intro(id)}
   startMatch(ids:string[]){
-    this.match=true;this.total={};this.history=[];this.players.forEach(p=>this.total[p.id]=0);
-    this.queue=[...ids.filter(i=>i!=='allin'),'allin'];this.qi=0;this.save();this.intro(this.queue[0]);
+    this.match=true;this.total={};this.history=[];this.stats={};this.album=[];this.players.forEach(p=>this.total[p.id]=0);const ms=[...MISSIONS].sort(()=>Math.random()-.5);this.missions={};this.players.filter(p=>!p.bot).forEach((p,i)=>this.missions[p.id]=ms[i]);
+    const q:string[]=[];ids.filter(i=>i!=='allin').forEach((g,i)=>{q.push(g);if((i+1)%3===0)q.push('duel')});if(q[q.length-1]==='duel')q.pop();this.queue=[...q,'missions','allin'];this.qi=0;this.save();this.intro(this.queue[0]);
   }
   intro(id:string){
     this.clear();const d=byId(id);this.def=d;this.stage='intro';this.inst=null;snd.music(null);snd.sfx('stinger');
@@ -97,11 +101,11 @@ export class Show{
     try{this.inst=this.def.make(this.api());this.inst.start()}catch(e){this.fail(e)}this.bump();
   }
   endGame(){
-    if(this.stage!=='game'&&this.stage!=='intro')return;this.clear();snd.music(null);const d=this.def!;const final=d.id==='allin'&&this.match;
+    if(this.stage!=='game'&&this.stage!=='intro')return;this.clear();snd.music(null);const d=this.def!;const final=(d.id==='allin'||!!d.direct)&&this.match;
     const mx=Math.max(1,...Object.values(this.rawS));const rows=this.players.map(p=>{const pts=final?(this.rawS[p.id]||0):Math.round(Math.max(0,this.rawS[p.id]||0)/mx*1000);return{p,pts}}).sort((a,b)=>b.pts-a.pts);
     rows.forEach(r=>this.total[r.p.id]=Math.max(0,(this.total[r.p.id]||0)+r.pts));
     if(this.match&&!final)this.history.push({game:d.title,winner:rows[0]?.p.name,avatar:rows[0]?.p.avatar,pts:rows[0]?.pts});
-    this.lastRes={rows:rows.map(r=>({id:r.p.id,name:r.p.name,avatar:r.p.avatar,photo:r.p.photo,color:r.p.color,pts:r.pts}))};this.stage='result';if(rows[0]){const w=LINES.winSp(),e=this.match&&!final?' '+LINES.secret():'';say(`${rows[0].p.avatar} ${rows[0].p.name} vann ${d.title}!`+e,w)}this.inst=null;snd.sfx('fanfare');this.qi++;this.save();
+    this.lastRes={rows:rows.map(r=>({id:r.p.id,name:r.p.name,avatar:r.p.avatar,photo:r.p.photo,color:r.p.color,pts:r.pts}))};this.stage='result';if(rows[0]&&!d.direct){this.stat(rows[0].p.id,'wins',1);const low=rows[rows.length-1].p,r=ROASTS[Math.random()*ROASTS.length|0],w=LINES.winSp();this.lastSip=this.sips&&rows.length>1?`${low.name} tar två klunkar. Vatten går också bra.`:'';say(`${rows[0].p.name} vann ${d.title}! ${low.name}: ${r}`,Math.random()<.5?w:r)}this.inst=null;snd.sfx('fanfare');this.qi++;this.save();
     this.setCd(this.match?10000:600000,()=>this.afterResult());this.bump();
   }
   afterResult(){if(this.match&&this.qi<this.queue.length)this.intro(this.queue[this.qi]);else if(this.match)this.reveal();else this.toLobby()}
@@ -113,7 +117,7 @@ export class Show{
   api():Api{const s=this;return{
     players:()=>s.players,online:()=>s.players.filter(p=>p.connected),refresh:()=>s.bump(),award:(p,n)=>{s.rawS[p]=(s.rawS[p]||0)+n},raw:p=>s.rawS[p]||0,
     after:(ms,f)=>{s.timers.push(setTimeout(s.safe(f),ms/FAST))},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
-    countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),say:t=>say(t),quip:ok=>{if(Math.random()<.45)say(ok?LINES.right():LINES.wrong())},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
+    countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),stat:(p,k,n)=>s.stat(p,k,n),keep:(src,cap)=>{if(s.album.length<24)s.album.push({src,cap})},custom:()=>s.customQ.splice(0,3),mission:p=>s.missions[p],say:(t,x)=>say(t,x),quip:ok=>{if(Math.random()<.45)say(ok?LINES.right():LINES.wrong())},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
     mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
     used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];let free=all.filter(i=>!u.includes(i)).sort(()=>Math.random()-.5);let list=free.slice(0,n);if(list.length<n){u=u.filter(i=>!all.includes(i));free=all.filter(i=>!list.includes(i)).sort(()=>Math.random()-.5);list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
   }}
@@ -125,13 +129,13 @@ export class Show{
   view(id:string){
     const p=this.players.find(x=>x.id===id);if(!p)return null;const v=this.vip();const isV=v?.id===id;
     let pv:any;
-    if(this.stage==='lobby')pv=isV?{k:'vipLobby',mode:this.mode,teams:this.teamCount,n:this.players.length,bots:this.players.filter(x=>x.bot).length,list:this.players.map(x=>({id:x.id,name:x.name,avatar:x.avatar,team:x.team}))}:{k:'wait',msg:'Du är med!',sub:`${v?.name||'Första spelaren'} väljer spel`};
+    if(this.stage==='lobby')pv=isV?{k:'vipLobby',mode:this.mode,teams:this.teamCount,n:this.players.length,bots:this.players.filter(x=>x.bot).length,sips:this.sips,list:this.players.map(x=>({id:x.id,name:x.name,avatar:x.avatar,team:x.team}))}:{k:'wait',msg:'Du är med!',sub:`${v?.name||'Första spelaren'} väljer spel`};
     else if(this.stage==='intro')pv={k:'intro',title:this.def?.title,how:this.def?.how,needs:this.def?.needs};
     else if(this.stage==='game'&&this.inst)try{pv=this.inst.phone(id)}catch(e){console.error(e);pv={k:'wait',msg:'Ett ögonblick'}}
     else if(this.stage==='result')pv={k:'wait',msg:this.match?'Delresultat':'Resultat',sub:(()=>{const r=this.lastRes?.rows?.find((x:any)=>x.id===id);return r?`${r.pts} poäng i ${this.def?.title}`:''})()};
     else pv=isV?{k:'vipEnd'}:{k:'wait',msg:'Titta på tv:n',sub:'Sanningens ögonblick'};
     const team=this.mode==='team'?TEAM[p.team]:null;
-    return{stage:this.stage,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby'};
+    return{stage:this.stage,mission:this.match?this.missions[id]:undefined,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby'};
   }
   push(id:string,force:boolean){
     const x=this.pipes.get(id);if(!x)return;const v=this.view(id);if(!v)return;const s=JSON.stringify(v);

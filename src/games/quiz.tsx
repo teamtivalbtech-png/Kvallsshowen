@@ -1,7 +1,7 @@
 import React from 'react';import {Av,RB,shuffle,pts,Stage,Answered,Opts,nameOf} from './base';import {QUIZ,CATS,HARD} from '../content/quiz';import {NOS} from '../content/nostalgi';import {TF,TIMELINE,CLOSEST,PRICES} from '../content/more';
 const pick=(api:any,k:string,arr:any[],n:number)=>api.used(k,n,arr.length).map((i:number)=>arr[i]);
 const mc=(q:any)=>({...q,o:shuffle([q.a,...q.w])});
-class Fast extends RB{qms=15000;revealMs=5000;setup(){this.items=pick(this.api,'quiz',QUIZ,10).map(mc)}
+class Fast extends RB{qms=15000;revealMs=5000;setup(){const c=this.api.custom();this.items=shuffle([...c,...pick(this.api,'quiz',QUIZ,10-c.length)]).map(mc)}
  ask(p:string){return{k:'choice',prompt:this.cur.cat,opts:this.cur.o.map((o:string)=>({id:o,label:o})),sel:this.sel(p)}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(a?.v===this.cur.a)this.api.award(p.id,pts(a.t,this.qms))})}
  result(p:string){const a=this.ans[p];return{k:'wait',msg:a?.v===this.cur.a?'Rätt!':'Fel',big:a?.v===this.cur.a?'✅':'❌',sub:`Rätt svar: ${this.cur.a}`,key:'r'+this.idx}}}

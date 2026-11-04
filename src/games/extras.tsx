@@ -1,0 +1,32 @@
+import React from 'react';import {RB,shuffle,Stage,Answered,Opts,nameOf,Av} from './base';import {QUIZ} from '../content/quiz';import credits from '../content/imageCredits.json';
+const mc=(q:any)=>({...q,o:shuffle([q.a,...q.w])});
+export const MISSIONS=`Få någon att säga ordet "banan"|Använd ordet "synergi" tre gånger|Få någon att skåla med dig utan anledning|Berätta en påhittad historia om din sommar|Få någon att ge dig en high five|Säg "det där är skattepliktigt" vid ett passande tillfälle|Nämn Ullared i ett samtal|Få någon att fråga vad klockan är|Viska något till en annan spelare|Få någon att skratta inom en minut|Härma Sixten utan att bli påkommen|Säg "så sa min morfar" minst två gånger|Ge någon en överdriven komplimang|Låtsas att du fått ett viktigt sms|Få någon att resa sig upp|Säg ordet "Vättern" naturligt i en mening|Kalla någon vid fel namn en gång|Ställ samma fråga till två personer|Börja nynna på en låt så att någon stämmer in|Få någon att hämta något åt dig`.split('|');
+export const ROASTS=['Det där var inte din bästa stund.','Vi pratar inte mer om det här.','Kanske nästa gång. Eller inte.','Mamma är stolt ändå.','Det gick ju inte alls.','Du gjorde ditt bästa, och det är det som är problemet.','Var det tänkt så?','Modigt försök, dåligt resultat.'];
+const CAPS=['När Klarna-fakturan kommer','Jag har en plan','Tre öl in på förfesten','Det här var inte vad det såg ut som','Mamma, jag kan förklara','Måndag morgon i en bild','När någon säger vi måste prata','Hemnet klockan två på natten','Kallas på möte med chefen','Sista bussen gick precis'];
+// Duell: två spelare väljs i hemlighet, först rätt tar poäng av den andra
+class Duel{a:any;b:any;q:any;ans:any={};done=false;win:any=null;constructor(public api:any){}
+ start(){this.api.music('tense');const r=[...this.api.online()].sort((x:any,y:any)=>this.api.total(y.id)-this.api.total(x.id));this.a=r[0];this.b=r[r.length-1];this.q=mc(QUIZ[this.api.used('quiz',1,QUIZ.length)[0]]);this.api.say(`${this.a.name} möter ${this.b.name}!`,'Dags för duell!');this.api.countdown(15000,()=>this.fin(null));this.api.refresh()}
+ fin(w:any){if(this.done)return;this.done=true;this.api.stopCountdown();this.win=w;if(w){const l=w===this.a?this.b:this.a;this.api.award(w.id,300);this.api.award(l.id,-300);this.api.sfx('fanfare')}this.api.after(4500,()=>this.api.end());this.api.refresh()}
+ onInput(p:string,d:any){if(this.done||(p!==this.a.id&&p!==this.b.id)||p in this.ans)return;this.ans[p]=d.a;if(d.a===this.q.a)this.fin(p===this.a.id?this.a:this.b);else if(this.a.id in this.ans&&this.b.id in this.ans)this.fin(null);this.api.refresh()}
+ phone(p:string){if(p!==this.a?.id&&p!==this.b?.id)return{k:'wait',msg:'Duell pågår',big:'⚔️'};if(this.done)return{k:'wait',msg:this.win?.id===p?'Du tog poängen!':'Duellen är över',big:'⚔️'};return{k:'choice',key:'d',prompt:'Först rätt tar poäng',opts:this.q.o.map((o:string)=>({id:o,label:o})),sel:this.ans[p]}}}
+const DuelTv=({g}:any)=><Stage kicker="Duell · en spelare tar poäng av den andra" title={g.q?.q}><div className="duelv"><span><Av p={g.a}/>{g.a?.name}</span><b>mot</b><span><Av p={g.b}/>{g.b?.name}</span></div>{g.q&&<Opts list={g.q.o} right={g.done?g.q.a:null}/>}{g.done&&<p className="lead">{g.win?`${g.win.name} tar poängen!`:'Ingen tog poängen.'}</p>}</Stage>;
+// Bildbluffen: skriv roligast bildtext
+class Cap extends RB{qms=35000;revealMs=7000;stage='write';o:any[]=[];c:any={};
+ setup(){const ph=this.api.players().filter((p:any)=>p.photo).map((p:any)=>({src:p.photo,name:p.name}));const im=shuffle(credits as any[]).slice(0,5).map((x:any)=>({src:'/img/'+x.file}));this.items=shuffle([...ph,...im]).slice(0,4)}
+ begin(){this.stage='write';this.o=[];this.c={}}
+ ask(p:string){if(this.stage==='write')return{k:'text',key:'w'+this.idx,prompt:'Skriv en rolig bildtext',max:60,sel:this.ans[p]?.v};return{k:'choice',key:'v'+this.idx,prompt:'Rösta på bästa texten',opts:this.o.filter(x=>x.id!==p).map(x=>({id:x.id,label:x.t})),sel:this.ans[p]?.v}}
+ close(){if(this.phase!=='q')return;if(this.stage==='write'){this.o=shuffle(Object.entries(this.ans).map(([id,a]:any)=>({id,t:a.v})));if(this.o.length<2){super.close();return}this.stage='vote';this.ans={};this.t0=this.api.now();this.api.countdown(22000,()=>this.close());this.api.refresh();return}super.close()}
+ score(){Object.values(this.ans).forEach((a:any)=>{this.c[a.v]=(this.c[a.v]||0)+1;this.api.award(a.v,400);this.api.stat(a.v,'capvotes',1)})}}
+const CapTv=({g,show}:any)=><div className="capg"><div className="capi"><img src={g.cur.src} alt=""/></div><div className="capt"><div className="kick">Bildbluffen {g.idx+1}/{g.items.length}</div>{g.stage==='write'?<><h2>Skriv en bildtext</h2><Answered g={g} show={show}/></>:<div className="blf">{g.o.map((x:any)=><div key={x.id}><span>{x.t}</span>{g.phase==='reveal'&&<em>{g.c[x.id]||0} röster · {nameOf(show,x.id)?.name}</em>}</div>)}</div>}</div></div>;
+// Hemliga uppdrag avslöjas
+class Mission extends RB{qms=18000;revealMs=4500;setup(){this.items=this.api.players().filter((p:any)=>!p.bot).map((p:any)=>({p,m:this.api.mission(p.id)})).filter((x:any)=>x.m)}
+ answerers(){return this.api.online().filter((x:any)=>!x.bot&&x.id!==this.cur.p.id)}
+ ask(p:string){return p===this.cur.p.id?{k:'wait',msg:'De andra dömer dig',big:'🤫'}:{k:'choice',key:'m'+this.idx,prompt:`Klarade ${this.cur.p.name} uppdraget?`,opts:[{id:'y',label:'Ja'},{id:'n',label:'Nej'}],sel:this.sel(p)}}
+ yes=0;score(){const v=Object.values(this.ans) as any[];this.yes=v.filter(a=>a.v==='y').length;if(this.yes*2>v.length&&v.length)this.api.award(this.cur.p.id,300)}}
+const MissionTv=({g}:any)=><Stage kicker="Hemliga uppdrag" title={g.cur.m}><div className="duelv"><span><Av p={g.cur.p}/>{g.cur.p.name}</span></div>{g.phase==='reveal'&&<div className="bignum">{g.yes*2>Object.keys(g.ans).length?'Klarat! +300':'Misslyckades'}</div>}</Stage>;
+export const EXTRAG=[
+{id:'cap',title:'Bildbluffen',tag:'Roligast bildtext vinner',how:'En bild visas på tv:n. Skriv en rolig text och rösta på den bästa.',cat:'Socialt',icon:'💬',mins:5,min:3,make:(a:any)=>new Cap(a),Tv:CapTv},
+{id:'duel',title:'Duell',tag:'En mot en',how:'Två spelare möts. Först rätt tar trehundra poäng av den andra.',cat:'Final',icon:'⚔️',mins:1,finalOnly:true,direct:true,make:(a:any)=>new Duel(a),Tv:DuelTv},
+{id:'missions',title:'Hemliga uppdrag',tag:'Avslöjandet',how:'Nu avslöjas era uppdrag. De andra röstar om ni klarade dem.',cat:'Final',icon:'🤫',mins:2,finalOnly:true,direct:true,humans:2,make:(a:any)=>new Mission(a),Tv:MissionTv},
+];
+export {CAPS};
