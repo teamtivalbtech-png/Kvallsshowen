@@ -19,6 +19,7 @@ export function botAct(g:any,id:string,now:number,fast:number){
   else if(k==='slider'){if(pv.sel!=null)return;send(g.cur?.y?Math.min(pv.max,Math.max(pv.min,g.cur.y+Math.round((R()-.5)*30))):Math.round((pv.min+(pv.max-pv.min)*R())/pv.step)*pv.step)}
   else if(k==='order'){if(pv.sel)return;const r=[...(g.cur?.right||pv.items.map((x:any)=>x.id))];if(R()<.9){const i=R()*3|0;[r[i],r[i+1]]=[r[i+1],r[i]]}send(r)}
   else if(k==='buzzer'){if(!pv.off&&R()<.15)send('buzz',{t:now})}
+  else if(k==='geo'){if(pv.sel==null&&g.cur)send([g.cur.lat+(R()-.5)*50,g.cur.lng+(R()-.5)*90])}
   else if(k==='stopwatch'){if(pv.sel==null)send(pv.target+(R()-.5)*3.5)}
   else if(k==='camera'){if(!pv.sel)send(selfie())}
   else if(k==='fleet'){if(pv.ready===false)send('ready');else if(pv.canShoot){const e=pv.grid.map((c:string,i:number)=>c==='e'?i:-1).filter((i:number)=>i>=0);send(e[R()*e.length|0])}}
