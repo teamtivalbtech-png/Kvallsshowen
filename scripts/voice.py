@@ -1,4 +1,4 @@
-# Spelar in programledarens fasta repliker med den öppna svenska Piper-rösten (CC0-dataset).
+# Äldre inspelningsskript. Nuvarande röst: sv-SE-MattiasNeural.
 import re,json,subprocess,glob,os,sys
 def h(s):
     x=5381
