@@ -1,4 +1,4 @@
-import React,{useEffect,useRef} from 'react';import {RB,shuffle,Stage,Answered,Opts,pts,nameOf} from './base';import {SONGS} from '../content/more';import credits from '../content/imageCredits.json';import {playSong,stopSong,resumeSong} from './songs';import {hostState} from '../host';
+import React,{useEffect,useRef} from 'react';import {RB,shuffle,Stage,Answered,Opts,pts,nameOf} from './base';import {REELS,EMOJI} from '../content/reel';import {SONGS} from '../content/more';import credits from '../content/imageCredits.json';import {playSong,stopSong,resumeSong} from './songs';import {hostState} from '../host';import {snd} from '../audio';
 const near=(s:any,o:any)=>Math.abs(o.y-s.y)<9;
 const fourTitles=(s:any,n=4)=>{const same=shuffle(SONGS.filter(x=>x.t!==s.t&&near(s,x))).map(x=>x.t);return shuffle([s.t,...[...new Set([...same,...shuffle(SONGS).map(x=>x.t)])].filter(t=>t!==s.t).slice(0,n-1)])};
 const fourArtists=(s:any,n=4)=>{const near2=shuffle(SONGS.filter(x=>x.a!==s.a&&near(s,x))).map(x=>x.a);return shuffle([s.a,...[...new Set([...near2,...shuffle(SONGS).map(x=>x.a)])].filter(a=>a!==s.a).slice(0,n-1)])};
@@ -50,7 +50,6 @@ const ZoomTv=({g,show}:any)=>{const im=g.cur;const ox=im?((im.file.charCodeAt(1)
 const CLIPS=[
  {id:'_OBlgSz8sSM',t:'Charlie bit my finger',start:5,stop:14,after:8,a:'Charlie biter brodern hårt i fingret',w:['Bebisen börjar sjunga','Pappan tar över kameran','Brodern tappar bebisen']},
  {id:'txqiwrbYGrs',t:'David efter tandläkaren',start:13,stop:22,after:7,a:'David undrar om det här är på riktigt',w:['Han somnar direkt','Han hoppar ur bilen','Han börjar gråta av skratt']},
- {id:'mLyOj_QD4a4',t:'Leeroy Jenkins',start:55,stop:65,after:10,a:'Leeroy rusar in och förstör hela planen',w:['Gruppen vinner utan problem','Alla loggar ut','De ber en annan grupp om hjälp']},
  {id:'OQSNhk5ICTI',t:'Double Rainbow',start:11,stop:20,after:8,a:'Han blir helt överväldigad av lycka',w:['Han börjar bygga ett tält','En björn dyker upp','Han lägger av att filma']},
  {id:'dQw4w9WgXcQ',t:'Klippet alla blivit lurade av',start:7,stop:15,after:8,a:'Rick sjunger att han aldrig ska ge dig upp',w:['Han tar av sig rocken','Han ramlar','Polisen kommer']},
  {id:'LU8DDYz68kM',t:'Battle at Kruger',start:240,stop:250,after:10,a:'Bufflarna kommer tillbaka och jagar bort lejonen',w:['En elefant räddar kalven','Turisterna ingriper','Lejonen flyr över floden']},
@@ -66,21 +65,25 @@ class Next extends RB{qms=120000;revealMs=9000;o:string[]=[];ready=false;fallbac
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(a?.v===this.cur.a)this.api.award(p.id,pts(a.t,12000))})}
  result(p:string){return{k:'wait',msg:this.ans[p]?.v===this.cur.a?'Rätt!':'Fel',sub:this.cur.a,key:'r'+this.idx}}}
 const Y:any={p:null,box:null,sound:false,cb:null};
+class Reel extends Next{setup(){const rs=this.api.used('reel',3,REELS.length).map((i:number)=>REELS[i]);const es=this.api.used('emoji',4,EMOJI.length).map((i:number)=>EMOJI[i]);const it:any[]=[];rs.forEach((r:any,i:number)=>{it.push({id:r.id,start:22,stop:32,after:0,t:'Vilken film eller serie?',a:r.a,w:shuffle(r.w).slice(0,5)});it.push({text:1,t:r.fq,a:r.fa,w:r.fw});if(es[i])it.push({emoji:es[i].emoji,t:'Gissa från emojis',a:es[i].a,w:es[i].w})});this.items=it}
+ begin(){const c=this.cur;if(c.id)return super.begin();this.fallback=false;this.ready=false;this.revealMs=4500;this.o=shuffle([c.a,...c.w]);this.open()}}
 function ytPlayer(){return new Promise<any>(ok=>{if(Y.p)return ok(Y.p);Y.box=document.createElement('div');Y.box.className='ytbox';const d=document.createElement('div');Y.box.appendChild(d);(document.querySelector('.tv')||document.body).appendChild(Y.box);new ((window as any).YT.Player)(d,{width:'100%',height:'100%',playerVars:{autoplay:0,controls:0,rel:0,modestbranding:1,playsinline:1,origin:location.origin},events:{onReady:(e:any)=>{Y.p=e.target;ok(Y.p)},onStateChange:(e:any)=>Y.cb?.(e.data),onError:()=>Y.err?.()}})})}
 function Yt({g}:any){const box=useRef<HTMLDivElement>(null),c=g.cur;const[on,setOn]=React.useState(false);const[muted,setM]=React.useState(!Y.sound);
  useEffect(()=>{let t:any,live=true,tried=Y.sound?2:0;Y.err=()=>{g.fallback=true;g.open()};const place=()=>{if(!Y.box||!box.current)return;const r=box.current.getBoundingClientRect();Object.assign(Y.box.style,{display:'block',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'})};
   yt().then(ytPlayer).then((p:any)=>{if(!live)return;place();Y.cb=(s:number)=>{setOn(s===1);if(s===1&&tried===0){tried=1;p.unMute();p.setVolume(100);setM(false)}else if(s===2&&!g.ready&&tried===1){tried=2;p.mute();setM(true);p.playVideo()}};if(Y.sound){p.unMute();p.setVolume(100)}else p.mute();p.loadVideoById({videoId:c.id,startSeconds:c.start});
-   t=setInterval(()=>{place();p.setVolume?.(hostState.talking?30:100);if(!g.ready&&p.getCurrentTime()>=c.stop){tried=3;p.pauseVideo();g.open()}},120)});
+   let clipT0=0;t=setInterval(()=>{place();p.setVolume?.(hostState.talking?30:100);if(!clipT0&&p.getPlayerState?.()===1)clipT0=Date.now();if(!g.ready&&(p.getCurrentTime()>=c.stop||(clipT0&&Date.now()-clipT0>10000))){tried=3;p.pauseVideo();g.open()}},120)});
   return()=>{live=false;clearInterval(t);Y.cb=null;try{Y.p?.pauseVideo();if(Y.box)Y.box.style.display='none'}catch{}}},[c.id]);
+ useEffect(()=>{snd.music('lobby');if(!muted)snd.duck(true);return()=>snd.duck(false)},[muted]);
  useEffect(()=>{if(g.phase==='reveal')try{Y.p?.playVideo()}catch{}},[g.phase]);
  const sound=()=>{try{Y.sound=true;Y.p.unMute();Y.p.setVolume(100);Y.p.playVideo();setM(false)}catch{}};
  return <><div className="yt" ref={box}/>{muted&&<button className="big vsound" onClick={sound}>🔊 Tryck för ljud</button>}{!on&&!g.ready&&<div className="vload">Laddar klippet…</div>}</>}
-const NextTv=({g,show}:any)=>{const c=g.cur;return <div className="nx"><div className="vid" key={g.idx}>{g.fallback?<div className="vfb">Videon kunde inte spelas</div>:<Yt g={g}/>}{g.ready&&g.phase==='q'&&<div className="frz on">Vad händer sen?</div>}</div><Stage kicker={`Vad händer sen? ${g.idx+1}/${g.items.length}`} title={c.t}>{g.ready?<Opts list={g.o} right={g.phase==='reveal'?c.a:null}/>:<p className="lead">Titta noga. Klippet fryser snart.</p>}<Answered g={g} show={show}/></Stage></div>};
+const NextTv=({g,show}:any)=>{const c=g.cur;if(c.text||c.emoji)return <Stage kicker={`Klippkampen ${g.idx+1}/${g.items.length}`} title={c.t}>{c.emoji&&<div className="emoji e3">{c.emoji}</div>}<Opts list={g.o} right={g.phase==='reveal'?c.a:null}/><Answered g={g} show={show}/></Stage>;return <div className="nx"><div className="vid" key={g.idx}>{g.fallback?<div className="vfb">Videon kunde inte spelas</div>:<Yt g={g}/>}{g.ready&&g.phase==='q'&&<div className="frz on">Vad händer sen?</div>}</div><Stage kicker={`Vad händer sen? ${g.idx+1}/${g.items.length}`} title={c.t}>{g.ready?<Opts list={g.o} right={g.phase==='reveal'?c.a:null}/>:<p className="lead">Titta noga. Klippet fryser snart.</p>}<Answered g={g} show={show}/></Stage></div>};
 export const MEDIAG=[
 {id:'song',title:'Låtkampen',tag:'Låt och artist',how:'Lyssna på tv:n. Välj låt och sedan artist.',cat:'Musik',icon:'🎵',mins:5,make:(a:any)=>new Song(a),Tv:SongTv},
 {id:'year',title:'Årtalet',tag:'Vilket år kom låten?',how:'Du får låten. Gissa året med reglaget.',cat:'Musik',icon:'📅',mins:5,make:(a:any)=>new Year(a),Tv:YearTv},
 {id:'intro',title:'Introduellen',tag:'Tryck först',how:'Tryck på summern när du känner igen låten. Fel svar låser dig och kostar poäng.',cat:'Musik',icon:'🔔',mins:5,make:(a:any)=>new Intro(a),Tv:IntroTv},
 {id:'mk',title:'Musikkampen',tag:'Artist, låt och år',how:'Tre snabba frågor på varje låt.',cat:'Klassiker',icon:'🎶',mins:6,make:(a:any)=>new MK(a),Tv:MKTv},
+{id:'reel',title:'Klippkampen',tag:'Film och serier',how:'Se ett kort trailerklipp eller gissa filmen från emojis. Sedan kommer följdfrågor.',cat:'Bild',icon:'🎬',mins:6,make:(a:any)=>new Reel(a),Tv:NextTv},
 {id:'zoom',title:'Zooma ut',tag:'Från närbild till helhet',how:'Bilden zoomas ut. Svara tidigt för mest poäng.',cat:'Bild',icon:'🔍',mins:4,make:(a:any)=>new Zoom(a),Tv:ZoomTv},
 {id:'next',title:'Vad händer sen?',tag:'Klippet fryser',how:'Ett kort klipp stannar. Gissa vad som händer sen.',cat:'Bild',icon:'⏸️',mins:4,make:(a:any)=>new Next(a),Tv:NextTv},
 ];

@@ -115,3 +115,5 @@ button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:p
 .vplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:auto;z-index:5;font-size:3vh;padding:2vh 3vw}
 
 .ytbox{position:fixed;z-index:2;display:none;overflow:hidden;border-radius:16px;pointer-events:none;background:#000}.ytbox iframe{width:100%;height:100%}.vsound{position:absolute;right:2vw;bottom:2vh;width:auto;z-index:8;font-size:2.6vh;padding:1.4vh 2vw}.vload{position:absolute;inset:0;z-index:1;display:grid;place-items:center;color:var(--mut);font-size:3vh}.frz.on{z-index:6;position:absolute}
+
+.emoji.e3{font-size:18vh;letter-spacing:.1em;animation:pop .4s var(--ease) both}
