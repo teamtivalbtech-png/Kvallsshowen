@@ -1,0 +1,96 @@
+import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake} from './net';import {buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {GAMES} from './games';import {Aim} from './ui/aim';
+const AV='🦊 🐸 🦉 🐙 🦄 🐯 🐼 🐵 🦁 🐧 🦖 🐢 🦩 🐝 👽 🤖 👻 🌶️ 🍕 🍷'.split(' ');
+let inId=Date.now()%1e6;
+class Link{
+  pipe:any;room:any;v:any=null;seq=0;off=0;rtt=0;pend=new Map<number,{d:any,n:number}>();on:(v:any)=>void=()=>{};lastHost=0;up=false;t:any;
+  constructor(public code:string,public pid:string,public name:string,public avatar:string){
+    this.room=openPipe('r:'+code,()=>{},ok=>{if(ok)this.hello()});
+    this.pipe=openPipe(`p:${code}:${pid}`,m=>this.msg(m),ok=>{if(ok)this.hello()});
+    this.t=setInterval(()=>this.beat(),700);
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){wake();this.hello()}});
+    window.addEventListener('online',()=>{wake();this.hello()});
+  }
+  hello(){this.room.send({t:'hello',pid:this.pid,name:this.name,avatar:this.avatar})}
+  n=0;
+  beat(){this.n++;if(Date.now()-this.lastHost>4000)this.hello();if(this.n%4===0)this.pipe.send({t:'ping',c:Date.now()});
+    this.pend.forEach((x,id)=>{if(++x.n>12){this.pend.delete(id);return}this.pipe.send({t:'in',id,d:x.d})});this.up=Date.now()-this.lastHost<6000;this.on(this.v)}
+  msg(m:any){this.lastHost=Date.now();
+    if(m.t==='v'){if(m.seq<this.seq&&m.seq>3)return;this.seq=m.seq;this.v=m.v;this.up=true;this.on(m.v);if(!this.n||this.n<3)this.pipe.send({t:'ping',c:Date.now()})}
+    if(m.t==='ack')this.pend.delete(m.id);
+    if(m.t==='pong'){const r=Date.now()-m.c;if(!this.rtt||r<this.rtt*1.3){this.rtt=r;this.off=m.h+r/2-Date.now()}}}
+  input(d:any){const id=++inId;this.pend.set(id,{d,n:0});this.pipe.send({t:'in',id,d})}
+  stream(d:any){this.pipe.send({t:'s',d})}
+  host(){return Date.now()+this.off}
+}
+let link:Link|null=null;
+const L=()=>link!;
+export function Phone({code}:{code:string}){
+  const q=new URLSearchParams(location.search),bn=q.get('n');const key='ks-p-'+code+(bn||'');const saved=useMemo(()=>{try{return JSON.parse(localStorage.getItem(key)||'null')}catch{return null}},[]);
+  const [joined,setJ]=useState(!!saved);const [name,setName]=useState(saved?.name||(()=>{try{return localStorage.getItem('ks-name')||''}catch{return''}})());const [av,setAv]=useState(saved?.avatar||AV[Math.random()*AV.length|0]);
+  const [v,setV]=useState<any>(null);const [,force]=useState(0);
+  useEffect(()=>{if(saved)go(saved);else if(bn){const s={pid:Math.random().toString(36).slice(2,10),name:bn,avatar:av};try{localStorage.setItem(key,JSON.stringify(s))}catch{};setJ(true);go(s)}},[]);
+  function go(s:any){if(link)return;link=new Link(code,s.pid,s.name,s.avatar);link.on=x=>{setV(x);force(n=>n+1)};keepAwake();link.hello()}
+  function join(){const n=name.trim();if(!n)return;const s={pid:saved?.pid||Math.random().toString(36).slice(2,10),name:n,avatar:av};try{localStorage.setItem(key,JSON.stringify(s));localStorage.setItem('ks-name',n)}catch{};setJ(true);go(s);buzz(20)}
+  if(!joined)return <div className="ph join"><h1 className="logo sm">Kvälls<br/>showen</h1><p className="roomtag">Rum {code}</p><input className="tx" autoFocus maxLength={14} placeholder="Ditt namn" value={name} onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&join()}/><div className="avs">{AV.map(a=><button key={a} className={a===av?'on':''} onClick={()=>setAv(a)}>{a}</button>)}</div><button className="big" disabled={!name.trim()} onClick={join}>Gå med</button><p className="note">Fungerar på iPhone och Android. Du behöver inte ladda ner någon app.</p></div>;
+  if(!v)return <div className="ph center"><div className="spin"/><h2>Ansluter till rum {code}</h2><p className="note">Kontrollera att tv:n visar samma kod.</p></div>;
+  return <div className="ph" style={{'--me':v.me.color} as any}>
+    <header className="bar"><span>{v.me.avatar} {v.me.name}</span>{v.me.team&&<span className="tm">{v.me.team}</span>}{v.dl>0&&<Clock dl={v.dl}/>}</header>
+    {!link!.up&&<div className="lost">Återansluter…</div>}
+    <main className="body"><W p={v.pv} rate={v.rate}/></main>
+    {v.canSkip&&v.pv?.k!=='vipLobby'&&<footer className="vipbar"><button onClick={()=>L().input({vip:'skip'})}>Hoppa vidare ⏭</button>{v.stage==='result'&&<button onClick={()=>L().input({vip:'lobby'})}>Till menyn</button>}</footer>}
+  </div>;
+}
+function Clock({dl}:{dl:number}){const [,f]=useState(0);useEffect(()=>{const i=setInterval(()=>f(n=>n+1),300);return()=>clearInterval(i)},[]);const s=Math.max(0,Math.ceil((dl-L().host())/1000));return s<300?<b className="clk">{s}</b>:null}
+function W({p,rate}:{p:any,rate:number}){
+  if(!p)return null;const C=(WID as any)[p.k]||WID.wait;return <C key={p.key||p.k} {...p} rate={rate}/>;
+}
+const send=(d:any)=>{buzz();L().input(d)};
+const WID:any={
+ wait:({msg,sub,big}:any)=><div className="center"><div className="waitmark">{big||'📺'}</div><h2>{msg}</h2>{sub&&<p>{sub}</p>}</div>,
+ intro:({title,how,needs}:any)=>{const [ok,set]=useState('');async function allow(){try{if(needs==='tilt'||needs==='shake'){set(await askMotion()?'yes':'no')}if(needs==='camera'||needs==='aim'){await getCam(needs==='aim'?'environment':'user');set('yes')}if(needs==='mic'){await getMic();set('yes')}}catch{set('no')}}
+   return <div className="center"><h2>{title}</h2><p>{how}</p>{needs&&!ok&&<button className="big" onClick={allow}>{{tilt:'Tillåt rörelsesensor',shake:'Tillåt rörelsesensor',camera:'Tillåt kamera',aim:'Tillåt kamera',mic:'Tillåt mikrofon'}[needs]}</button>}{ok==='yes'&&<p className="good">Klart ✓</p>}{ok==='no'&&<p className="bad">Inte tillåtet. Du kan spela ändå med knapparna på skärmen{isIOS?'. Ändra i Inställningar › Safari om du vill använda sensorn':''}.</p>}</div>},
+ vipLobby:(p:any)=>{const [tab,setTab]=useState('match');const [sel,setSel]=useState<string[]>(()=>GAMES.filter(g=>!g.finalOnly&&g.id!=='allin'&&!g.needs).map(g=>g.id).slice(0,8));const list=GAMES;
+   const v=(d:any)=>send({vip:d.vip,...d});
+   return <div className="vip"><h3>Du är programledare</h3>
+   <div className="seg"><button className={p.mode==='solo'?'on':''} onClick={()=>v({vip:'mode',v:'solo'})}>Var för sig</button><button className={p.mode==='team'?'on':''} onClick={()=>v({vip:'mode',v:'team'})}>Lag</button></div>
+   {p.mode==='team'&&<><div className="seg">{[2,3,4].map(n=><button key={n} className={p.teams===n?'on':''} onClick={()=>v({vip:'teams',v:n})}>{n} lag</button>)}</div><div className="swap">{p.list.map((x:any)=><button key={x.id} onClick={()=>v({vip:'swap',p:x.id})}>{x.avatar} {x.name} <i>L{x.team+1}</i></button>)}</div></>}
+   <div className="seg"><button className={tab==='match'?'on':''} onClick={()=>setTab('match')}>Hela kvällen</button><button className={tab==='one'?'on':''} onClick={()=>setTab('one')}>Ett spel</button></div>
+   {tab==='match'&&<div className="seg"><button onClick={()=>setSel(pick(6))}>Kort · 6</button><button onClick={()=>setSel(pick(12))}>Lång · 12</button><button onClick={()=>setSel(list.filter(g=>g.id!=='allin').map(g=>g.id))}>Alla</button></div>}
+   <div className="glist">{list.map(g=><button key={g.id} className={tab==='match'&&sel.includes(g.id)?'on':''} onClick={()=>tab==='one'?v({vip:'single',v:g.id}):setSel(s=>s.includes(g.id)?s.filter(x=>x!==g.id):[...s,g.id])}><span>{g.icon}</span><b>{g.title}</b><i>{g.cat}{g.needs?' · '+({tilt:'rörelse',shake:'rörelse',camera:'kamera',aim:'kamera',mic:'mikrofon'}as any)[g.needs]:''}</i></button>)}</div>
+   {tab==='match'&&<button className="big sticky" disabled={!sel.length} onClick={()=>v({vip:'match',v:sel})}>Starta kvällen ({sel.length} spel + final)</button>}</div>},
+ choice:({prompt,opts,sel,color,grid}:any)=><div className="cho">{prompt&&<h3>{prompt}</h3>}<div className={'opts '+(grid?'g2':'')}>{opts.map((o:any,i:number)=><button key={o.id??i} disabled={sel!=null||o.off} className={'op c'+(i%4)+(sel===(o.id??i)?' pick':'')+(sel!=null&&sel!==(o.id??i)?' dim':'')} onClick={()=>send({a:o.id??i})}>{o.icon&&<span>{o.icon}</span>}{o.label}</button>)}</div></div>,
+ text:({prompt,ph,max,sel}:any)=>{const [t,s]=useState('');return sel?<div className="center"><h2>Inskickat ✓</h2><p>{sel}</p></div>:<div className="cho"><h3>{prompt}</h3><input className="tx" autoFocus maxLength={max||40} value={t} placeholder={ph||'Skriv här'} onChange={e=>s(e.target.value)} onKeyDown={e=>e.key==='Enter'&&t.trim()&&send({a:t.trim()})}/><button className="big" disabled={!t.trim()} onClick={()=>send({a:t.trim()})}>Skicka</button></div>},
+ guess:({prompt,fb}:any)=>{const [t,s]=useState('');const go=()=>{if(t.trim()){send({a:t.trim()});s('')}};return <div className="cho"><h3>{prompt}</h3>{fb&&<p className="note">{fb}</p>}<input className="tx" autoFocus value={t} placeholder="Gissa" onChange={e=>s(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()}/><button className="big" onClick={go}>Gissa</button></div>},
+ number:({prompt,unit,sel}:any)=>{const [t,s]=useState('');const pad=(c:string)=>{buzz(8);s(x=>c==='←'?x.slice(0,-1):(x+c).slice(0,10))};return sel!=null?<div className="center"><h2>Låst: {Number(sel).toLocaleString('sv-SE')} {unit}</h2></div>:<div className="cho"><h3>{prompt}</h3><div className="numout">{t?Number(t).toLocaleString('sv-SE'):'0'} <small>{unit}</small></div><div className="pad">{'1 2 3 4 5 6 7 8 9 ← 0'.split(' ').map(c=><button key={c} onClick={()=>pad(c)}>{c}</button>)}<button className="ok" disabled={!t} onClick={()=>send({a:Number(t)})}>OK</button></div></div>},
+ slider:({prompt,min,max,step,unit,sel,val,btn}:any)=>{const [x,s]=useState(val??Math.round((min+max)/2/step)*step);return sel!=null?<div className="center"><h2>Låst: {sel} {unit}</h2></div>:<div className="cho"><h3>{prompt}</h3><div className="numout">{x} <small>{unit}</small></div><input type="range" className="rg" min={min} max={max} step={step} value={x} onChange={e=>s(+e.target.value)}/><button className="big" onClick={()=>send({a:x})}>{btn||'Lås'}</button></div>},
+ order:({prompt,items,sel}:any)=>{const [o,s]=useState(items);const mv=(i:number,d:number)=>{const n=[...o],j=i+d;if(j<0||j>=n.length)return;[n[i],n[j]]=[n[j],n[i]];s(n);buzz(8)};return sel?<div className="center"><h2>Inskickat ✓</h2></div>:<div className="cho"><h3>{prompt}</h3><div className="ordl">{o.map((t:any,i:number)=><div key={t.id}><span>{i+1}</span><p>{t.label}</p><button onClick={()=>mv(i,-1)}>▲</button><button onClick={()=>mv(i,1)}>▼</button></div>)}</div><button className="big" onClick={()=>send({a:o.map((t:any)=>t.id)})}>Lås ordningen</button></div>},
+ buzzer:({label,off}:any)=><button className="buzzer" disabled={off} onPointerDown={()=>{if(!off){buzz(40);L().input({a:'buzz',t:L().host()})}}}>{label||'SUMMER'}</button>,
+ actions:({title,body,btns}:any)=><div className="cho center">{title&&<h2>{title}</h2>}{body&&<p>{body}</p>}<div className="opts">{btns.map((b:any,i:number)=><button key={b.id} className={'op c'+i} onClick={()=>send({a:b.id})}>{b.label}</button>)}</div></div>,
+ tap:({label,mode}:any)=>{const c=useRef(0);useEffect(()=>{if(mode==='shake')askMotion();const s=motion.shake;let last=s;const i=setInterval(()=>{const n=motion.shake-last;last=motion.shake;if(c.current+n){L().stream({n:c.current+n});c.current=0}},150);return()=>clearInterval(i)},[]);return <button className="tapper" onPointerDown={()=>{c.current++;buzz(6)}}>{label||'TRYCK!'}<small>Tryck snabbt eller skaka telefonen</small></button>},
+ joystick:({hint,action,rate}:any)=>{const r=useRef<HTMLDivElement>(null),st=useRef({x:0,y:0,b:0,ch:true});const [k,sk]=useState({x:0,y:0});
+   useEffect(()=>{const i=setInterval(()=>{if(st.current.ch){st.current.ch=false;const s=st.current;L().stream({x:+s.x.toFixed(2),y:+s.y.toFixed(2),b:s.b})}},1000/rate);return()=>{clearInterval(i);L().stream({x:0,y:0,b:0})}},[rate]);
+   const mv=(e:any)=>{const b=r.current!.getBoundingClientRect(),R=b.width/2;let x=(e.clientX-b.left-R)/R,y=(e.clientY-b.top-R)/R;const m=Math.hypot(x,y);if(m>1){x/=m;y/=m}st.current.x=x;st.current.y=y;st.current.ch=true;sk({x,y})};
+   return <div className="joy"><p>{hint}</p><div className="stick" ref={r} onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);mv(e)}} onPointerMove={e=>e.buttons||e.pointerType==='touch'?mv(e):0} onPointerUp={()=>{st.current.x=st.current.y=0;st.current.ch=true;sk({x:0,y:0})}}><div style={{transform:`translate(${k.x*90}%,${k.y*90}%)`}}/></div>{action&&<button className="big" onPointerDown={()=>{st.current.b=1;st.current.ch=true;buzz(25)}} onPointerUp={()=>{st.current.b=0;st.current.ch=true}}>{action}</button>}</div>},
+ tilt:({rate}:any)=>{const [ok,set]=useState(tilt.ok);const b=useRef(0);const [ang,sa]=useState(0);
+   useEffect(()=>{const i=setInterval(()=>{const land=Math.abs((screen.orientation?.angle??(window as any).orientation??0))===90;let s=b.current;if(tilt.ok){s=(land?tilt.beta*Math.sign(screen.orientation?.angle===270?-1:1):tilt.gamma)/32;if(!b.current&&!ok)set(true)}else s=b.current;s=Math.max(-1,Math.min(1,s));sa(s);L().stream({s:+s.toFixed(2)})},1000/rate);return()=>clearInterval(i)},[rate]);
+   return <div className="tilt"><div className="wheel" style={{transform:`rotate(${ang*90}deg)`}}>🛞</div><p>{ok?'Luta telefonen som en ratt':'Håll in vänster eller höger'}</p><div className="lr"><button onPointerDown={()=>b.current=-1} onPointerUp={()=>b.current=0} onPointerCancel={()=>b.current=0}>◀</button><button onPointerDown={()=>b.current=1} onPointerUp={()=>b.current=0} onPointerCancel={()=>b.current=0}>▶</button></div></div>},
+ pads:({pads,prompt,flash})=><div className="pads"><h3>{prompt}</h3><div>{pads.map((p:any,i:number)=><button key={i} style={{background:p.c}} className={flash===i?'fl':''} onPointerDown={()=>{buzz(10);L().input({a:i,t:L().host()})}}>{p.l}</button>)}</div></div>,
+ stopwatch:({prompt,target,sel}:any)=>{const [st,s]=useState<number|null>(null);if(sel!=null)return <div className="center"><h2>Stoppad</h2><p>Se resultatet på tv:n</p></div>;
+   return <div className="center"><p>{prompt}</p>{st==null?<button className="buzzer go" onPointerDown={()=>{buzz(20);s(performance.now())}}>START</button>:<button className="buzzer" onPointerDown={()=>{buzz(40);L().input({a:(performance.now()-st)/1000})}}>STOPP</button>}<p className="note">{target} sekunder. Mät i huvudet.</p></div>},
+ draw:({word,rate}:any)=>{const c=useRef<HTMLCanvasElement>(null),col=useRef('#16081f'),pts=useRef<number[]>([]),st=useRef<number>(0);const [cc,setC]=useState('#16081f');
+   useEffect(()=>{const i=setInterval(()=>{if(pts.current.length){L().stream({s:st.current,c:col.current,p:pts.current});pts.current=[]}},200);return()=>clearInterval(i)},[]);
+   const xy=(e:any)=>{const b=c.current!.getBoundingClientRect();return[(e.clientX-b.left)/b.width,(e.clientY-b.top)/b.height].map(v=>+v.toFixed(3))};let last=useRef<number[]|null>(null);
+   const line=(a:number[],b:number[])=>{const x=c.current!.getContext('2d')!,W=c.current!.width,H=c.current!.height;x.strokeStyle=col.current;x.lineWidth=col.current==='#fff7e8'?26:6;x.lineCap='round';x.beginPath();x.moveTo(a[0]*W,a[1]*H);x.lineTo(b[0]*W,b[1]*H);x.stroke()};
+   return <div className="draw"><h3>Rita: {word}</h3><canvas ref={c} width={600} height={450} onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);st.current++;last.current=xy(e);pts.current.push(...last.current)}} onPointerMove={e=>{if(!last.current)return;const n=xy(e);line(last.current,n);last.current=n;pts.current.push(...n)}} onPointerUp={()=>last.current=null}/><div className="cols">{['#16081f','#e23b3b','#2f6fe0','#2fa84f','#f2b21f','#fff7e8'].map(k=><button key={k} className={cc===k?'on':''} style={{background:k}} onClick={()=>{col.current=k;setC(k)}}/>)}<button onClick={()=>{c.current!.getContext('2d')!.clearRect(0,0,600,450);L().stream({clear:1})}}>Rensa</button></div></div>},
+ camera:({prompt,sel}:any)=>{const v=useRef<HTMLVideoElement>(null);const [err,setE]=useState('');useEffect(()=>{if(sel)return;getCam('user').then(s=>{v.current!.srcObject=s;v.current!.play().catch(()=>{})}).catch(()=>setE('Kameran är inte tillåten'));return()=>stopCam()},[sel]);
+   const snap=()=>{const V=v.current!,c=document.createElement('canvas'),w=360,h=Math.round(w*(V.videoHeight/V.videoWidth||.75));c.width=w;c.height=h;const x=c.getContext('2d')!;x.translate(w,0);x.scale(-1,1);x.drawImage(V,0,0,w,h);send({a:c.toDataURL('image/jpeg',.6)})};
+   if(sel)return <div className="center"><h2>Bilden är skickad ✓</h2></div>;return <div className="cam"><h3>{prompt}</h3>{err?<p className="bad">{err}. Ge kameran tillåtelse i webbläsaren och ladda om sidan.</p>:<video ref={v} playsInline muted/>}<button className="big" disabled={!!err} onClick={snap}>Ta bilden</button></div>},
+ mic:({rate}:any)=>{const [hz,set]=useState(0);const [err,setE]=useState('');useEffect(()=>{let stop=false,src:any;getMic().then(s=>{const ctx=micCtx!;ctx.resume();const a=ctx.createAnalyser();a.fftSize=2048;src=ctx.createMediaStreamSource(s);src.connect(a);const b=new Float32Array(2048);const i=setInterval(()=>{if(stop){clearInterval(i);return}a.getFloatTimeDomainData(b);const f=pitch(b,ctx.sampleRate);set(f);L().stream({hz:Math.round(f),t:L().host()})},1000/Math.min(rate,10))}).catch(()=>setE('Mikrofonen är inte tillåten'));return()=>{stop=true;src?.disconnect()}},[]);
+   return <div className="center"><div className="waitmark" style={{transform:`scale(${hz?1.25:1})`}}>🎤</div><h2>{err||(hz?'Vi hör dig!':'Sjung!')}</h2><p>Håll telefonen nära munnen och följ tonerna på tv:n.</p></div>},
+ wordgrid:({letters,size,fb,found}:any)=>{const [path,set]=useState<number[]>([]);const ok=(i:number)=>{if(path.includes(i))return i===path[path.length-1]?-1:0;if(!path.length)return 1;const l=path[path.length-1],dx=Math.abs(i%size-l%size),dy=Math.abs((i/size|0)-(l/size|0));return dx<=1&&dy<=1?1:0};
+   const tap=(i:number)=>{const r=ok(i);if(r===1){set([...path,i]);buzz(6)}else if(r===-1)set(path.slice(0,-1))};
+   return <div className="wg"><div className="wgout">{path.map(i=>letters[i]).join('')||'Tryck bokstäver i rad'}</div><div className="wgrid" style={{gridTemplateColumns:`repeat(${size},1fr)`}}>{letters.map((l:string,i:number)=><button key={i} className={path.includes(i)?'on':''} onClick={()=>tap(i)}>{l}</button>)}</div><div className="lr"><button onClick={()=>set([])}>Rensa</button><button className="ok" disabled={path.length<3} onClick={()=>{send({a:path});set([])}}>Skicka</button></div><p className="note">{fb||`${found} ord`}</p></div>},
+ fleet:({grid,canShoot,prompt,ready})=>{const n=8;return <div className="fleet"><h3>{prompt}</h3><div className="bs" style={{gridTemplateColumns:`repeat(${n},1fr)`}}>{grid.map((c:string,i:number)=><button key={i} className={'c-'+c} disabled={!canShoot||c==='h'||c==='m'} onClick={()=>send({a:i})}>{c==='h'?'✹':c==='m'?'•':''}</button>)}</div>{ready===false&&<div className="lr"><button onClick={()=>send({a:'shuffle'})}>Slumpa</button><button className="ok" onClick={()=>send({a:'ready'})}>Klar</button></div>}</div>},
+ aim:(p:any)=><Aim {...p} link={L()} rate={p.rate}/>,
+};
+function pick(n:number){return GAMES.filter(g=>g.id!=='allin').map(g=>g.id).sort(()=>Math.random()-.5).slice(0,n)}

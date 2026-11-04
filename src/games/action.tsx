@@ -1,0 +1,118 @@
+import React,{useCallback,useEffect,useRef,useState} from 'react';import {Canvas,shuffle,nameOf,Stage} from './base';import {MEL} from '../content/more';import {snd} from '../audio';import {svg,CORN,S,M,box,loadAruco} from '../ui/aim';
+const CAM={fov:46,y:3.4,tilt:.06};
+const project=(x:number,y:number,z:number)=>{const d=9-z,f=.5/Math.tan(CAM.fov*Math.PI/360),cy=y-CAM.y,c=Math.cos(CAM.tilt),s2=Math.sin(CAM.tilt),Y=cy*c+d*s2*-1,Z=d*c+cy*s2;return{sx:.5+x*f/Z,sy:.5-Y*f/Z,scale:f/Z}};
+const glow=(x:any,c:string,b=18)=>{x.shadowColor=c;x.shadowBlur=b};
+const label=(x:any,p:any,X:number,Y:number)=>{x.shadowBlur=0;x.font='28px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(p.avatar,X,Y)};
+// — Sumoarenan —
+class Sumo{ps:any[]=[];R=1;round=0;t=0;over=false;fx:any[]=[];constructor(public api:any){}
+ start(){this.api.music('action');this.go()}
+ go(){const on=this.api.online();this.R=1;this.over=false;this.t=0;this.ps=on.map((p:any,i:number)=>{const a=i/on.length*6.283;return{id:p.id,p,x:Math.cos(a)*.65,y:Math.sin(a)*.65,vx:0,vy:0,ix:0,iy:0,dash:0,cd:0,alive:true}});this.api.refresh()}
+ onStream(p:string,d:any){const s=this.ps.find(x=>x.id===p);if(!s)return;s.ix=d.x||0;s.iy=d.y||0;if(d.b&&s.cd<=0){s.dash=.22;s.cd=1.4;this.api.sfx('hit')}}
+ tick(dt:number){if(this.over)return;this.t+=dt;this.R=Math.max(.32,1-Math.max(0,this.t-6)*.022);const a=this.ps.filter(s=>s.alive);
+  for(const s of a){s.cd-=dt;const f=s.dash>0?11:3.4;s.dash-=dt;s.vx+=s.ix*f*dt;s.vy+=s.iy*f*dt;s.vx*=.965;s.vy*=.965;s.x+=s.vx*dt;s.y+=s.vy*dt}
+  for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++){const A=a[i],B=a[j],dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy)||.01;if(d<.15){const nx=dx/d,ny=dy/d,pow=.55+Math.hypot(A.vx-B.vx,A.vy-B.vy)*.7;A.vx-=nx*pow;A.vy-=ny*pow;B.vx+=nx*pow;B.vy+=ny*pow;A.x-=nx*(.15-d)/2;A.y-=ny*(.15-d)/2;B.x+=nx*(.15-d)/2;B.y+=ny*(.15-d)/2;this.fx.push({x:A.x+nx*.07,y:A.y+ny*.07,t:.3});this.api.sfx('hit')}}
+  a.forEach(s=>{if(Math.hypot(s.x,s.y)>this.R+.03){s.alive=false;this.api.sfx('splash');this.api.award(s.id,(this.ps.length-a.length+1)*0);s.out=this.ps.filter(x=>!x.alive).length;this.api.award(s.id,(s.out-1)*200);this.api.refresh()}});
+  const left=this.ps.filter(s=>s.alive);if(left.length<=1||this.t>75){this.over=true;left.forEach(s=>this.api.award(s.id,800));this.api.sfx('fanfare');this.round++;this.api.after(3000,()=>this.round>=3?this.api.end():this.go());this.api.refresh()}
+  this.fx=this.fx.filter(f=>(f.t-=dt)>0)}
+ phone(p:string){const s=this.ps.find(x=>x.id===p);return s?.alive&&!this.over?{k:'joystick',key:'j'+this.round,hint:'Styr och putsa ut dem',action:'KNUFF'}:{k:'wait',msg:this.over?'Runda klar':'Utslagen',big:'💥'}}
+ draw=(x:any,w:number,h:number)=>{x.clearRect(0,0,w,h);const c=h/2.25;x.save();x.translate(w/2,h/2);x.scale(c,c);
+  x.beginPath();x.arc(0,0,this.R,0,6.3);const g=x.createRadialGradient(0,0,0,0,0,this.R);g.addColorStop(0,'rgba(255,194,61,.5)');g.addColorStop(1,'rgba(232,120,43,.72)');x.fillStyle=g;x.fill();x.lineWidth=.02;x.strokeStyle='#fff';glow(x,'#ffc23d',24);x.stroke();x.shadowBlur=0;
+  this.fx.forEach(f=>{x.beginPath();x.arc(f.x,f.y,.14*(1-f.t/.3)+.02,0,6.3);x.strokeStyle=`rgba(255,255,255,${f.t*3})`;x.stroke()});
+  this.ps.forEach(s=>{if(!s.alive)return;x.beginPath();x.arc(s.x,s.y,.075,0,6.3);x.fillStyle=s.p.color;glow(x,s.dash>0?'#fff':s.p.color);x.fill();x.save();x.translate(s.x,s.y);x.scale(1/c,1/c);label(x,s.p,0,0);x.restore()});x.restore()};}
+const SumoTv=({g}:any)=><div className="arena art art-sumo"><Canvas draw={g.draw}/><div className="hud">Sumoarenan · runda {Math.min(g.round+1,3)}/3</div></div>;
+// — Sista överlevaren —
+class Surv{ps:any[]=[];rocks:any[]=[];t=0;round=0;over=false;spawn=0;constructor(public api:any){}
+ start(){this.api.music('action');this.go()}go(){const on=this.api.online();this.t=0;this.over=false;this.rocks=[];this.ps=on.map((p:any,i:number)=>({id:p.id,p,x:(i+1)/(on.length+1),y:.85,ix:0,iy:0,alive:true}));this.api.refresh()}
+ onStream(p:string,d:any){const s=this.ps.find(x=>x.id===p);if(s){s.ix=d.x||0;s.iy=d.y||0}}
+ tick(dt:number){if(this.over)return;this.t+=dt;const sp=.25+this.t*.02;this.spawn-=dt;if(this.spawn<=0){this.spawn=Math.max(.14,.7-this.t*.022);const e=['🍺','🍕','🧳','🪑','🛞','🥾','🍷','🧯'][Math.random()*8|0];this.rocks.push({x:Math.random(),y:-.05,v:sp+Math.random()*.25,r:.028+Math.random()*.018,e,s:Math.random()*5})}
+  const al=this.ps.filter(s=>s.alive);al.forEach(s=>{s.x=Math.max(.02,Math.min(.98,s.x+s.ix*.55*dt));s.y=Math.max(.05,Math.min(.97,s.y+s.iy*.55*dt))});this.rocks.forEach(r=>{r.y+=r.v*dt;r.s+=dt*2});this.rocks=this.rocks.filter(r=>r.y<1.1);
+  al.forEach(s=>{if(this.rocks.some(r=>Math.hypot((r.x-s.x)*1.7,r.y-s.y)<r.r+.022)){s.alive=false;this.api.sfx('boom');this.api.award(s.id,Math.round(this.t*50));this.api.refresh()}});
+  const l=this.ps.filter(s=>s.alive);if(l.length===0||(l.length===1&&this.ps.length>1)||this.t>75){this.over=true;l.forEach(s=>this.api.award(s.id,Math.round(this.t*50)+800));this.round++;this.api.sfx('fanfare');this.api.after(3000,()=>this.round>=3?this.api.end():this.go());this.api.refresh()}}
+ phone(p:string){const s=this.ps.find(x=>x.id===p);return s?.alive&&!this.over?{k:'joystick',key:'s'+this.round,hint:'Väj för allt som faller'}:{k:'wait',msg:'Du överlevde inte',big:'🪦'}}
+ draw=(x:any,w:number,h:number)=>{x.clearRect(0,0,w,h);x.font=`${h*.075}px serif`;x.textAlign='center';x.textBaseline='middle';this.rocks.forEach(r=>{x.save();x.translate(r.x*w,r.y*h);x.rotate(r.s);x.fillText(r.e,0,0);x.restore()});
+  this.ps.forEach(s=>{if(!s.alive)return;x.beginPath();x.arc(s.x*w,s.y*h,h*.03,0,6.3);x.fillStyle=s.p.color;glow(x,s.p.color);x.fill();label(x,s.p,s.x*w,s.y*h)});x.shadowBlur=0};}
+const SurvTv=({g}:any)=><div className="arena wide art art-survivor"><Canvas draw={g.draw}/><div className="hud">Sista överlevaren · {Math.floor(g.t)} s · runda {Math.min(g.round+1,3)}/3</div></div>;
+// — Tiltracet —
+const TRACK=Array.from({length:120},(_, i)=>{const a=i/120*6.283;const r=1+.22*Math.sin(a*3)+.12*Math.cos(a*2);return[Math.cos(a)*r*1.45,Math.sin(a)*r*.82]});
+class Race{ps:any[]=[];t=0;LAPS=3;over=false;started=false;pl=0;constructor(public api:any){}
+ start(){this.api.music('action');const on=this.api.online();this.ps=on.map((p:any,i:number)=>{const[a,b]=TRACK[0],[c,d]=TRACK[1];const h=Math.atan2(d-b,c-a);return{id:p.id,p,x:a+(i%2?.08:-.08)*Math.sin(h)-.09*(i>>1)*Math.cos(h),y:b-(i%2?.08:-.08)*Math.cos(h)-.09*(i>>1)*Math.sin(h),h,v:0,s:0,seg:0,lap:0,done:0}});this.api.after(3200,()=>{this.started=true;this.api.sfx('fanfare');this.api.refresh()});this.api.refresh()}
+ onStream(p:string,d:any){const s=this.ps.find(x=>x.id===p);if(s)s.s=d.s||0}
+ near(s:any){let bd=9,bi=0;for(let k=-3;k<8;k++){const i=(s.seg+k+120)%120,[a,b]=TRACK[i],d=Math.hypot(a-s.x,b-s.y);if(d<bd){bd=d;bi=i}}return{d:bd,i:bi}}
+ tick(dt:number){if(!this.started||this.over)return;this.t+=dt;for(const s of this.ps){if(s.done)continue;const n=this.near(s);const off=n.d>.17;s.v+=((off?.32:1.0)-s.v)*dt*1.6;s.h+=s.s*2.6*dt;s.x+=Math.cos(s.h)*s.v*dt*.95;s.y+=Math.sin(s.h)*s.v*dt*.95;
+   if(n.d>.38){const[a,b]=TRACK[n.i];s.x=a;s.y=b;const[c,e]=TRACK[(n.i+1)%120];s.h=Math.atan2(e-b,c-a);s.v=.1;this.api.sfx('hit')}
+   if(n.i<10&&s.seg>110){s.lap++;this.api.sfx('tick');if(s.lap>=this.LAPS){s.done=this.t;this.pl++;this.api.award(s.id,[1200,800,500,300,200,100][this.pl-1]||50);this.api.sfx('fanfare');this.api.refresh()}}else if(n.i>110&&s.seg<10){s.lap=Math.max(-1,s.lap-1)}s.seg=n.i}
+  if(this.ps.every(s=>s.done)||this.t>120){this.over=true;this.api.after(2500,()=>this.api.end())}}
+ phone(p:string){const s=this.ps.find(x=>x.id===p);return s&&!s.done?{k:'tilt',key:'t'}:{k:'wait',msg:'I mål!',big:'🏁'}}
+ draw=(x:any,w:number,h:number)=>{x.clearRect(0,0,w,h);const c=Math.min(w/3.6,h/2.25);x.save();x.translate(w/2,h/2);x.scale(c,c);const path=()=>{x.beginPath();TRACK.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.closePath()};x.lineJoin='round';path();x.strokeStyle='#fff';x.lineWidth=.42;x.stroke();path();x.strokeStyle='#333842';x.lineWidth=.38;x.stroke();path();x.setLineDash([.08,.1]);x.strokeStyle='#ffc23d';x.lineWidth=.012;x.stroke();x.setLineDash([]);
+  const[a,b]=TRACK[0];x.fillStyle='#fff';x.fillRect(a-.2,b-.02,.4,.04);this.ps.forEach(s=>{x.save();x.translate(s.x,s.y);x.rotate(s.h);x.fillStyle=s.p.color;glow(x,s.p.color,10);x.fillRect(-.07,-.04,.14,.08);x.fillStyle='#111';x.fillRect(.02,-.03,.03,.06);x.restore()});x.restore();x.shadowBlur=0};}
+const RaceTv=({g,show}:any)=>{const[,f]=useState(0);useEffect(()=>{const i=setInterval(()=>f(n=>n+1),400);return()=>clearInterval(i)},[]);return <div className="arena wide art art-race"><Canvas draw={g.draw}/><div className="hud">Tiltracet {!g.started&&'· Gör er redo'}</div><div className="laps">{[...g.ps].sort((a:any,b:any)=>(b.lap*120+b.seg)-(a.lap*120+a.seg)).map((s:any,i:number)=><span key={s.id}>{i+1}. {s.p.avatar} {Math.max(0,Math.min(s.lap,g.LAPS))}/{g.LAPS}</span>)}</div></div>};
+// — Dragkampen —
+class Tug{sides:any[][]=[[],[]];pos=0;tl=0;time=45;round=0;over=false;tap:any={};constructor(public api:any){}
+ start(){this.api.music('action');const t=this.api.teams();if(t.length>=2&&this.api.mode()==='team'){this.sides=[t[0].members,t.slice(1).flatMap((x:any)=>x.members)]}else{const s=shuffle(this.api.online());this.sides=[s.filter((_:any,i:number)=>i%2===0),s.filter((_:any,i:number)=>i%2)]}this.go()}
+ go(){this.pos=0;this.time=40;this.over=false;this.api.refresh()}
+ sideOf(p:string){return this.sides[0].some(x=>x.id===p)?0:1}
+ onStream(p:string,d:any){if(this.over)return;const s=this.sideOf(p);const n=Math.min(8,d.n||0);this.pos+=(s?1:-1)*n*.012/Math.max(1,this.sides[s].length)*1.6;this.tap[p]=(this.tap[p]||0)+n}
+ tick(dt:number){if(this.over)return;this.time-=dt;if(Math.abs(this.pos)>=1||this.time<=0){this.over=true;const w=this.pos<0?0:1;this.sides[w].forEach(p=>this.api.award(p.id,1000));this.round++;this.api.sfx('fanfare');this.api.after(3500,()=>this.round>=3?this.api.end():this.go());this.api.refresh()}}
+ phone(){return this.over?{k:'wait',msg:'Runda klar',big:'🪢'}:{k:'tap',key:'t'+this.round,label:'DRA!',mode:'shake'}}}
+const TugTv=({g}:any)=>{const[,f]=useState(0);useEffect(()=>{let r=0;const l=()=>{f(n=>n+1);r=requestAnimationFrame(l)};l();return()=>cancelAnimationFrame(r)},[]);return <div className="tug"><div className="kick">Dragkampen · runda {Math.min(g.round+1,3)}/3 · {Math.ceil(Math.max(0,g.time))} s</div><div className="rope"><i className="line"/><div className="knot" style={{left:50+g.pos*45+'%'}}>🔴</div><div className="mid"/></div><div className="tsides"><div>{g.sides[0].map((p:any)=><span key={p.id}>{p.avatar}</span>)}</div><div>{g.sides[1].map((p:any)=><span key={p.id}>{p.avatar}</span>)}</div></div></div>};
+// — Tornet —
+class Tower{ps:any[]=[];turn=0;blocks:any[]=[{x:.5,w:.3}];cur:any=null;t=0;over=false;n=0;fall:any=null;constructor(public api:any){}
+ start(){this.api.music('tense');this.ps=shuffle(this.api.online());this.next()}
+ get who(){return this.ps[this.turn%this.ps.length]}
+ next(){this.n++;if(this.n>this.ps.length*5)return this.api.end();const top=this.blocks[this.blocks.length-1];this.cur={x:0,w:top.w,dir:1,c:this.who.color};this.api.countdown(9000,()=>this.drop());this.api.refresh()}
+ tick(dt:number){const c=this.cur;if(c&&!this.fall){const sp=.55+this.n*.02;c.x+=c.dir*sp*dt;if(c.x<0){c.x=0;c.dir=1}if(c.x>1-c.w){c.x=1-c.w;c.dir=-1}}if(this.fall){this.fall.y+=dt*2.2}}
+ onInput(p:string,d:any){if(d.a==='drop'&&p===this.who.id&&this.cur)this.drop()}
+ drop(){const c=this.cur;if(!c)return;this.api.stopCountdown();this.cur=null;const top=this.blocks[this.blocks.length-1];const l=Math.max(c.x,top.x),r=Math.min(c.x+c.w,top.x+top.w),ov=r-l;this.api.sfx('drop');
+  if(ov<=.01){this.fall={x:c.x,w:c.w,y:0,c:c.c};this.api.sfx('wrong');this.api.award(this.who.id,-100);this.blocks=this.blocks.slice(0,Math.max(1,this.blocks.length-1));this.turn++;this.api.after(900,()=>{this.fall=null;this.next()});this.api.refresh();return}
+  const q=ov/c.w;this.blocks.push({x:l,w:ov,c:c.c});this.api.award(this.who.id,Math.round(q*q*600)+(q>.96?400:0));if(q>.96)this.api.sfx('correct');this.turn++;this.api.after(500,()=>this.next());this.api.refresh()}
+ phone(p:string){return p===this.who?.id&&this.cur?{k:'actions',key:'d'+this.n,title:'Din kloss!',body:'Tryck när den är rakt över tornet.',btns:[{id:'drop',label:'SLÄPP'}]}:{k:'wait',msg:`${this.who?.name} bygger`,big:'🏗️'}}
+ draw=(x:any,w:number,h:number)=>{x.clearRect(0,0,w,h);const B=h*.06,cam=Math.max(0,this.blocks.length-9)*B;const rect=(b:any,y:number,c:string)=>{x.fillStyle=c;glow(x,c,8);x.fillRect(b.x*w,y,b.w*w,B-3)};this.blocks.forEach((b,i)=>rect(b,h-B*(i+1)+cam,b.c||'#ffc23d'));if(this.cur)rect(this.cur,h*.08,this.cur.c);if(this.fall)rect(this.fall,h*.08+this.fall.y*h,this.fall.c);x.shadowBlur=0};}
+const TowerTv=({g}:any)=><div className="arena wide art art-tower"><Canvas draw={g.draw}/><div className="hud">Tornet · {g.blocks.length-1} våningar</div></div>;
+// — Rytmkampen —
+const NOTES=[523,587,659,784];
+class Rhythm{chart:any[]=[];start0=0;bpm=112;hits:any={};score:any={};combo:any={};over=false;i=0;fb:any={};constructor(public api:any){}
+ start(){const b=60/this.bpm,base=[0,2,1,3,0,1,2,3,3,1,2,0,1,2,0,3];let t=0;for(let s=0;s<3;s++)for(let i=0;i<64;i++){if(i%2===0||Math.random()<.2*(s+1))this.chart.push({t:t+i*b/2,l:base[i%16]});}this.dur=this.chart[this.chart.length-1].t+1.5;this.start0=Date.now()+3500;this.api.music(null);this.api.refresh();this.api.after(3500,()=>this.api.music('action'))}dur=0;
+ onInput(p:string,d:any){const t=((d.t||Date.now())-this.start0)/1000;const n=this.chart.filter(c=>c.l===d.a&&!c['h'+p]).sort((a,b)=>Math.abs(a.t-t)-Math.abs(b.t-t))[0];const e=n?Math.abs(n.t-t):9;if(e<.18){n['h'+p]=1;const pt=e<.06?100:e<.12?70:40;this.combo[p]=(this.combo[p]||0)+1;this.api.award(p,pt+Math.min(30,this.combo[p]));this.fb[p]=e<.06?'Perfekt':e<.12?'Bra':'Okej'}else{this.combo[p]=0;this.fb[p]='Miss'}}
+ tick(){const t=(Date.now()-this.start0)/1000;if(t>this.dur&&!this.over){this.over=true;this.api.after(1500,()=>this.api.end())}}
+ phone(p:string){return{k:'pads',key:'pad',prompt:this.fb[p]||'Tryck i takt',pads:[{c:'#ff5d5d',l:'1'},{c:'#ffc23d',l:'2'},{c:'#4fd1ff',l:'3'},{c:'#a6e84a',l:'4'}]}}
+ draw=(x:any,w:number,h:number)=>{const t=(Date.now()-this.start0)/1000;x.fillStyle='#16081f';x.fillRect(0,0,w,h);const L=w*.5,X=w*.25,C=['#ff5d5d','#ffc23d','#4fd1ff','#a6e84a'],hit=h*.85;for(let i=0;i<4;i++){x.fillStyle='rgba(255,255,255,.05)';x.fillRect(X+i*L/4+4,0,L/4-8,h)}x.fillStyle='#fff';x.fillRect(X,hit,L,4);this.chart.forEach(n=>{const y=hit-(n.t-t)*h*.45;if(y<-30||y>h+30)return;x.fillStyle=C[n.l];glow(x,C[n.l]);x.fillRect(X+n.l*L/4+10,y-12,L/4-20,24)});x.shadowBlur=0}}
+const RhythmTv=({g}:any)=><div className="arena wide"><Canvas draw={g.draw}/><div className="hud">Rytmkampen</div></div>;
+// — Sångduellen —
+class Sing{idx=0;song:any=null;notes:any[]=[];t0=0;bpm=96;pl:any={};sc:any={};over=false;constructor(public api:any){}
+ start(){this.song=shuffle(MEL as any[])[0];let t=0;this.notes=this.song.s.map(([m,l]:number[])=>{const d=l*60/this.bpm/2;const o={m,t,d};t+=d;return o});this.dur=t;this.t0=Date.now()+4000;this.api.after(4000,()=>this.play());this.api.refresh()}dur=0;
+ play(){this.notes.forEach(n=>{const c=snd.ctx;if(c)snd.tone(440*2**((n.m-69)/12),c.currentTime+n.t,n.d*.9,'triangle',.14)})}
+ onStream(p:string,d:any){if(!d.hz)return;const t=((d.t||Date.now())-this.t0)/1000;const n=this.notes.find(x=>t>=x.t&&t<x.t+x.d);(this.pl[p]||=[]).push({t,hz:d.hz});if(n){const m=69+12*Math.log2(d.hz/440);let c=(m-n.m)%12;if(c<-6)c+=12;if(c>6)c-=12;if(Math.abs(c)<1.2){this.api.award(p,30);this.sc[p]=(this.sc[p]||0)+1}}}
+ tick(){if(!this.over&&(Date.now()-this.t0)/1000>this.dur+1){this.over=true;this.api.after(1200,()=>this.api.end())}}
+ phone(){return{k:'mic',key:'m'}}
+ draw=(x:any,w:number,h:number)=>{const t=(Date.now()-this.t0)/1000;x.fillStyle='#16081f';x.fillRect(0,0,w,h);const px=w/8,now=w*.25,Y=(m:number)=>h*.85-((m-56)/20)*h*.7;this.notes.forEach(n=>{x.fillStyle='#ffc23d';glow(x,'#ffc23d',10);x.fillRect(now+(n.t-t)*px,Y(n.m)-9,n.d*px-4,18)});x.shadowBlur=0;x.fillStyle='#fff';x.fillRect(now,0,3,h)}}
+const SingTv=({g,show}:any)=><div className="arena wide"><Canvas draw={g.draw}/><div className="hud">Sångduellen · {g.song?.n}</div><div className="laps">{show.players.map((p:any)=><span key={p.id}>{p.avatar} {g.sc[p.id]||0}</span>)}</div></div>;
+// — Anjakten —
+class Duck{duels:any[]=[];di=0;a:any=null;b:any=null;state='brief';time=45;ducks:any[]=[[],[]];score=[0,0];aim=[{x:.5,y:.5},{x:.5,y:.5}];spawn=[0,0];pops:any[]=[[],[]];flash=[0,0];clock=0;constructor(public api:any){}
+ start(){this.api.music('action');const on=this.api.online();let list:any[]=[];if(this.api.mode()==='team'){const t=this.api.teams();const mx=Math.max(...t.map((x:any)=>x.members.length));for(let i=0;i<mx;i++)for(let k=1;k<t.length;k++){const A=t[0].members[i%t[0].members.length],B=t[k].members[i%t[k].members.length];list.push([A,B])}}else{const s=shuffle(on);for(let i=0;i<s.length;i++)list.push([s[i],s[(i+1)%s.length]]);if(s.length===2)list=[[s[0],s[1]],[s[1],s[0]]]}
+  this.duels=list.slice(0,6);this.go()}
+ go(){if(this.di>=this.duels.length)return this.api.end();[this.a,this.b]=this.duels[this.di];this.state='brief';this.score=[0,0];this.ducks=[[],[]];this.pops=[[],[]];this.time=45;this.api.countdown(9000,()=>{this.state='hunt';this.api.stopCountdown();this.api.refresh()});this.api.refresh()}
+ side(p:string){return p===this.a?.id?0:p===this.b?.id?1:-1}
+ onStream(p:string,d:any){const s=this.side(p);if(s>=0)this.aim[s]={x:d.x,y:d.y}}
+ onInput(p:string,d:any){const s=this.side(p);if(s<0||this.state!=='hunt'||d.a!=='shoot')return;this.aim[s]={x:d.x,y:d.y};this.flash[s]=1;this.api.sfx('shot');let best:any=null,bd=9;for(const k of this.ducks[s]){if(k.dead)continue;const q=project(k.wx,k.wy,k.wz),r=q.scale*k.size*1.15+.016,e=Math.hypot(q.sx-d.x,q.sy-d.y);if(e<r&&e/r<bd){bd=e/r;best=k}}
+  if(best){best.dead=1;best.vy=1.5;this.score[s]+=best.v;this.api.sfx(best.v<0?'wrong':'quack');this.api.award(p,best.v*100);const q=project(best.wx,best.wy,best.wz);this.pops[s].push({x:q.sx,y:q.sy,t:best.v>0?'+'+best.v:String(best.v),c:best.v>0?(best.k==='g'?'#ffc23d':'#fff'):'#ff5d5d',id:Math.random()})}}
+ tick(dt:number){this.clock+=dt;if(this.state!=='hunt')return;this.time-=dt;const p=45-this.time;for(const s of [0,1]){this.spawn[s]-=dt;if(this.spawn[s]<=0){this.spawn[s]=Math.max(.42,.95-p*.012);const r=Math.random(),k=r<.1?'g':r<.22?'s':'d',L=Math.random()<.5,z=-(4+Math.random()*44),wide=9-z,sp=(2.4+Math.random()*1.8+p*.05)*(1+wide*.012),hw=wide*.62;this.ducks[s].push({wx:L?-hw:hw,wy:CAM.y+.8+Math.random()*(wide*.34)-wide*.02,wz:z,vx:(L?1:-1)*sp,vz:(Math.random()-.5)*.8,vy:0,ph:Math.random()*6,size:k==='g'?.62:.85,v:k==='g'?3:k==='s'?-2:1,k,dead:0,hw})}
+   for(const k of this.ducks[s]){if(k.dead){k.vy-=dt*14;k.wy+=k.vy*dt;k.wx+=k.vx*.3*dt;continue}k.wx+=k.vx*dt;k.wz+=k.vz*dt;k.ph+=dt*4}this.ducks[s]=this.ducks[s].filter((k:any)=>Math.abs(k.wx)<k.hw+3&&k.wy>-1.2);this.pops[s]=this.pops[s].slice(-6);this.flash[s]=Math.max(0,this.flash[s]-dt*7)}
+  if(this.time<=0){this.state='done';const w=this.score[0]===this.score[1]?-1:this.score[0]>this.score[1]?0:1;if(w>=0)this.api.award([this.a,this.b][w].id,500);this.api.sfx('fanfare');this.api.after(5000,()=>{this.di++;this.go()});this.api.refresh()}}
+ phone(p:string){const s=this.side(p);if(s<0)return{k:'wait',msg:`${this.a?.name} möter ${this.b?.name}`,big:'🦆',key:'w'+this.di};if(this.state==='done')return{k:'wait',msg:`${this.score[s]} poäng`,big:'🎯',key:'d'+this.di};return{k:'aim',key:'aim'+this.di,base:101+s*10,color:s?'#4fd1ff':'#ffc23d'}}}
+function Mk({id,i}:any){const[h,set]=useState('');useEffect(()=>{loadAruco().then(()=>set(svg(id)))},[id]);const b=box(i);return <div className="mk" style={{left:b.x*100+'%',top:b.y*100+'%',width:S*100+'%',height:S*100+'%'}} dangerouslySetInnerHTML={{__html:h}}/>}
+function View3D({g,s}:any){const c=useRef<HTMLCanvasElement>(null),aim=useRef<HTMLDivElement>(null),fl=useRef<HTMLDivElement>(null);const[,tick]=useState(0);
+ useEffect(()=>{let sc:any=null,raf=0,live=true;import('./duck3d').then(m=>{if(!live)return;try{sc=new m.DuckScene(c.current!)}catch(e){c.current!.dataset.fail='1';return}const go=()=>{const el=c.current;if(!el||!live)return;const w=el.clientWidth,h=el.clientHeight;if(el.width!==Math.round(w*sc.r.getPixelRatio())||!el.dataset.ok){sc.size(w,h);el.dataset.ok='1'}sc.sync(g.ducks[s],g.clock);const a=g.aim[s];if(aim.current)aim.current.style.transform=`translate(${a.x*w}px,${a.y*h}px)`;if(fl.current)fl.current.style.opacity=String(g.flash[s]);raf=requestAnimationFrame(go)};go()});return()=>{live=false;cancelAnimationFrame(raf);sc?.dispose()}},[g,s]);
+ useEffect(()=>{const i=setInterval(()=>tick(n=>n+1),250);return()=>clearInterval(i)},[]);
+ return <><canvas ref={c} className="cv"/><div className="vig"/><div className="flash" ref={fl}/><div className="reticle" ref={aim} style={{'--c':s?'#4fd1ff':'#ffc23d'} as any}><i/></div>{g.pops[s].map((p:any)=><span key={p.id} className="popn" style={{left:p.x*100+'%',top:p.y*100+'%',color:p.c}}>{p.t}</span>)}</>}
+const Panel=({g,s,p,base}:any)=><div className="dp"><div className="dh" style={{'--c':s?'#4fd1ff':'#ffc23d'} as any}><span>{p?.avatar} {p?.name}</span><b key={g.score[s]}>{g.score[s]}</b></div><div className="dsq"><View3D g={g} s={s}/>{[0,1,2,3].map(i=><Mk key={i} id={base+i} i={i}/>)}</div></div>;
+const DuckTv=({g}:any)=>{const[,f]=useState(0);useEffect(()=>{const i=setInterval(()=>f(n=>n+1),300);return()=>clearInterval(i)},[]);return <div className="duck"><Panel g={g} s={0} p={g.a} base={101}/><div className="dmid"><b key={Math.ceil(g.time)}>{g.state==='brief'?'':Math.ceil(Math.max(0,g.time))}</b>{g.state==='brief'&&<p>Rikta kameran mot din halva</p>}{g.state==='done'&&<p>{g.score[0]===g.score[1]?'Oavgjort':(g.score[0]>g.score[1]?g.a:g.b)?.name+' vinner'}</p>}<small>Anka +1<br/>Guldand +3<br/>Svan −2</small></div><Panel g={g} s={1} p={g.b} base={111}/></div>};
+export const ACTIONG=[
+{id:'sumo',title:'Sumoarenan',tag:'Sista kvar på mattan',how:'Styr med spaken och knuffa ut de andra innan mattan krymper.',cat:'Action',icon:'🥋',mins:5,make:(a:any)=>new Sumo(a),Tv:SumoTv},
+{id:'race',title:'Tiltracet',tag:'Telefonen är din ratt',how:'Luta telefonen eller håll i knapparna. Tre varv.',cat:'Action',icon:'🏎️',mins:4,needs:'tilt',make:(a:any)=>new Race(a),Tv:RaceTv},
+{id:'surv',title:'Sista överlevaren',tag:'Väj för allt',how:'Allt faller från taket. Överlev längst.',cat:'Action',icon:'☄️',mins:4,make:(a:any)=>new Surv(a),Tv:SurvTv},
+{id:'tug',title:'Dragkampen',tag:'Hamra för laget',how:'Tryck eller skaka så snabbt du kan för att dra repet.',cat:'Action',icon:'🪢',mins:3,needs:'shake',make:(a:any)=>new Tug(a),Tv:TugTv},
+{id:'tower',title:'Tornet',tag:'Bygg högt',how:'Släpp din kloss rakt över tornet. Spill minskar nästa kloss.',cat:'Action',icon:'🏗️',mins:4,make:(a:any)=>new Tower(a),Tv:TowerTv},
+{id:'rhythm',title:'Rytmkampen',tag:'Håll takten',how:'Tryck rätt knapp när tonen når linjen.',cat:'Tajming',icon:'🥁',mins:3,make:(a:any)=>new Rhythm(a),Tv:RhythmTv},
+{id:'sing',title:'Sångduellen',tag:'Träffa tonerna',how:'Sjung in i telefonen och följ tonerna på tv:n.',cat:'Musik',icon:'🎤',mins:2,needs:'mic',make:(a:any)=>new Sing(a),Tv:SingTv},
+{id:'duck',title:'Anjakten',tag:'Telefonen är ditt sikte',how:'1 mot 1. Rikta kameran mot din halva av tv:n och skjut flest ankor på 45 sekunder. Guldänder ger 3, svanar kostar 2.',cat:'Action',icon:'🦆',mins:6,needs:'aim',make:(a:any)=>new Duck(a),Tv:DuckTv},
+];
