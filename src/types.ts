@@ -1,4 +1,4 @@
-export interface Player{id:string;name:string;avatar:string;color:string;team:number;connected:boolean;seen:number;bot?:boolean}
+export interface Player{id:string;name:string;avatar:string;photo?:string;color:string;team:number;connected:boolean;seen:number;bot?:boolean}
 export type PV=any;
 export interface Api{
   players():Player[]; online():Player[]; refresh():void; award(pid:string,pts:number):void; raw(pid:string):number;

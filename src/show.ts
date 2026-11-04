@@ -40,9 +40,9 @@ export class Show{
     if(!p){
       if(this.players.length>=12)return;
       const taken=new Set(this.players.map(x=>x.color));
-      p={id:m.pid,name:String(m.name||'Spelare').slice(0,14),avatar:m.avatar||'🙂',color:COL.find(c=>!taken.has(c))||COL[0],team:0,connected:true,seen:Date.now()};
+      p={id:m.pid,name:String(m.name||'Spelare').slice(0,14),avatar:m.avatar||'🙂',photo:typeof m.photo==='string'&&m.photo.length<30000?m.photo:undefined,color:COL.find(c=>!taken.has(c))||COL[0],team:0,connected:true,seen:Date.now()};
       this.players.push(p);this.assignTeams();snd.sfx('join');if(this.players.length===1)say(LINES.welcome());else if(Math.random()<.5)say(LINES.join());
-    }else if(m.name){p.name=String(m.name).slice(0,14);p.avatar=m.avatar||p.avatar}
+    }else if(m.name){p.name=String(m.name).slice(0,14);p.avatar=m.avatar||p.avatar;if(typeof m.photo==='string'&&m.photo.length<30000)p.photo=m.photo}
     p.seen=Date.now();p.connected=true;this.pipe(p.id);this.save();this.bump();this.push(p.id,true);
   }
   assignTeams(){this.players.forEach((p,i)=>p.team=i%this.teamCount)}
@@ -97,7 +97,7 @@ export class Show{
     const mx=Math.max(1,...Object.values(this.rawS));const rows=this.players.map(p=>{const pts=final?(this.rawS[p.id]||0):Math.round(Math.max(0,this.rawS[p.id]||0)/mx*1000);return{p,pts}}).sort((a,b)=>b.pts-a.pts);
     rows.forEach(r=>this.total[r.p.id]=Math.max(0,(this.total[r.p.id]||0)+r.pts));
     if(this.match&&!final)this.history.push({game:d.title,winner:rows[0]?.p.name,avatar:rows[0]?.p.avatar,pts:rows[0]?.pts});
-    this.lastRes={rows:rows.map(r=>({id:r.p.id,name:r.p.name,avatar:r.p.avatar,color:r.p.color,pts:r.pts}))};this.stage='result';if(rows[0]){const w=LINES.winSp(),e=this.match&&!final?' '+LINES.secret():'';say(`${rows[0].p.avatar} ${rows[0].p.name} vann ${d.title}!`+e,w)}this.inst=null;snd.sfx('fanfare');this.qi++;this.save();
+    this.lastRes={rows:rows.map(r=>({id:r.p.id,name:r.p.name,avatar:r.p.avatar,photo:r.p.photo,color:r.p.color,pts:r.pts}))};this.stage='result';if(rows[0]){const w=LINES.winSp(),e=this.match&&!final?' '+LINES.secret():'';say(`${rows[0].p.avatar} ${rows[0].p.name} vann ${d.title}!`+e,w)}this.inst=null;snd.sfx('fanfare');this.qi++;this.save();
     this.setCd(this.match?10000:600000,()=>this.afterResult());this.bump();
   }
   afterResult(){if(this.match&&this.qi<this.queue.length)this.intro(this.queue[this.qi]);else if(this.match)this.reveal();else this.toLobby()}
@@ -116,7 +116,7 @@ export class Show{
   teamList(){return Array.from({length:this.teamCount},(_,i)=>({id:i,...TEAM[i],members:this.players.filter(p=>p.team===i)})).filter(t=>t.members.length)}
   finalRows(){
     if(this.mode==='team')return this.teamList().map(t=>({id:'t'+t.id,name:t.name,avatar:t.members.map(m=>m.avatar).join(''),color:t.color,pts:Math.round(t.members.reduce((a,m)=>a+(this.total[m.id]||0),0)/t.members.length)})).sort((a,b)=>b.pts-a.pts);
-    return this.players.map(p=>({id:p.id,name:p.name,avatar:p.avatar,color:p.color,pts:this.total[p.id]||0})).sort((a,b)=>b.pts-a.pts);
+    return this.players.map(p=>({id:p.id,name:p.name,avatar:p.avatar,photo:p.photo,color:p.color,pts:this.total[p.id]||0})).sort((a,b)=>b.pts-a.pts);
   }
   view(id:string){
     const p=this.players.find(x=>x.id===id);if(!p)return null;const v=this.vip();const isV=v?.id===id;
