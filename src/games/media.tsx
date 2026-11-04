@@ -1,12 +1,13 @@
-import React,{useEffect,useRef} from 'react';import {RB,shuffle,Stage,Answered,Opts,pts,nameOf} from './base';import {SONGS} from '../content/more';import credits from '../content/imageCredits.json';import {playSong,stopSong,resumeSong} from './songs';
-const fourTitles=(s:any)=>shuffle([s.t,...shuffle(SONGS.filter(x=>x.t!==s.t)).slice(0,3).map(x=>x.t)]);
-const fourArtists=(s:any)=>shuffle([s.a,...shuffle([...new Set(SONGS.map(x=>x.a))].filter(a=>a!==s.a)).slice(0,3)]);
+import React,{useEffect,useRef} from 'react';import {RB,shuffle,Stage,Answered,Opts,pts,nameOf} from './base';import {SONGS} from '../content/more';import credits from '../content/imageCredits.json';import {playSong,stopSong,resumeSong} from './songs';import {hostState} from '../host';
+const near=(s:any,o:any)=>Math.abs(o.y-s.y)<9;
+const fourTitles=(s:any,n=4)=>{const same=shuffle(SONGS.filter(x=>x.t!==s.t&&near(s,x))).map(x=>x.t);return shuffle([s.t,...[...new Set([...same,...shuffle(SONGS).map(x=>x.t)])].filter(t=>t!==s.t).slice(0,n-1)])};
+const fourArtists=(s:any,n=4)=>{const near2=shuffle(SONGS.filter(x=>x.a!==s.a&&near(s,x))).map(x=>x.a);return shuffle([s.a,...[...new Set([...near2,...shuffle(SONGS).map(x=>x.a)])].filter(a=>a!==s.a).slice(0,n-1)])};
 const Vis=({ok}:any)=><div className={'eq '+(ok===false?'mute':'')}>{Array.from({length:18},(_, i)=><i key={i} style={{animationDelay:-i*.17+'s'}}/>)}{ok===false&&<p>Ljudet nådde inte fram. Svara ändå eller hoppa vidare.</p>}</div>;
 class Song extends RB{qms=22000;revealMs=6000;mood='';audio:any=null;part=0;p2=[]as any[];
  setup(){this.items=this.api.used('song',8,SONGS.length).map((i:number)=>({...SONGS[i],ts:null}));}
- begin(){const s=this.cur;s.ts=fourTitles(s);s.as=fourArtists(s);this.part=0;this.audio=null;playSong(s).then(ok=>{this.audio=ok;this.api.refresh()})}
+ begin(){const s=this.cur;s.ts=fourTitles(s,6);s.as=fourArtists(s,6);this.part=0;this.audio=null;playSong(s).then(ok=>{this.audio=ok;this.api.refresh()})}
  start(){this.setup();this.nextRound()}
- ask(p:string){const s=this.cur,a=this.ans[p];if(!a?.t2&&a?.title==null)return{k:'choice',key:'t'+this.idx,prompt:'Vilken låt?',opts:s.ts.map((o:string)=>({id:o,label:o}))};return{k:'choice',key:'a'+this.idx,prompt:'Vilken artist?',opts:s.as.map((o:string)=>({id:o,label:o})),sel:a.artist}}
+ ask(p:string){const s=this.cur,a=this.ans[p];if(!a?.t2&&a?.title==null)return{k:'choice',key:'t'+this.idx,prompt:'Vilken låt?',grid:1,opts:s.ts.map((o:string)=>({id:o,label:o}))};return{k:'choice',key:'a'+this.idx,prompt:'Vilken artist?',grid:1,opts:s.as.map((o:string)=>({id:o,label:o})),sel:a.artist}}
  onInput(p:string,d:any){if(this.phase!=='q')return;const a=this.ans[p]||(this.ans[p]={t:this.api.now()-this.t0,v:null,title:null,artist:null});if(a.title==null)a.title=d.a;else if(a.artist==null)a.artist=d.a;a.done=a.title!=null&&a.artist!=null;this.api.sfx('tick');if(this.answerers().every(x=>this.ans[x.id]?.done))this.close();this.api.refresh()}
  sel(){return null}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(!a)return;let s=0;if(a.title===this.cur.t)s+=pts(a.t,this.qms,700);if(a.artist===this.cur.a)s+=500;this.api.award(p.id,s);a.s=s})}
@@ -16,7 +17,7 @@ class Song extends RB{qms=22000;revealMs=6000;mood='';audio:any=null;part=0;p2=[
 function stopSongLater(g:any){stopSong()}
 const Reveal=({s})=> <div className="songrev"><b>{s.t}</b><span>{s.a} · {s.y}</span></div>;
 const SongTv=({g,show}:any)=>{const s=g.cur;return <Stage kicker={`Låtkampen ${g.idx+1}/${g.items.length}`} title={g.phase==='q'?'Vilken låt är det?':''}>{g.phase==='q'?<Vis ok={g.audio}/>:<Reveal s={s}/>}<Answered g={g} show={show}/></Stage>};
-class Year extends RB{qms=22000;revealMs=6500;mood='';setup(){this.items=this.api.used('song2',8,SONGS.length).map((i:number)=>SONGS[i])}
+class Year extends RB{qms=22000;revealMs=6500;mood='';setup(){this.items=this.api.used('song',8,SONGS.length).map((i:number)=>SONGS[i])}
  audio:any=null;begin(){this.audio=null;playSong(this.cur).then(ok=>{this.audio=ok;this.api.refresh()})}start(){this.setup();this.nextRound()}
  ask(p:string){return{k:'slider',prompt:`${this.cur.t} · ${this.cur.a}`,min:1960,max:2026,step:1,unit:'',val:1995,sel:this.sel(p)}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(!a)return;const d=Math.abs(a.v-this.cur.y);const s=d===0?1000:d<=1?700:d<=3?450:d<=6?200:0;this.api.award(p.id,s);a.s=s;a.d=d})}
@@ -24,15 +25,15 @@ class Year extends RB{qms=22000;revealMs=6500;mood='';setup(){this.items=this.ap
  nextRound(){stopSong();super.nextRound()}}
 const YearTv=({g,show}:any)=><Stage kicker={`Årtalet ${g.idx+1}/${g.items.length}`} title={g.phase==='q'?'Vilket år kom låten?':g.cur.y}>{g.phase==='q'?<><Vis ok={g.audio}/><h2 className="sub">{g.cur.t}</h2><p className="lead">{g.cur.a}</p></>:<Reveal s={g.cur}/>}<Answered g={g} show={show}/></Stage>;
 class Intro extends RB{qms=30000;revealMs=5500;mood='';locked:Record<string,1>={};by:string|null=null;opts:string[]=[];buzz:any[]=[];audio:any=null;
- setup(){this.items=this.api.used('song3',8,SONGS.length).map((i:number)=>SONGS[i])}start(){this.setup();this.nextRound()}
- begin(){this.locked={};this.by=null;this.buzz=[];this.opts=fourTitles(this.cur);this.audio=null;playSong(this.cur).then(o=>{this.audio=o;this.api.refresh()})}
+ setup(){this.items=this.api.used('song',8,SONGS.length).map((i:number)=>SONGS[i])}start(){this.setup();this.nextRound()}
+ begin(){this.locked={};this.by=null;this.buzz=[];this.opts=fourTitles(this.cur,6);this.audio=null;playSong(this.cur).then(o=>{this.audio=o;this.api.refresh()})}
  onInput(p:string,d:any){if(this.phase!=='q')return;if(d.a==='buzz'){if(this.by||this.locked[p])return;this.buzz.push({p,t:d.t||Date.now()});if(this.buzz.length===1)this.api.after(180,()=>this.grant())}else if(p===this.by){if(d.a===this.cur.t){this.api.award(p,1000);this.api.sfx('correct');this.close()}else{this.api.award(p,-300);this.api.sfx('wrong');this.locked[p]=1;this.by=null;this.buzz=[];resumeSong();if(this.api.online().every(x=>this.locked[x.id]))this.close()}}this.api.refresh()}
  grant(){if(this.phase!=='q'||this.by||!this.buzz.length)return;this.by=this.buzz.sort((a,b)=>a.t-b.t)[0].p;stopSong();this.api.sfx('buzz')}
- score(){}ask(p:string){if(this.by===p)return{k:'choice',key:'c'+this.idx,prompt:'Du summade! Vilken låt?',opts:this.opts.map(o=>({id:o,label:o}))};return{k:'buzzer',key:'z'+this.idx,off:!!this.by||!!this.locked[p],label:this.locked[p]?'Låst':this.by?'Väntar':'SUMMER'}}
+ score(){}ask(p:string){if(this.by===p)return{k:'choice',key:'c'+this.idx,prompt:'Du summade! Vilken låt?',grid:1,opts:this.opts.map(o=>({id:o,label:o}))};return{k:'buzzer',key:'z'+this.idx,off:!!this.by||!!this.locked[p],label:this.locked[p]?'Låst':this.by?'Väntar':'SUMMER'}}
  result(){return{k:'wait',msg:this.cur.t,sub:this.cur.a,big:'🔔',key:'r'+this.idx}}nextRound(){stopSong();super.nextRound()}}
-const IntroTv=({g,show}:any)=>{const b=g.by&&nameOf(show,g.by);return <Stage kicker={`Introduellen ${g.idx+1}/${g.items.length}`} title={g.phase==='reveal'?'':b?`${b.avatar} ${b.name} summade!`:'Tryck först när du känner igen låten'}>{g.phase==='q'&&(b?<Opts list={g.opts}/>:<Vis ok={g.audio}/>)}{g.phase==='reveal'&&<Reveal s={g.cur}/>}</Stage>};
+const IntroTv=({g,show}:any)=>{const b=g.by&&nameOf(show,g.by);return <Stage kicker={`Introduellen ${g.idx+1}/${g.items.length}`} title={g.phase==='reveal'?'':b?`${b.avatar} ${b.name} summade!`:'Tryck först när du känner igen låten'}>{g.phase==='q'&&(b?<p className="lead">Svarar på telefonen…</p>:<Vis ok={g.audio}/>)}{g.phase==='reveal'&&<Reveal s={g.cur}/>}</Stage>};
 class MK extends RB{qms=18000;revealMs=5000;mood='';part=0;audio:any=null;
- setup(){this.items=this.api.used('song4',18,SONGS.length).slice(0,6).flatMap((i:number)=>[0,1,2].map(k=>({...SONGS[i],k})))}start(){this.setup();this.nextRound()}
+ setup(){this.items=this.api.used('song',6,SONGS.length).flatMap((i:number)=>[0,1,2].map(k=>({...SONGS[i],k})))}start(){this.setup();this.nextRound()}
  begin(){const s=this.cur;this.audio=this.audio;s.o=s.k===0?fourArtists(s):s.k===1?fourTitles(s):shuffle([s.y,s.y-4+(Math.random()*3|0),s.y+3,s.y-9]).map(String);if(s.k===0){this.audio=null;playSong(s).then(o=>{this.audio=o;this.api.refresh()})}}
  get right(){const s=this.cur;return s.k===0?s.a:s.k===1?s.t:String(s.y)}
  ask(p:string){return{k:'choice',prompt:['Artist?','Låt?','År?'][this.cur.k],opts:this.cur.o.map((o:string)=>({id:o,label:o})),sel:this.sel(p)}}
@@ -65,7 +66,7 @@ class Next extends RB{qms=120000;revealMs=9000;o:string[]=[];ready=false;fallbac
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(a?.v===this.cur.a)this.api.award(p.id,pts(a.t,20000))})}
  result(p:string){return{k:'wait',msg:this.ans[p]?.v===this.cur.a?'Rätt!':'Fel',sub:this.cur.a,key:'r'+this.idx}}}
 function Yt({g}:any){const box=useRef<HTMLDivElement>(null),pl=useRef<any>(null),c=g.cur,ph=useRef(g.phase);ph.current=g.phase;
- useEffect(()=>{let t:any,live=true;const YT=()=>(window as any).YT;yt().then(()=>{if(!live||!box.current)return;const d=document.createElement('div');box.current.innerHTML='';box.current.appendChild(d);pl.current=new (YT().Player)(d,{width:'100%',height:'100%',videoId:c.id,playerVars:{autoplay:1,controls:0,start:c.start,rel:0,modestbranding:1,playsinline:1},events:{onReady:(e:any)=>{e.target.setVolume(100);e.target.unMute();e.target.playVideo()},onError:()=>g.open()}});
+ useEffect(()=>{let t:any,live=true;const YT=()=>(window as any).YT;yt().then(()=>{if(!live||!box.current)return;const d=document.createElement('div');box.current.innerHTML='';box.current.appendChild(d);pl.current=new (YT().Player)(d,{width:'100%',height:'100%',videoId:c.id,playerVars:{autoplay:1,mute:1,controls:0,start:c.start,rel:0,modestbranding:1,playsinline:1,origin:location.origin},events:{onReady:(e:any)=>{e.target.playVideo()},onStateChange:(e:any)=>{if(e.data===1){e.target.unMute();e.target.setVolume(100)}},onError:()=>{g.fallback=true;g.open()}}});
    t=setInterval(()=>{const p=pl.current;if(!p?.getCurrentTime)return;if(!g.ready&&p.getCurrentTime()>=c.stop){p.pauseVideo();g.open()}},120)});return()=>{live=false;clearInterval(t);try{pl.current?.destroy()}catch{}}},[c.id]);
  useEffect(()=>{if(g.phase==='reveal')try{pl.current?.playVideo()}catch{}},[g.phase]);
  return <div className="yt"><div ref={box}/></div>}
