@@ -1,5 +1,5 @@
 const R:Record<string,string>={
-Vilken ö är Fårö knuten till?|Gotland|Öland|Ven|Hönö
+'Sverige 2':`Vilken ö är Fårö knuten till?|Gotland|Öland|Ven|Hönö
 Vilket landskap ligger Malmö i?|Skåne|Halland|Blekinge|Småland
 Vilket landskap ligger Umeå i?|Västerbotten|Norrbotten|Ångermanland|Jämtland
 Vilket län är Kiruna i?|Norrbottens län|Västerbottens län|Jämtlands län|Dalarnas län
@@ -119,7 +119,7 @@ Vad heter fenomenet där solen aldrig går ner?|Midnattssol|Polarnatt|Solstånd|
 Vad heter den största månen runt Saturnus?|Titan|Europa|Io|Ganymedes
 Vilken planet ligger närmast solen?|Merkurius|Venus|Mars|Jorden
 Hur många planeter finns i solsystemet?|8|7|9|10
-Vilken planet har tydligast ringar?|Saturnus|Jupiter|Uranus|Neptunus
+Vilken planet har tydligast ringar?|Saturnus|Jupiter|Uranus|Neptunus`,
 'Svenskt vardagsliv':`Vad kallas en svensk kaffepaus?|Fika|Lagom|Mys|Kaffekalas
 Vad betyder allemansrätten?|Rätten att vistas i naturen|Rätten till semester|Rätten till bostad|Rätten att fiska överallt
 Hur många semesterdagar har svenskar enligt lag?|25|20|30|15
@@ -142,7 +142,7 @@ Vad heter Stockholms kollektivtrafik?|SL|Västtrafik|Skånetrafiken|UL
 Vad heter Göteborgs kollektivtrafik?|Västtrafik|SL|Skånetrafiken|Länstrafiken
 Vad heter Skånes kollektivtrafik?|Skånetrafiken|Västtrafik|SL|Blekingetrafiken
 Vilket nummer ringer du till sjukvårdsrådgivning?|1177|112|114 14|113 13
-Vilket nummer ringer du till polisen när det inte är akut?|114 14|112|1177|113 13
+Vilket nummer ringer du till polisen när det inte är akut?|114 14|112|1177|113 13`,
 };
 export const QUIZ2=Object.entries(R).flatMap(([c,s])=>s.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:c.replace(' 2',''),q,a,w}})).filter(x=>x.w.length===3);
 export const CATS3=[...new Set(QUIZ2.map(x=>x.cat))];
