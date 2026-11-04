@@ -9,8 +9,8 @@ export class Show{
   constructor(){
     let s:any=null;try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
     if(s&&Date.now()-s.at<6*3600e3){this.code=s.code;this.players=s.players.filter((p:Player)=>!p.bot).map((p:Player)=>({...p,connected:false}));this.mode=s.mode;this.teamCount=s.teamCount;this.total=s.total;this.queue=s.queue;this.qi=s.qi;this.match=s.match;this.history=s.history}
-    try{this.usedPools=JSON.parse(localStorage.getItem('ks-used-v1')||'{}')}catch{}
     else this.code=rnd('ABCDEFGHJKLMNPQRSTUVWXYZ');
+    try{this.usedPools=JSON.parse(localStorage.getItem('ks-used-v1')||'{}')}catch{}
     this.room=openPipe('r:'+this.code,m=>this.onRoom(m));
     this.players.forEach(p=>this.pipe(p.id));
     this.lastTick=performance.now();
