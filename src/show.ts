@@ -1,4 +1,4 @@
-import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';
+import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {say,LINES} from './host';
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
@@ -40,7 +40,7 @@ export class Show{
       if(this.players.length>=12)return;
       const taken=new Set(this.players.map(x=>x.color));
       p={id:m.pid,name:String(m.name||'Spelare').slice(0,14),avatar:m.avatar||'🙂',color:COL.find(c=>!taken.has(c))||COL[0],team:0,connected:true,seen:Date.now()};
-      this.players.push(p);this.assignTeams();snd.sfx('join');
+      this.players.push(p);this.assignTeams();snd.sfx('join');if(this.players.length===1)say(LINES.welcome());else if(Math.random()<.5)say(LINES.join());
     }else if(m.name){p.name=String(m.name).slice(0,14);p.avatar=m.avatar||p.avatar}
     p.seen=Date.now();p.connected=true;this.pipe(p.id);this.save();this.bump();this.push(p.id,true);
   }
@@ -80,7 +80,7 @@ export class Show{
     this.clear();const d=byId(id);this.def=d;this.stage='intro';this.inst=null;snd.music(null);snd.sfx('stinger');
     const n=this.players.filter(p=>p.connected).length;
     if(n<(d.min||2)){this.lastRes={skip:`${d.title} kräver minst ${d.min||2} spelare`};if(this.match){this.qi++;if(this.qi<this.queue.length)return this.intro(this.queue[this.qi]);return this.reveal()}}
-    this.setCd(this.match?14000:20000,()=>this.beginGame());this.bump();
+    say(LINES.intro(d.title,d.how));this.setCd(this.match?15000:20000,()=>this.beginGame());this.bump();
   }
   beginGame(){
     if(!this.def)return;this.clear();this.rawS={};this.players.forEach(p=>this.rawS[p.id]=0);this.stage='game';
@@ -91,7 +91,7 @@ export class Show{
     const mx=Math.max(1,...Object.values(this.rawS));const rows=this.players.map(p=>{const pts=final?(this.rawS[p.id]||0):Math.round(Math.max(0,this.rawS[p.id]||0)/mx*1000);return{p,pts}}).sort((a,b)=>b.pts-a.pts);
     rows.forEach(r=>this.total[r.p.id]=Math.max(0,(this.total[r.p.id]||0)+r.pts));
     if(this.match&&!final)this.history.push({game:d.title,winner:rows[0]?.p.name,avatar:rows[0]?.p.avatar,pts:rows[0]?.pts});
-    this.lastRes={rows:rows.map(r=>({id:r.p.id,name:r.p.name,avatar:r.p.avatar,color:r.p.color,pts:r.pts}))};this.stage='result';this.inst=null;snd.sfx('fanfare');this.qi++;this.save();
+    this.lastRes={rows:rows.map(r=>({id:r.p.id,name:r.p.name,avatar:r.p.avatar,color:r.p.color,pts:r.pts}))};this.stage='result';if(rows[0])say(LINES.win(rows[0].p.name,d.title)+(this.match&&!final?' '+LINES.secret():''));this.inst=null;snd.sfx('fanfare');this.qi++;this.save();
     this.setCd(this.match?10000:600000,()=>this.afterResult());this.bump();
   }
   afterResult(){if(this.match&&this.qi<this.queue.length)this.intro(this.queue[this.qi]);else if(this.match)this.reveal();else this.toLobby()}
@@ -103,7 +103,7 @@ export class Show{
   api():Api{const s=this;return{
     players:()=>s.players,online:()=>s.players.filter(p=>p.connected),refresh:()=>s.bump(),award:(p,n)=>{s.rawS[p]=(s.rawS[p]||0)+n},raw:p=>s.rawS[p]||0,
     after:(ms,f)=>{s.timers.push(setTimeout(s.safe(f),ms/FAST))},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
-    countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
+    countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),say:t=>say(t),quip:ok=>{if(Math.random()<.45)say(ok?LINES.right():LINES.wrong())},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
     mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
     used(k,n,pool){let u=s.usedPools[k]||[];const free=[...Array(pool).keys()].filter(i=>!u.includes(i));let list=free.sort(()=>Math.random()-.5).slice(0,n);if(list.length<n){u=[];list=[...list,...[...Array(pool).keys()].filter(i=>!list.includes(i)).sort(()=>Math.random()-.5).slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];return list},
   }}

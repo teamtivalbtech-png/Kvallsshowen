@@ -17,10 +17,10 @@ async def main():
             q=await c.new_page();await q.goto(f'http://localhost:4173/?r={code}&local=1&n={n}');ph.append(q)
         await tv.wait_for_function('__show.players.length==2')
         await tv.evaluate("__show.startSingle('duck');__show.next()");await tv.wait_for_timeout(1800)
-        await tv.screenshot(path='tests/shots/duck-real.png')
+        await tv.screenshot(path='/tmp/shots/duck-real.png')
         sq=await tv.evaluate("(()=>{const r=[...document.querySelectorAll('.dsq')].map(e=>{const b=e.getBoundingClientRect();return[b.x,b.y,b.width,b.height]});return r})()")
         print('paneler',sq)
-        im=Image.open('tests/shots/duck-real.png').convert('RGB')
+        im=Image.open('/tmp/shots/duck-real.png').convert('RGB')
         res=[]
         for t,(s,base) in enumerate([(0,101),(1,111)]*4):
             x0,y0,W,H=sq[s]
@@ -40,8 +40,8 @@ async def main():
             # sann riktpunkt: invers homografi
             H1=np.linalg.inv(np.array(list(k)+[1.0]).reshape(3,3)@np.eye(3)) if False else None
             kk=np.array(list(k)+[1.0]).reshape(3,3);v=kk@np.array([320,240,1.0]);tx,ty=(v[0]/v[2]-x0)/W,(v[1]/v[2]-y0)/H
-            cam.save('tests/shots/cam.jpg',quality=80)
-            import base64;d='data:image/jpeg;base64,'+base64.b64encode(open('tests/shots/cam.jpg','rb').read()).decode()
+            cam.save('/tmp/shots/cam.jpg',quality=80)
+            import base64;d='data:image/jpeg;base64,'+base64.b64encode(open('/tmp/shots/cam.jpg','rb').read()).decode()
             r=await tv.evaluate("""async ([d,base])=>{const i=new Image();i.src=d;await i.decode();const c=document.createElement('canvas');c.width=640;c.height=480;const x=c.getContext('2d');x.drawImage(i,0,0);const det=new AR.Detector({dictionaryName:'ARUCO',maxHammingDistance:2});const t=performance.now();const m=det.detect(x.getImageData(0,0,640,480));const ms=performance.now()-t;return {r:__locate(m,base,320,240),ms,ids:m.map(q=>q.id)}}""",[d,base])
             e=None if not r['r'] else float(np.hypot(r['r']['x']-tx,r['r']['y']-ty));res.append(e);print(t,'mål',round(tx,3),round(ty,3),'fick',r['r'] and (round(r['r']['x'],3),round(r['r']['y'],3)),'fel',e and round(e,3),'ms',round(r['ms']),r['ids'],'skala',round(scale,2))
         await b.close();ok=[e for e in res if e is not None];print('låst',len(ok),'/',len(res),'medelfel',sum(ok)/max(1,len(ok)))

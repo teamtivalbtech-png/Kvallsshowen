@@ -10,7 +10,7 @@ export abstract class RB implements Inst{
   nextRound(){this.idx++;if(this.idx>=this.items.length)return this.api.end();this.ans={};this.phase='q';this.t0=this.api.now();this.begin();this.api.countdown(this.qms,()=>this.close());this.api.refresh()}
   get cur(){return this.items[this.idx]}
   answerers(){return this.api.online()}
-  close(){if(this.phase!=='q')return;this.phase='reveal';this.api.stopCountdown();this.score();this.api.sfx('reveal');this.api.after(this.revealMs,()=>this.nextRound());this.api.refresh()}
+  close(){if(this.phase!=='q')return;this.phase='reveal';this.api.stopCountdown();this.score();this.api.sfx('reveal');this.api.quip(Math.random()<.5);this.api.after(this.revealMs,()=>this.nextRound());this.api.refresh()}
   sel(p:string){return this.ans[p]?.v}
   onInput(p:string,d:any){if(this.phase!=='q'||p in this.ans)return;this.ans[p]={v:d.a,t:this.api.now()-this.t0};this.api.sfx('tick');if(this.answerers().every(x=>x.id in this.ans))this.close();this.api.refresh()}
   onLeave(){if(this.phase==='q'&&this.answerers().length&&this.answerers().every(x=>x.id in this.ans))this.close()}

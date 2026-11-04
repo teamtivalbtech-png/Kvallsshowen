@@ -18,9 +18,9 @@ const bot=()=>{if(window.__bot)return;window.__bot=setInterval(()=>{try{const q=
 for(const p of ph)await p.evaluate(bot);
 const res={};const ids=await tv.evaluate(()=>window.__gids=null);
 const list=only||JSON.parse(fs.readFileSync('/tmp/gids.json'));
-fs.mkdirSync('tests/shots',{recursive:true});
+fs.mkdirSync('/tmp/shots',{recursive:true});
 for(const id of list){const n0=errs.length;const t0=Date.now();await tv.evaluate(i=>{window.__show.toLobby();window.__show.startSingle(i);window.__show.next()},id);
- await tv.waitForTimeout(2500);await tv.screenshot({path:`tests/shots/${id}.jpg`,quality:60,type:'jpeg'});await ph[0].screenshot({path:`tests/shots/${id}-p.jpg`,quality:60,type:'jpeg'});
+ await tv.waitForTimeout(2500);await tv.screenshot({path:`/tmp/shots/${id}.jpg`,quality:60,type:'jpeg'});await ph[0].screenshot({path:`/tmp/shots/${id}-p.jpg`,quality:60,type:'jpeg'});
  let ok=false;try{await tv.waitForFunction(()=>window.__show.stage==='result',null,{timeout:150000});ok=true}catch{}
  const sc=await tv.evaluate(()=>window.__show.lastRes?.rows?.map(r=>r.pts)||[]);const stage=await tv.evaluate(()=>window.__show.stage+' '+(window.__show.error||''));
  res[id]={ok,secs:Math.round((Date.now()-t0)/1000),sc,errs:errs.slice(n0).slice(0,3),stage};console.log(id,JSON.stringify(res[id]),'\n');if(!ok)await tv.evaluate(()=>window.__show.endGame())}

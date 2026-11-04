@@ -4,7 +4,7 @@ export interface Api{
   players():Player[]; online():Player[]; refresh():void; award(pid:string,pts:number):void; raw(pid:string):number;
   after(ms:number,fn:()=>void):void; every(ms:number,fn:()=>void):void; clearTimers():void;
   countdown(ms:number,fn:()=>void):void; deadline():number; stopCountdown():void;
-  now():number; sfx(n:string):void; music(n:string|null):void; end():void;
+  now():number; say(t:string):void; quip(ok:boolean):void; sfx(n:string):void; music(n:string|null):void; end():void;
   mode():'solo'|'team'; teams():{id:number;name:string;color:string;members:Player[]}[]; 
   used(key:string,n:number,pool:number):number[]; isFinal():boolean; total(pid:string):number;
 }

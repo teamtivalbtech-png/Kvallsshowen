@@ -1,6 +1,7 @@
 // All musik och alla ljudeffekter syntetiseras i webbläsaren, så inga rättigheter behövs.
 class Snd{
   ctx:AudioContext|null=null;master:GainNode|null=null;cur:string|null=null;timer:any=0;step=0;next=0;on=false;want:string|null=null;
+  duck(on:boolean){if(this.master&&this.ctx)this.master.gain.linearRampToValueAtTime(on?.16:.5,this.ctx.currentTime+.25)}
   unlock(){if(!this.ctx){this.ctx=new (window.AudioContext||(window as any).webkitAudioContext)();this.master=this.ctx.createGain();this.master.gain.value=.5;const c=this.ctx.createDynamicsCompressor();this.master.connect(c);c.connect(this.ctx.destination)}this.ctx.resume();this.on=true;if(this.want)this.music(this.want)}
   tone(f:number,t:number,d:number,type:OscillatorType='sine',v=.2,dest?:AudioNode){if(!this.ctx)return;const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.008);g.gain.exponentialRampToValueAtTime(.0008,t+d);o.connect(g);g.connect(dest||this.master!);o.start(t);o.stop(t+d+.02)}
   noise(t:number,d:number,v=.15,hp=2000){if(!this.ctx)return;const n=this.ctx.sampleRate*d|0,b=this.ctx.createBuffer(1,n,this.ctx.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=this.ctx.createBufferSource();s.buffer=b;const f=this.ctx.createBiquadFilter();f.type='highpass';f.frequency.value=hp;const g=this.ctx.createGain();g.gain.value=v;s.connect(f);f.connect(g);g.connect(this.master!);s.start(t)}

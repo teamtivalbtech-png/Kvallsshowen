@@ -1,1 +1,1 @@
-{"rewrites":[{"source":"/((?!assets|img|words|aruco|art).*)","destination":"/index.html"}],"headers":[{"source":"/(.*)","headers":[{"key":"Permissions-Policy","value":"camera=(self), microphone=(self), accelerometer=(self), gyroscope=(self)"}]}]}
+{"rewrites":[{"source":"/((?!assets|img|words|aruco|art|api).*)","destination":"/index.html"}],"headers":[{"source":"/(.*)","headers":[{"key":"Permissions-Policy","value":"camera=(self), microphone=(self), accelerometer=(self), gyroscope=(self)"}]}]}

@@ -21,13 +21,13 @@ export function bird(kind:string){const g=new T.Group(),gold=kind==='g',sw=kind=
   const wing=(s:number)=>{const sh=new T.Shape();sh.moveTo(0,0);sh.bezierCurveTo(.3,.35*1,.65,1.0,.28,1.75);sh.bezierCurveTo(-.05,1.45,-.42,.7,-.5,0);sh.lineTo(0,0);const G=new T.ExtrudeGeometry(sh,{depth:.03,bevelEnabled:false,steps:1,curveSegments:8});G.rotateX(Math.PI/2);if(s<0)G.scale(1,1,-1);const w=new T.Mesh(G,M(sw?0xf5f2ea:0x5e5548));w.position.set(.1,.2,s*.3);const tip=new T.Mesh(new T.PlaneGeometry(.26,.34),M(sw?0xffffff:0x1f5ec2));tip.rotation.x=Math.PI/2;tip.position.set(-.2,.0,s*.66);w.add(tip);return w};
   const w1=wing(1),w2=wing(-1);g.add(w1,w2);(g as any).wings=[w1,w2];return g}
 export class DuckScene{
-  scene=new T.Scene();cam=new T.PerspectiveCamera(CAM.fov,1,.1,800);pool=new Map<any,T.Group>();mats:any[]=[];puffs:any[]=[];rips:any[]=[];r:T.WebGLRenderer;off=false;
+  scene=new T.Scene();cam=new T.PerspectiveCamera(CAM.fov,1,.1,800);pool=new Map<any,T.Group>();mats:any[]=[];puffs:any[]=[];rips:any[]=[];r:T.WebGLRenderer;off=false;jet:any;
   constructor(public canvas:HTMLCanvasElement){
     this.r=new T.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});this.r.toneMapping=T.ACESFilmicToneMapping;this.r.toneMappingExposure=1.05;this.r.outputColorSpace=T.SRGBColorSpace;
     const S=this.scene;S.fog=new T.Fog(0xe88a70,70,300);const hs=new T.HemisphereLight(0xffc9a3,0x28324a,1.5);const d=new T.DirectionalLight(0xffd0a0,3);d.position.copy(SUN).multiplyScalar(50);d.position.y=30;S.add(hs,d);
-    const sk=sky(),w=water(),rd=reeds();this.mats=[sk.material,w.material,rd.material];const hz=[sk,ridge(-160,34,0x5a5a8c,1.2),ridge(-125,22,0x3b4a6b,4.4),ridge(-100,11,0x24413f,7.1),forest(420),shore(),cottage()];hz.forEach(o=>(o as any).isHorizon=true);S.add(...hz,w,jetty(),rd);
+    const sk=sky(),w=water(),rd=reeds();this.mats=[sk.material,w.material,rd.material];const hz=[sk,ridge(-160,34,0x5a5a8c,1.2),ridge(-125,22,0x3b4a6b,4.4),ridge(-100,11,0x24413f,7.1),forest(420),shore(),cottage()];hz.forEach(o=>(o as any).isHorizon=true);this.jet=jetty();S.add(...hz,w,this.jet,rd);
     // Valfri AI-bild: ersätter himmel och fjärran landskap, 3D-vatten och ankor ligger kvar ovanpå
-    new T.TextureLoader().load('/art/duck-backdrop.jpg',t=>{t.colorSpace=T.SRGBColorSpace;const m=new T.Mesh(new T.PlaneGeometry(420,260),new T.MeshBasicMaterial({map:t,fog:false,toneMapped:false}));m.position.set(0,92,-180);S.add(m);[...S.children].forEach(o=>{if((o as any).isHorizon)o.visible=false});S.fog=new T.Fog(0xf08b5c,70,260)},undefined,()=>{});
+    new T.TextureLoader().load('/art/duck-backdrop.jpg',t=>{t.colorSpace=T.SRGBColorSpace;t.repeat.set(.47,1);t.offset.set(.5,0);S.background=t;[...S.children].forEach(o=>{if((o as any).isHorizon)o.visible=false});S.fog=null;this.jet.visible=false;w.visible=false},undefined,()=>{});
     this.cam.position.set(0,CAM.y,9);this.cam.rotation.x=CAM.tilt;
   }
   size(w:number,h:number){if(!w)return;this.r.setPixelRatio(Math.min(devicePixelRatio,1.5));this.r.setSize(w,h,false);this.cam.aspect=w/h;this.cam.updateProjectionMatrix()}

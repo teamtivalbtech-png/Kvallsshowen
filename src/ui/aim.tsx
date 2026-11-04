@@ -2,9 +2,9 @@ import React,{useEffect,useRef,useState} from 'react';import {buzz} from '../dev
 declare const AR:any;
 let load:Promise<void>|null=null;
 export function loadAruco(){return load||=new Promise((ok,no)=>{const a=(s:string,n?:()=>void)=>{const e=document.createElement('script');e.src=s;e.onload=()=>n?n():ok();e.onerror=no;document.head.appendChild(e)};a('/aruco/cv.js',()=>a('/aruco/aruco.js'))})}
-export const S=.16,M=.02;
-export const box=(i:number)=>({x:i%2?1-M-S:M,y:i>>1?1-M-S:M});
-export const CORN=(i:number)=>{const{x,y}=box(i);return[[x,y],[x+S,y],[x+S,y+S],[x,y+S]]};
+export const PANEL=5/6;export const S=.16,SY=S*PANEL,M=.02,MY=M*PANEL;
+export const box=(i:number)=>({x:i%2?1-M-S:M,y:i>>1?1-MY-SY:MY});
+export const CORN=(i:number)=>{const{x,y}=box(i);return[[x,y],[x+S,y],[x+S,y+SY],[x,y+SY]]};
 export const svg=(id:number)=>new AR.Dictionary('ARUCO').generateSVG(id);
 /** Beräknar 3×3-homografi (minsta kvadrat) från bildpunkter till panelkoordinater. */
 export function homography(src:number[][],dst:number[][]){
