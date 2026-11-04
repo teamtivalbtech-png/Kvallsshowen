@@ -1,5 +1,6 @@
+import {XTF,XTL,XCL,XSONG,XWHO,XLIKE,XMIME,XWORDS,XSPY,XSELFIE,XFIB} from './extra';
 const L=(s:string)=>s.trim().split('\n').map(x=>x.split('|'));
-export const TF=L(`Sverige har över 200 000 öar|1
+const TF0=L(`Sverige har över 200 000 öar|1
 Bananer är botaniskt sett bär|1
 Hjärtat hos en blåval kan väga över 100 kg|1
 Kameler lagrar vatten i sina pucklar|0
@@ -34,7 +35,7 @@ Dalahästen var från början en leksak|1
 Snigeln har tusentals tänder|1
 Coca-Cola innehöll från början kokain|1
 Lördagsgodis är ett begrepp från 1950-talets svenska kampanjer mot karies|1`).map(([q,a])=>({q,a:a==='1'}));
-export const TIMELINE=L(`Vasaskeppet sjunker|1628
+const TIMELINE0=L(`Vasaskeppet sjunker|1628
 Gustav Vasa blir kung|1523
 Sverige inför allmän rösträtt för kvinnor i val|1921
 Berlinmuren faller|1989
@@ -70,7 +71,7 @@ Euron blir kontanter|2002
 Olof Palme mördas|1986
 Tv-sändningar i färg i Sverige|1970
 Sverige går med i EU|1995`).map(([t,y],i)=>({id:i,t,y:+y}));
-export const CLOSEST=L(`Hur många meter hög är Kebnekaises sydtopp ungefär (2020-talet)?|2095|m
+const CLOSEST0=L(`Hur många meter hög är Kebnekaises sydtopp ungefär (2020-talet)?|2095|m
 Hur långt är det i luftlinje Stockholm–Göteborg ungefär?|395|km
 Hur många invånare har Sverige (miljoner, avrundat till hela)?|11|miljoner
 Hur många meter högt är Eiffeltornet?|330|m
@@ -128,7 +129,7 @@ export const PRICES=L(`🍺|Stor stark på krogen i Stockholm|95
 🍦|Daimstrut på GB|42
 📺|55-tums tv|7990
 🛒|Veckohandling för två|1600`).map(([e,n,p])=>({e,n,p:+p}));
-export const SONGS=L(`Dancing Queen|ABBA|1976
+const SONGS0=L(`Dancing Queen|ABBA|1976
 Waterloo|ABBA|1974
 Mamma Mia|ABBA|1975
 The Winner Takes It All|ABBA|1980
@@ -239,8 +240,8 @@ Levitating|Dua Lipa|2020
 As It Was|Harry Styles|2022
 Flowers|Miley Cyrus|2023
 Espresso|Sabrina Carpenter|2024`).filter(s=>!/Kajagoogoo|Rolling Stone\b|Hot N Cold|Håkan Hellström Känn|Marcus Rosenberg|Du kan gå|Du är min man|Jag vill ha en egen måne|Hem till Norden|Mamma Pappa Barn/.test(s.join('|'))).map(([t,a,y])=>({t,a,y:+y}));
-export const WORDS=`baksmälla,första dejten,bastu,kräftskiva,flyttkartong,fredagsmys,grillkväll,ex-pojkvän,tinderdejt,skilsmässa,midsommarstång,snapsvisa,tandläkare,körkort,pensionär,gymkort,karaoke,dansgolv,fyllekäk,taxikö,sommarstuga,bilköp,bolån,svärmor,solsemester,hotellfrukost,brandlarm,loppis,Ikea-besök,midlifecrisis,dubbelsäng,hårförlust,vinprovning,polisbil,matlåda,sommarjobb,ölmage,cykelolycka,vattensäng,fågelholk,fotbollshuligan,brandman,gravöl,bröllopstal,tomteskägg,kärleksbrev,simhopp,mössa,robotdammsugare,vinterkräksjuka,kajak,toalettköa,smörgåstårta,älgjakt,påskkärring,lucia,parkeringsbot,afterwork,lönehelg,flygrädsla,trädkoja,fiskekort,hängmatta,snöskottning,glassbil,jordgubbstårta,badbrygga,matlagningskurs,rödvinsfläck,stuprör,sovsäck,ostbricka,tvättstuga,hyresvärd,fönsterputsare`.split(',');
-export const FIB=L(`Vad kallas skräcken för att ha lång ord i munnen?|Hippopotomonstrosesquippedaliofobi
+const WORDS0=`baksmälla,första dejten,bastu,kräftskiva,flyttkartong,fredagsmys,grillkväll,ex-pojkvän,tinderdejt,skilsmässa,midsommarstång,snapsvisa,tandläkare,körkort,pensionär,gymkort,karaoke,dansgolv,fyllekäk,taxikö,sommarstuga,bilköp,bolån,svärmor,solsemester,hotellfrukost,brandlarm,loppis,Ikea-besök,midlifecrisis,dubbelsäng,hårförlust,vinprovning,polisbil,matlåda,sommarjobb,ölmage,cykelolycka,vattensäng,fågelholk,fotbollshuligan,brandman,gravöl,bröllopstal,tomteskägg,kärleksbrev,simhopp,mössa,robotdammsugare,vinterkräksjuka,kajak,toalettköa,smörgåstårta,älgjakt,påskkärring,lucia,parkeringsbot,afterwork,lönehelg,flygrädsla,trädkoja,fiskekort,hängmatta,snöskottning,glassbil,jordgubbstårta,badbrygga,matlagningskurs,rödvinsfläck,stuprör,sovsäck,ostbricka,tvättstuga,hyresvärd,fönsterputsare`.split(',');
+const FIB0=L(`Vad kallas skräcken för att ha lång ord i munnen?|Hippopotomonstrosesquippedaliofobi
 Vad heter det officiella vetenskapliga namnet på den svenska älgen?|Alces alces
 Vad kallar man en grupp ugglor på engelska?|A parliament
 Vad betyder det grekiska ordet "symposion" ordagrant?|Att dricka tillsammans
@@ -266,11 +267,11 @@ Vad betyder Volvo på latin?|Jag rullar
 Vad kommer ordet "smörgås" från ursprungligen?|Smörklumpar som liknade gäss
 Vad betyder det svenska ordet "tretår"?|Andra påtåren kaffe
 Vad heter fobin för att ens knän ska kollapsa?|Genufobi`).filter(x=>!/rosa badmaskin|Kyrkröveri|Liechtenstein|vinklubb|fobin för att ens/.test(x[0])).map(([q,a])=>({q,a}));
-export const WHO=`Vem skulle mest troligt missa flyget?|Vem skickar fyllesms oftast?|Vem blir först gripen?|Vem har googlat sig själv senast?|Vem har sämst kläder på fest?|Vem blir mest full på en kräftskiva?|Vem skulle överleva en zombieapokalyps längst?|Vem somnar först på efterfesten?|Vem skulle kunna starta en sekt?|Vem är bäst på att ljuga för chefen?|Vem har mest skärmtid?|Vem kommer aldrig i tid?|Vem glömmer alltid födelsedagar?|Vem är mest sannolikt med i dokusåpa om fem år?|Vem köper mest dumma saker på nätet?|Vem skulle bli rik först?|Vem har flest hemliga konton?|Vem dansar sämst?|Vem bryter ihop mest vid en brädspelsförlust?|Vem är mest benägen att ringa sitt ex?|Vem skulle bli bäst programledare?|Vem äter flest pizzor ensam?|Vem har mest kvar på sitt Klarna-konto?|Vem somnar oftast på bio?|Vem blir mest tagen av en bilreklam?|Vem kan absolut inte hålla en hemlighet?|Vem spenderar mest på Systemet?|Vem har snott en grej från ett hotell?|Vem skulle ta med katten på dejt?|Vem har sagt "jag älskar dig" av misstag?|Vem kommer sjunga på bröllopet utan att bli tillfrågad?|Vem hade klarat Robinson längst?|Vem skulle sälja sin bästa vän för en miljon?|Vem har dolda skulder till sina vänner?|Vem fuskar mest i spel?|Vem blir tjurigast utan mat?|Vem gråter under filmer?|Vem har svårast att säga förlåt?|Vem är mest rädd för spindlar?|Vem skriver längst sms?`.split('|');
-export const LIKE=`Något man gör i smyg på jobbet|Ett typiskt svenskt sommarljud|Något du hittar i en svensk frys|En dålig ursäkt för att komma sent|Något som luktar gott|En sak du aldrig lånar ut|Något man säger på en dålig dejt|En maträtt man lagar när man är bakfull|Världens tråkigaste hobby|Ett bra namn på en katt|En svensk kändis alla känner till|Något som alltid är dyrt på flygplats|Det första man gör efter jobbet|Ett ställe du inte vill bli inlåst|En sak som finns i varenda garage|Något man ångrar dagen efter|Den värsta presenten att få|En film alla har sett|En klassisk svensk godisbit|Något som hör till en kräftskiva|Något man bara gör på semestern|En app alla har|Något folk ljuger om på dejtingappar|En stad man drar till på svensexa|En låt alla kan texten till|Något man köper på Ikea utan att behöva det|Ett svenskt bilmärke|Något som är overrated|Något man kan köpa på Systemet för en fest|Ett yrke du aldrig skulle kunna ha|En sak som finns i varje handväska|Det sista man gör innan man somnar|Något man gör första gången i ett hotellrum|Ett ställe man förlorar sin mobil|Ett ord man säger för mycket|En ursäkt för att lämna festen|En typisk grillrätt|Något du bara gör när du är ensam hemma|En kropp­sdel man ogärna visar|Ett gott pålägg`.split('|').map(s=>s.replace('­',''));
-export const SPY=`Systembolaget,Ikea,Liseberg,Gekås Ullared,Arlanda,Gym,Tandläkaren,Bastu,Kyrkbröllop,Kräftskiva,Studentflak,Hockeyarena,Midsommarfest,Finlandsbåten,Dejt,Skidbacke,Fängelse,Sjukhus,Rymdstation,Kryssning,Bibliotek,Hemlig bar,Konferenshotell,Campingplats,Eurovision,Biograf,Julbord,Riksdagen,Tinder,Grillfest,Stripklubb,Polisstation`.split(',');
-export const MIME=`baksmälla,sniffa ost,simma crawl,första dejten,raka benen,tinderswipe,köra Ikea-matlåda,flygvärdinna,svära på tyska,bli jagad av gäss,fiska kräftor,diska,dansa tango,sumobrottare,bröllopstal,bli dumpad via sms,bartender,skida utför,brandman,toalettbesök utan papper,klättra på klippa,ta en selfie,bli stungen av bi,ge en massage,personlig tränare,bjuda upp på krogen,hitta nycklarna,tvätta håret,elefant,tandläkare,spela luftgitarr,sprutlackera,rocka karaoke,hoppa bungyjump,ta på strumpbyxor,svensexa,möhippa,pensionsfest,yogalärare,midsommardans,bil som inte startar,läcka i taket,snubbla i en backe,äta spaghetti,flyga drake,räkna pengar,ta för mycket chili,bada isvak`.split(',');
-export const SELFIE=`Se ut som du just blivit dumpad|Din bästa domarblick|Se ut som någon som precis hittat en tusenlapp|Din minst säljande dejtingprofilbild|Spela bakfull på en jobbintervju|Se ut som en valaffisch|Din bästa skådespelargråt|Se ut som du försöker dölja en fis|Du är Sveriges nya statsminister|Din blick när någon tar sista pizzabiten|Föreställ en tysk turist i Ullared|Din bästa modellpose|Se ut som om du fått fel paket|Din blick när någon sätter ananas på din pizza|Se romantiskt in i kameran|Din reaktion på ett sms från ditt ex|Spela arg italienare|Föreställ dig som 90-åring|Bästa dubbelhakan|Din blick när chefen säger "vi behöver prata"|Spela sjömannen som sett något|Du har precis vunnit Melodifestivalen|Den värsta passfotot någonsin|Se ut som om du spelar poker med rysk maffia|Du är influerare och säljer te`.split('|');
+const WHO0=`Vem skulle mest troligt missa flyget?|Vem skickar fyllesms oftast?|Vem blir först gripen?|Vem har googlat sig själv senast?|Vem har sämst kläder på fest?|Vem blir mest full på en kräftskiva?|Vem skulle överleva en zombieapokalyps längst?|Vem somnar först på efterfesten?|Vem skulle kunna starta en sekt?|Vem är bäst på att ljuga för chefen?|Vem har mest skärmtid?|Vem kommer aldrig i tid?|Vem glömmer alltid födelsedagar?|Vem är mest sannolikt med i dokusåpa om fem år?|Vem köper mest dumma saker på nätet?|Vem skulle bli rik först?|Vem har flest hemliga konton?|Vem dansar sämst?|Vem bryter ihop mest vid en brädspelsförlust?|Vem är mest benägen att ringa sitt ex?|Vem skulle bli bäst programledare?|Vem äter flest pizzor ensam?|Vem har mest kvar på sitt Klarna-konto?|Vem somnar oftast på bio?|Vem blir mest tagen av en bilreklam?|Vem kan absolut inte hålla en hemlighet?|Vem spenderar mest på Systemet?|Vem har snott en grej från ett hotell?|Vem skulle ta med katten på dejt?|Vem har sagt "jag älskar dig" av misstag?|Vem kommer sjunga på bröllopet utan att bli tillfrågad?|Vem hade klarat Robinson längst?|Vem skulle sälja sin bästa vän för en miljon?|Vem har dolda skulder till sina vänner?|Vem fuskar mest i spel?|Vem blir tjurigast utan mat?|Vem gråter under filmer?|Vem har svårast att säga förlåt?|Vem är mest rädd för spindlar?|Vem skriver längst sms?`.split('|');
+const LIKE0=`Något man gör i smyg på jobbet|Ett typiskt svenskt sommarljud|Något du hittar i en svensk frys|En dålig ursäkt för att komma sent|Något som luktar gott|En sak du aldrig lånar ut|Något man säger på en dålig dejt|En maträtt man lagar när man är bakfull|Världens tråkigaste hobby|Ett bra namn på en katt|En svensk kändis alla känner till|Något som alltid är dyrt på flygplats|Det första man gör efter jobbet|Ett ställe du inte vill bli inlåst|En sak som finns i varenda garage|Något man ångrar dagen efter|Den värsta presenten att få|En film alla har sett|En klassisk svensk godisbit|Något som hör till en kräftskiva|Något man bara gör på semestern|En app alla har|Något folk ljuger om på dejtingappar|En stad man drar till på svensexa|En låt alla kan texten till|Något man köper på Ikea utan att behöva det|Ett svenskt bilmärke|Något som är overrated|Något man kan köpa på Systemet för en fest|Ett yrke du aldrig skulle kunna ha|En sak som finns i varje handväska|Det sista man gör innan man somnar|Något man gör första gången i ett hotellrum|Ett ställe man förlorar sin mobil|Ett ord man säger för mycket|En ursäkt för att lämna festen|En typisk grillrätt|Något du bara gör när du är ensam hemma|En kropp­sdel man ogärna visar|Ett gott pålägg`.split('|').map(s=>s.replace('­',''));
+const SPY0=`Systembolaget,Ikea,Liseberg,Gekås Ullared,Arlanda,Gym,Tandläkaren,Bastu,Kyrkbröllop,Kräftskiva,Studentflak,Hockeyarena,Midsommarfest,Finlandsbåten,Dejt,Skidbacke,Fängelse,Sjukhus,Rymdstation,Kryssning,Bibliotek,Hemlig bar,Konferenshotell,Campingplats,Eurovision,Biograf,Julbord,Riksdagen,Tinder,Grillfest,Stripklubb,Polisstation`.split(',');
+const MIME0=`baksmälla,sniffa ost,simma crawl,första dejten,raka benen,tinderswipe,köra Ikea-matlåda,flygvärdinna,svära på tyska,bli jagad av gäss,fiska kräftor,diska,dansa tango,sumobrottare,bröllopstal,bli dumpad via sms,bartender,skida utför,brandman,toalettbesök utan papper,klättra på klippa,ta en selfie,bli stungen av bi,ge en massage,personlig tränare,bjuda upp på krogen,hitta nycklarna,tvätta håret,elefant,tandläkare,spela luftgitarr,sprutlackera,rocka karaoke,hoppa bungyjump,ta på strumpbyxor,svensexa,möhippa,pensionsfest,yogalärare,midsommardans,bil som inte startar,läcka i taket,snubbla i en backe,äta spaghetti,flyga drake,räkna pengar,ta för mycket chili,bada isvak`.split(',');
+const SELFIE0=`Se ut som du just blivit dumpad|Din bästa domarblick|Se ut som någon som precis hittat en tusenlapp|Din minst säljande dejtingprofilbild|Spela bakfull på en jobbintervju|Se ut som en valaffisch|Din bästa skådespelargråt|Se ut som du försöker dölja en fis|Du är Sveriges nya statsminister|Din blick när någon tar sista pizzabiten|Föreställ en tysk turist i Ullared|Din bästa modellpose|Se ut som om du fått fel paket|Din blick när någon sätter ananas på din pizza|Se romantiskt in i kameran|Din reaktion på ett sms från ditt ex|Spela arg italienare|Föreställ dig som 90-åring|Bästa dubbelhakan|Din blick när chefen säger "vi behöver prata"|Spela sjömannen som sett något|Du har precis vunnit Melodifestivalen|Den värsta passfotot någonsin|Se ut som om du spelar poker med rysk maffia|Du är influerare och säljer te`.split('|');
 export const BOXES=[['Guldklocka',1800],['Tom låda',0],['Vinflaska från 1982',1300],['En gammal tv-fjärrkontroll',20],['Bitcoin-nyckel',2500],['Skrapelott',300],['Svärmors porslin',100],['Äkta Zorn-etsning',2200],['Kvitto från Ullared',10],['Diamantörhängen',2000],['Förbannad docka',-400],['Hyresskuld',-800],['Skattekrav',-1000],['Klassisk Volvo-nyckel',1500],['Sommarstugenyckel',2800],['Gymkort som går ut idag',50],['Oöppnad Nintendo från 1985',1700],['Burk surströmming',150],['Signerad Zlatan-tröja',900],['Ex:ets breven',-200],['Guldtacka',3000],['Kassettband med Gyllene Tider',250],['Tio liter glögg',120],['Parkeringsböter',-300]];
 export const SCENES=[
  {t:'Katten på bordet',icons:['🐱','🍷'],a:'Glaset välter ner på mattan',w:['Katten dricker upp vinet','Glaset flyger iväg som en raket','Katten tar selfie'],kind:'push'},
@@ -283,3 +284,15 @@ export const SCENES=[
  {t:'Toast i brödrost',icons:['🍞','🔥'],a:'Macka hoppar upp bränd',w:['Rosten exploderar','Mackan försvinner','Mackan blir en duva'],kind:'toast'},
 ];
 export const MEL:any=[{n:'Grattis på födelsedagen',s:[[60,1],[60,1],[62,2],[60,2],[65,2],[64,4],[60,1],[60,1],[62,2],[60,2],[67,2],[65,4]]},{n:'Bä bä vita lamm',s:[[60,2],[60,2],[67,2],[67,2],[69,2],[69,2],[67,4],[65,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,4]]},{n:'Gubben Noak',s:[[60,2],[60,2],[60,2],[64,2],[62,2],[62,2],[62,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,4]]},{n:'Broder Jakob',s:[[60,2],[62,2],[64,2],[60,2],[60,2],[62,2],[64,2],[60,2],[64,2],[65,2],[67,4],[64,2],[65,2],[67,4]]}].slice(0);
+
+export const TF=[...TF0,...XTF];
+export const TIMELINE=[...TIMELINE0,...XTL];
+export const CLOSEST=[...CLOSEST0,...XCL];
+export const SONGS=[...SONGS0,...XSONG];
+export const WORDS=[...WORDS0,...XWORDS];
+export const FIB=[...FIB0,...XFIB];
+export const WHO=[...WHO0,...XWHO];
+export const LIKE=[...LIKE0,...XLIKE];
+export const SPY=[...SPY0,...XSPY];
+export const MIME=[...MIME0,...XMIME];
+export const SELFIE=[...SELFIE0,...XSELFIE];
