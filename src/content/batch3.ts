@@ -1,6 +1,15 @@
 // Andra fördubblingen.
 const L=(s:string)=>s.trim().split('\n').map(x=>x.split('|'));
-export const TF3=L(`Spanien vann fotbolls-VM 2026|1
+export const TF3=L(`Sverige har fler öar än något annat land|1
+Danmark har en kung|1
+Mount Everest ligger i Afrika|0
+Det finns inga vilda ormar på Irland|1
+Kanada är större än USA till ytan|1
+Katter har fler ben i kroppen än människor|1
+Giraffer har sju halskotor|1
+Hajar har ett skelett av brosk|1
+Harry Potter-böckerna är skrivna av en amerikan|0
+Spanien vann fotbolls-VM 2026|1
 Kalle Anka har sänts på julafton i svensk tv sedan 1960|1
 Sverige körde på vänster sida av vägen fram till 1967|1
 Ikea grundades i Småland|1
@@ -53,7 +62,13 @@ Tomater är botaniskt sett bär|1
 Tungan har särskilda zoner för olika smaker|0
 Man använder bara tio procent av hjärnan|0
 Kor har fyra magavdelningar|1`).map(([q,a])=>({q,a:a==='1'}));
-export const TL3=L(`Wikipedia startar|2001
+export const TL3=L(`Apple grundas|1976
+Microsoft grundas|1975
+Ikea grundas|1943
+H&M grundas|1947
+Amazon grundas|1994
+Lego grundas|1932
+Wikipedia startar|2001
 Twitter lanseras|2006
 WhatsApp lanseras|2009
 Tinder lanseras|2012
@@ -105,7 +120,13 @@ Första Vasaloppet|1922
 Första moderna olympiska spelen|1896
 Greta Thunberg börjar skolstrejka|2018
 ChatGPT lanseras|2022`).map(([t,y],i)=>({id:i+300,t,y:+y}));
-export const CL3=L(`Hur många länder är med i EU?|27|länder
+export const CL3=L(`Hur många dagar har ett skottår?|366|dagar
+Hur många nordiska länder finns det?|5|länder
+Hur många spelare har ett basketlag på planen?|5|spelare
+Hur många grader är en rät vinkel?|90|grader
+Hur många kategorier har Nobelpriset?|6|kategorier
+Hur många minuter varar en fotbollsmatch?|90|minuter
+Hur många länder är med i EU?|27|länder
 Hur många delstater har USA?|50|delstater
 Hur högt är Eiffeltornet?|330|meter
 Hur högt är Mount Everest?|8849|meter
@@ -137,7 +158,9 @@ Hur lång är Göta kanal?|190|km
 Hur många kommuner har Sverige?|290|kommuner
 Hur många länder finns i FN?|193|länder
 Hur många gånger har Tyskland vunnit herr-VM i fotboll?|4|gånger`).map(([q,a,u])=>({q,a:+a,u}));
-export const FIB3=L(`Vad heter plastbiten i änden på ett skosnöre?|Aglett
+export const FIB3=L(`Vad heter huvudstaden i Eswatini?|Mbabane
+Vad heter huvudstaden i Moçambique?|Maputo
+Vad heter plastbiten i änden på ett skosnöre?|Aglett
 Vad kallas gropen ovanför överläppen?|Philtrum
 Vad kallas rädslan för talet 13?|Triskaidekafobi
 Vad kallas rädslan för att jordnötssmör fastnar i gommen?|Arachibutyrofobi
@@ -214,7 +237,9 @@ Vem målade Midvinterblot?|Carl Larsson|Anders Zorn|Bruno Liljefors|Ernst Joseph
 Vilken svensk blev 1909 första kvinna att få Nobelpriset i litteratur?|Selma Lagerlöf|Nelly Sachs|Karin Boye|Moa Martinson
 Vad är kvadratroten ur 1764?|42|38|44|46
 Vilket år fick svenska kvinnor för första gången rösta i ett riksdagsval?|1921|1919|1909|1931`;
-export const NOS3=`Vilket land kommer Lazy Town från?|Island|Norge|Danmark|Finland
+export const NOS3=`Vilken färg har Bolibompa-draken?|Grön|Röd|Blå|Gul
+Vad heter Pingus lillasyster?|Pinga|Robby|Punki|Pino
+Vilket land kommer Lazy Town från?|Island|Norge|Danmark|Finland
 Vad heter hjälten i Lazy Town?|Sportacus|Robbie|Pixel|Stingy
 Vad heter näbbdjuret i Phineas och Ferb?|Perry|Pelle|Pablo|Pontus
 Vad heter Phineas och Ferbs storasyster?|Candace|Stacy|Vanessa|Isabella
@@ -376,4 +401,37 @@ Vad heter FIFA-spelen sedan 2023?|EA Sports FC|FIFA World|Football Pro|eFootball
 Vad kallas förrädaren i Among Us?|Impostor|Crewmate|Traitor|Sus
 Vilket företag gör Fortnite?|Epic Games|Valve|Riot Games|Activision
 Vilket företag gör League of Legends?|Riot Games|Blizzard|Valve|Epic Games
-Vad spelar man med i Rocket League?|Bilar|Raketer|Flygplan|Robotar`.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:"Spel",q,a,w}})];
+Vad spelar man med i Rocket League?|Bilar|Raketer|Flygplan|Robotar`.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:"Spel",q,a,w}}),...`Hur många strängar har en vanlig gitarr?|6|4|5|7
+Hur många strängar har en fiol?|4|3|5|6
+Vilket instrument är Jimi Hendrix känd för?|Gitarr|Trummor|Bas|Piano
+Vilken färg får man av blått och gult?|Grönt|Lila|Orange|Brunt
+Vilken färg får man av rött och blått?|Lila|Grönt|Orange|Rosa
+Hur många sidor har en hexagon?|6|5|7|8
+Hur många grader är vinkelsumman i en triangel?|180|90|360|270
+Vad är 15 procent av 200?|30|15|20|45
+Vad är 7 gånger 8?|56|54|48|64
+Vilket är det minsta primtalet?|2|1|3|5
+Vad heter en figur med åtta sidor?|Oktagon|Hexagon|Pentagon|Dekagon
+Vilket språk talas i Brasilien?|Portugisiska|Spanska|Brasilianska|Italienska
+Vilket är det största språket i Österrike?|Tyska|Österrikiska|Ungerska|Italienska
+Vilket är det officiella språket i Egypten?|Arabiska|Egyptiska|Engelska|Franska
+Hur många bokstäver har det svenska alfabetet?|29|26|28|30
+Vilket stjärntecken har någon född 24 december?|Stenbocken|Skytten|Vattumannen|Fiskarna
+Hur många nollor har en miljard?|9|6|8|12
+I vilket väderstreck går solen upp?|Öst|Väst|Nord|Syd
+Vad kallas en korsning mellan labrador och pudel?|Labradoodle|Cockapoo|Puggle|Goldendoodle
+Från vilket land kommer hundrasen chihuahua?|Mexiko|Spanien|Peru|Kina
+Från vilket land kommer hundrasen shiba?|Japan|Kina|Sydkorea|Thailand
+Vilken ras är Lassie?|Collie|Schäfer|Golden retriever|Beagle
+Vilken ras är Scooby-Doo?|Grand danois|Beagle|Bulldogg|Schäfer
+Vilken ras är Snobben?|Beagle|Tax|Terrier|Pudel
+Vad heter Asterix bäste vän?|Obelix|Idéfix|Getafix|Kakofonix
+Vad heter Kalle Ankas flickvän?|Kajsa Anka|Mimmi Pigg|Klarabella|Mårten Gås
+Vad heter Kalle Ankas rika farbror?|Joakim von Anka|Alexander Lukas|Oppfinnarjocke|Björnligan
+Vad heter Musse Piggs hund?|Pluto|Långben|Max|Fido
+Vad heter Tintins hund?|Milou|Haddock|Snobben|Pluto
+Vad heter Gustafs ägare?|Jon|Odie|Nermal|Liz
+Vad heter Batmans stad?|Gotham|Metropolis|Star City|Central City
+Vad heter Supermans stad?|Metropolis|Gotham|Star City|Smallville
+Vad heter Spider-Man på riktigt?|Peter Parker|Clark Kent|Bruce Wayne|Tony Stark
+Vad heter Batman på riktigt?|Bruce Wayne|Clark Kent|Peter Parker|Barry Allen`.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:'Blandat',q,a,w}})];
