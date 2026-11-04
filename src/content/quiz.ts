@@ -106,11 +106,11 @@ Vilken ålder krävs för att handla på Systembolaget?|20|18|21|25
 Vad heter en cocktail med rom, lime, mynta och socker?|Mojito|Daiquiri|Cosmopolitan|Sidecar
 Vad brukar svenskar kalla mellandagarna-shoppingen?|Mellandagsrea|Black Friday|Cyber Monday|Julrea-veckan`,
 };
-import {EXTRA,CATS2} from './extra';import {QUIZ2,CATS3} from './quiz2';
-export const QUIZ=[...Object.entries(R).flatMap(([c,s])=>s.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:c,q,a,w}})),...EXTRA,...QUIZ2];
-export const CATS=[...new Set([...Object.keys(R),...CATS2,...CATS3])];
+import {EXTRA,CATS2} from './extra';import {QUIZ2,CATS3} from './quiz2';import {QUIZ3,HARD3} from './batch3';
+export const QUIZ=[...Object.entries(R).flatMap(([c,s])=>s.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:c,q,a,w}})),...EXTRA,...QUIZ2,...QUIZ3];
+export const CATS=[...new Set([...Object.keys(R),...CATS2,...CATS3,...QUIZ3.map(x=>x.cat)])];
 // Allt eller inget: svårare frågor för finalen
-export const HARD=`Vilket år grundades Stockholm enligt första skriftliga källan?|1252|1103|1397|1523
+export const HARD=(`Vilket år grundades Stockholm enligt första skriftliga källan?|1252|1103|1397|1523
 Vilket grundämne har atomnummer 79?|Guld|Kvicksilver|Platina|Bly
 Vilket land har flest tidszoner sett till hela sitt territorium?|Frankrike|Ryssland|USA|Kina
 Vem skrev romanen Röda rummet?|August Strindberg|Selma Lagerlöf|Hjalmar Söderberg|Vilhelm Moberg
@@ -121,5 +121,5 @@ Vilket år föll Berlinmuren?|1989|1991|1987|1985
 Vad heter Norges huvudstad på 1800-talet innan namnet Oslo?|Kristiania|Bergen|Trondheim|Nidaros
 Vilket år landade Apollo 11 på månen?|1969|1967|1971|1965
 Vem målade Stjärnenatten?|Vincent van Gogh|Claude Monet|Edvard Munch|Paul Gauguin
-Vilket är det minsta landet i världen?|Vatikanstaten|Monaco|San Marino|Nauru`.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{q,a,w}});
+Vilket är det minsta landet i världen?|Vatikanstaten|Monaco|San Marino|Nauru\n`+HARD3).split('\n').map(l=>{const[q,a,...w]=l.split('|');return{q,a,w}});
 

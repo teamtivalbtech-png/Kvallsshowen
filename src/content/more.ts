@@ -1,5 +1,6 @@
 import {WHO2,LIKE2,SPY2,MIME2,WORDS2,SELFIE2,BOXES2} from './extra2';
 import {SONGS2} from './songs2';import {SONGS3} from './songs3';
+import {TF3,TL3,CL3,FIB3,PR3} from './batch3';
 import {XTF,XTL,XCL,XSONG,XWHO,XLIKE,XMIME,XWORDS,XSPY,XSELFIE,XFIB} from './extra';
 const L=(s:string)=>s.trim().split('\n').map(x=>x.split('|'));
 const TF0=L(`Sverige har över 200 000 öar|1
@@ -101,7 +102,7 @@ Hur många år blev Astrid Lindgren?|94|år
 Hur många grader lutar jordaxeln?|23|grader
 Hur högt är Kaknästornet ungefär?|155|m
 Hur många minuter tar en fotbollsmatch utan tillägg?|90|min`).map(([q,a,u])=>({q,a:+a,u}));
-export const PRICES=L(`🍺|Stor stark på krogen i Stockholm|95
+const PRICES0=L(`🍺|Stor stark på krogen i Stockholm|95
 🍕|Vesuvio på kvarterspizzerian|120
 ☕|Latte på kaffekedja|59
 🍌|Ett kilo bananer|25
@@ -287,12 +288,13 @@ export const SCENES=[
 ];
 export const MEL:any=[{n:'Grattis på födelsedagen',s:[[60,1],[60,1],[62,2],[60,2],[65,2],[64,4],[60,1],[60,1],[62,2],[60,2],[67,2],[65,4]]},{n:'Bä bä vita lamm',s:[[60,2],[60,2],[67,2],[67,2],[69,2],[69,2],[67,4],[65,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,4]]},{n:'Gubben Noak',s:[[60,2],[60,2],[60,2],[64,2],[62,2],[62,2],[62,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,4]]},{n:'Broder Jakob',s:[[60,2],[62,2],[64,2],[60,2],[60,2],[62,2],[64,2],[60,2],[64,2],[65,2],[67,4],[64,2],[65,2],[67,4]]}].slice(0);
 
-export const TF=[...TF0,...XTF];
-export const TIMELINE=[...TIMELINE0,...XTL];
-export const CLOSEST=[...CLOSEST0,...XCL];
+export const PRICES=[...PRICES0,...PR3];
+export const TF=[...TF0,...XTF,...TF3];
+export const TIMELINE=[...TIMELINE0,...XTL,...TL3];
+export const CLOSEST=[...CLOSEST0,...XCL,...CL3];
 export const SONGS=[...SONGS0,...XSONG,...SONGS2,...SONGS3].filter((s,i,a)=>a.findIndex(x=>x.t===s.t&&x.a===s.a)===i);
 export const WORDS=[...WORDS0,...XWORDS,...WORDS2];
-export const FIB=[...FIB0,...XFIB];
+export const FIB=[...FIB0,...XFIB,...FIB3];
 export const WHO=[...WHO0,...XWHO,...WHO2];
 export const LIKE=[...LIKE0,...XLIKE,...LIKE2];
 export const SPY=[...SPY0,...XSPY,...SPY2];

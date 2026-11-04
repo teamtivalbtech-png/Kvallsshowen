@@ -1,4 +1,5 @@
 // Frågesport för dig född runt år 2000.
+import {NOS3} from './batch3';
 const R=`Vad hette Hannah Montanas pappa i serien, spelad av Billy Ray Cyrus?|Robby Ray|Oliver|Jackson|Rico
 Vad heter skolan i High School Musical?|East High|West Beverly|Waverly High|Hawkins High
 Vem spelar Troy Bolton i High School Musical?|Zac Efron|Nick Jonas|Corbin Bleu|Chord Overstreet
@@ -69,4 +70,4 @@ Vad hette Paris Hiltons dokusåpa med Nicole Richie?|The Simple Life|Keeping Up|
 Vilket MTV-program visade tonåringars extrema födelsedagsfester?|My Super Sweet 16|Pimp My Ride|Punk'd|Jackass
 Vilket MTV-program fixade upp gamla bilar?|Pimp My Ride|Top Gear|Gas Monkey|Bilprovningen
 Vilket MTV-program lurade kändisar?|Punk'd|Jackass|Viva La Bam|Teen Mom`;
-export const NOS=R.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:'Nostalgi',q,a,w}}).filter(x=>!/Vad kallade man den irländska|Vilket kort spelade|fina och elaka|Vilken stil hade|Vilken karta|Vad heter pingvinen|Vilket godis kallas|Vilket Twilight-lag|Vilken söt bubblig/.test(x.q));
+export const NOS=(R+'\n'+NOS3).split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:'Nostalgi',q,a,w}}).filter(x=>!/Vad kallade man den irländska|Vilket kort spelade|fina och elaka|Vilken stil hade|Vilken karta|Vad heter pingvinen|Vilket godis kallas|Vilket Twilight-lag|Vilken söt bubblig/.test(x.q));
