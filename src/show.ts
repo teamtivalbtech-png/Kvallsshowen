@@ -95,7 +95,7 @@ export class Show{
     const n=this.players.filter(p=>p.connected&&!p.bot).length;
     if(n<(d.humans||1)){const m=`${d.title} kräver minst ${d.humans} riktiga personer.`;if(this.match){this.qi++;if(this.qi<this.queue.length)return this.intro(this.queue[this.qi]);return this.reveal()}this.toLobby();say(m);return}
     const before=this.players.length;this.fit(d);
-    say(LINES.intro(d.title,d.how));if(this.players.length>before)setTimeout(()=>{},0);this.setCd(this.match?15000:20000,()=>this.beginGame());this.bump();
+    say(LINES.intro(d.title,d.how),d.title.replace(/[!?]+$/,'')+'!');if(this.players.length>before)setTimeout(()=>{},0);this.setCd(this.match?15000:20000,()=>this.beginGame());this.bump();
   }
   beginGame(){
     if(!this.def)return;this.clear();resetBots();this.rawS={};this.players.forEach(p=>this.rawS[p.id]=0);this.stage='game';

@@ -1,5 +1,5 @@
 import {snd} from './audio';import {songDuck} from './games/songs';import voices from './content/voice.json';
-// Programledaren Sixten. Fasta repliker är inspelade, övriga tas från Googles röst och i sista hand webbläsaren.
+// Programledaren Sixten. Allt som sägs är inspelat. Saknas en replik visas den bara som text, så att ingen robotröst hörs.
 export const hostState={text:'',talking:false,level:0,sub:new Set<()=>void>()};
 const emit=()=>hostState.sub.forEach(f=>f());
 export const hash=(s:string)=>{let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)};
@@ -15,9 +15,9 @@ function file(src:string,text:string,n:number,next:()=>void){let moved=false;con
 export function unlockVoice(){try{au.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';au.play().catch(()=>{});const s=window.speechSynthesis;if(s){const u=new SpeechSynthesisUtterance(' ');u.volume=0;s.speak(u)}}catch{}}
 /** text visas i pratbubblan. spoken är det som läses upp; utan namn kan det spelas in i förväg. */
 export function say(text:string,spoken=text){if(new URLSearchParams(location.search).has('fast'))return;const n=++token;hostState.text=text;hostState.talking=true;emit();meter();snd.duck(true);songDuck(true);try{au?.pause();window.speechSynthesis?.cancel()}catch{}
-  if(have.has(hash(spoken)))file(`/voice/${hash(spoken)}.mp3`,spoken,n,()=>browser(spoken,n));else file('/api/tts?t='+encodeURIComponent(text),text,n,()=>browser(spoken,n))}
+  if(have.has(hash(spoken)))file(`/voice/${hash(spoken)}.mp3`,spoken,n,()=>done(n));else setTimeout(()=>done(n),Math.min(6000,1200+text.length*55))}
 export const LINES={
-  welcome:()=>pick(['Välkomna till Kvällsshowen! Jag heter Sixten, och i kväll ska vi ta reda på vem som är smartast, snabbast och minst pinsam.','God kväll och välkomna! Skanna koden, ta något gott i glaset och gör er redo.']),
+  welcome:()=>pick(['God kväll och välkomna till Kvällsshowen! Jag heter Sixten, och i kväll ska vi ta reda på vem som är smartast, snabbast och minst pinsam.','God kväll och välkomna! Skanna koden, ta något gott i glaset och gör er redo.']),
   join:()=>pick(['Ny spelare! Modigt.','Välkommen in, det finns gott om plats för förlorare.','Där kom det en till. Bra!']),
   bots:()=>'Ni är lite för få, så jag har kallat in mina robotvänner.',
   roasts:()=>['Det där var inte din bästa stund.','Vi pratar inte mer om det här.','Kanske nästa gång. Eller inte.','Mamma är stolt ändå.','Det gick ju inte alls.','Du gjorde ditt bästa, och det är det som är problemet.','Var det tänkt så?','Modigt försök, dåligt resultat.'],
