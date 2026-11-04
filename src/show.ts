@@ -1,4 +1,4 @@
-import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {say,LINES} from './host';
+import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {say,LINES} from './host';import {botAct,botInfo,resetBots} from './games/bots';
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
@@ -8,7 +8,7 @@ export class Show{
   dl=0;dlFn:any=null;timers:any[]=[];room:Pipe|null=null;pipes=new Map<string,{p:Pipe,last:string,seq:number,ids:Set<number>,lastSend:number}>();lastRes:any=null;loop:any=0;lastTick=0;dirty=false;usedPools:Record<string,number[]>={};revealStep=-1;error='';
   constructor(){
     let s:any=null;try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
-    if(s&&Date.now()-s.at<6*3600e3){this.code=s.code;this.players=s.players.map((p:Player)=>({...p,connected:false}));this.mode=s.mode;this.teamCount=s.teamCount;this.total=s.total;this.queue=s.queue;this.qi=s.qi;this.match=s.match;this.history=s.history;this.usedPools=s.used||{}}
+    if(s&&Date.now()-s.at<6*3600e3){this.code=s.code;this.players=s.players.filter((p:Player)=>!p.bot).map((p:Player)=>({...p,connected:false}));this.mode=s.mode;this.teamCount=s.teamCount;this.total=s.total;this.queue=s.queue;this.qi=s.qi;this.match=s.match;this.history=s.history;this.usedPools=s.used||{}}
     else this.code=rnd('ABCDEFGHJKLMNPQRSTUVWXYZ');
     this.room=openPipe('r:'+this.code,m=>this.onRoom(m));
     this.players.forEach(p=>this.pipe(p.id));
@@ -21,9 +21,10 @@ export class Show{
   sub=(f:()=>void)=>{this.subs.add(f);return()=>{this.subs.delete(f)}};
   frame(){
     const n=performance.now(),dt=Math.min(.1,(n-this.lastTick)/1000)*FAST;this.lastTick=n;const w=Date.now();
-    this.players.forEach(p=>{const c=w-p.seen<9000;if(c!==p.connected){p.connected=c;if(!c)this.inst?.onLeave?.(p.id);this.bump()}});
+    this.players.forEach(p=>{if(p.bot)p.seen=w;const c=w-p.seen<9000;if(c!==p.connected){p.connected=c;if(!c)this.inst?.onLeave?.(p.id);this.bump()}});
     if(this.dl&&w>=this.dl){const f=this.dlFn;this.dl=0;this.dlFn=null;try{f?.()}catch(e){this.fail(e)}this.bump()}
     if(this.stage==='game'&&this.inst?.tick)try{this.inst.tick(dt)}catch(e){this.fail(e)}
+    if(this.stage==='game'&&this.inst)for(const p of this.players)if(p.bot)try{botAct(this.inst,p.id,w,FAST);this.dirty=true}catch(e){console.error(e)}
     if(this.dirty){this.dirty=false;this.pushAll(false)}
     this.pipes.forEach((x,id)=>{if(w-x.lastSend>2500)this.push(id,true)});
   }
@@ -57,10 +58,14 @@ export class Show{
       this.dirty=true;
     }
   }
-  vip(){return this.players.find(p=>p.connected)}
+  vip(){return this.players.find(p=>p.connected&&!p.bot)}
+  addBot(){const n=this.players.filter(p=>p.bot).length;if(this.players.length>=12)return;const taken=new Set(this.players.map(x=>x.color)),i=botInfo(n),c=this.players.filter(p=>!p.bot).length;const sizes=Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);this.players.push({id:'bot'+n+Math.random().toString(36).slice(2,6),...i,color:COL.find(x=>!taken.has(x))||COL[0],team:sizes.indexOf(Math.min(...sizes)),connected:true,seen:Date.now(),bot:true});this.total[this.players[this.players.length-1].id]=this.total[this.players[this.players.length-1].id]||0;void c}
+  dropBot(){const i=this.players.map(p=>!!p.bot).lastIndexOf(true);if(i>=0)this.players.splice(i,1)}
+  fit(d:GameDef){while(this.players.length<(d.min||2))this.addBot();if(this.mode==='team'||d.even)if(d.even&&this.players.length%2)this.addBot();if(this.mode==='team'){const t=this.teamList();const small=Math.min(...t.map(x=>x.members.length)),big=Math.max(...t.map(x=>x.members.length));if(big>small||t.length<this.teamCount)this.addBot()}}
   vipCmd(d:any){
     if(d.vip==='mode'){this.mode=d.v;this.assignTeams()}
     if(d.vip==='teams'){this.teamCount=d.v;this.assignTeams()}
+    if(d.vip==='bot+')this.addBot();if(d.vip==='bot-')this.dropBot();
     if(d.vip==='swap'){const p=this.players.find(x=>x.id===d.p);if(p)p.team=(p.team+1)%this.teamCount}
     if(d.vip==='single')this.startSingle(d.v);
     if(d.vip==='match')this.startMatch(d.v);
@@ -78,12 +83,13 @@ export class Show{
   }
   intro(id:string){
     this.clear();const d=byId(id);this.def=d;this.stage='intro';this.inst=null;snd.music(null);snd.sfx('stinger');
-    const n=this.players.filter(p=>p.connected).length;
-    if(n<(d.min||2)){this.lastRes={skip:`${d.title} kräver minst ${d.min||2} spelare`};if(this.match){this.qi++;if(this.qi<this.queue.length)return this.intro(this.queue[this.qi]);return this.reveal()}}
+    const n=this.players.filter(p=>p.connected&&!p.bot).length;
+    if(n<(d.humans||1)){const m=`${d.title} kräver minst ${d.humans} riktiga personer.`;if(this.match){this.qi++;if(this.qi<this.queue.length)return this.intro(this.queue[this.qi]);return this.reveal()}this.toLobby();say(m);return}
+    this.fit(d);
     say(LINES.intro(d.title,d.how));this.setCd(this.match?15000:20000,()=>this.beginGame());this.bump();
   }
   beginGame(){
-    if(!this.def)return;this.clear();this.rawS={};this.players.forEach(p=>this.rawS[p.id]=0);this.stage='game';
+    if(!this.def)return;this.clear();resetBots();this.rawS={};this.players.forEach(p=>this.rawS[p.id]=0);this.stage='game';
     try{this.inst=this.def.make(this.api());this.inst.start()}catch(e){this.fail(e)}this.bump();
   }
   endGame(){
@@ -115,13 +121,13 @@ export class Show{
   view(id:string){
     const p=this.players.find(x=>x.id===id);if(!p)return null;const v=this.vip();const isV=v?.id===id;
     let pv:any;
-    if(this.stage==='lobby')pv=isV?{k:'vipLobby',mode:this.mode,teams:this.teamCount,n:this.players.length,list:this.players.map(x=>({id:x.id,name:x.name,avatar:x.avatar,team:x.team}))}:{k:'wait',msg:'Du är med!',sub:`${v?.name||'Första spelaren'} väljer spel`};
+    if(this.stage==='lobby')pv=isV?{k:'vipLobby',mode:this.mode,teams:this.teamCount,n:this.players.length,bots:this.players.filter(x=>x.bot).length,list:this.players.map(x=>({id:x.id,name:x.name,avatar:x.avatar,team:x.team}))}:{k:'wait',msg:'Du är med!',sub:`${v?.name||'Första spelaren'} väljer spel`};
     else if(this.stage==='intro')pv={k:'intro',title:this.def?.title,how:this.def?.how,needs:this.def?.needs};
     else if(this.stage==='game'&&this.inst)try{pv=this.inst.phone(id)}catch(e){console.error(e);pv={k:'wait',msg:'Ett ögonblick'}}
     else if(this.stage==='result')pv={k:'wait',msg:this.match?'Delresultat':'Resultat',sub:(()=>{const r=this.lastRes?.rows?.find((x:any)=>x.id===id);return r?`${r.pts} poäng i ${this.def?.title}`:''})()};
     else pv={k:'wait',msg:'Titta på tv:n',sub:'Sanningens ögonblick'};
     const team=this.mode==='team'?TEAM[p.team]:null;
-    return{stage:this.stage,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.length))),canSkip:isV&&this.stage!=='lobby'};
+    return{stage:this.stage,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby'};
   }
   push(id:string,force:boolean){
     const x=this.pipes.get(id);if(!x)return;const v=this.view(id);if(!v)return;const s=JSON.stringify(v);

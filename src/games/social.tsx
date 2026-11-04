@@ -1,6 +1,6 @@
 import React,{useEffect,useRef} from 'react';import {RB,shuffle,norm,Stage,Answered,Opts,nameOf,pts} from './base';import {WORDS,FIB,WHO,LIKE,SPY,MIME,SELFIE} from '../content/more';
 class Draw{phase='draw';turn=0;order:any[]=[];word='';strokes:any[]=[];got:Record<string,number>={};rounds=0;constructor(public api:any){}
- start(){this.api.music('lobby');this.order=shuffle(this.api.online());this.rounds=Math.min(this.order.length,6);this.go()}
+ start(){this.api.music('lobby');this.order=shuffle(this.api.online().filter((x:any)=>!x.bot));this.rounds=Math.min(this.order.length,6);this.go()}
  go(){if(this.turn>=this.rounds)return this.api.end();this.strokes=[];this.got={};this.phase='draw';this.word=WORDS[this.api.used('w',1,WORDS.length)[0]];this.api.countdown(60000,()=>this.stop());this.api.refresh()}
  get artist(){return this.order[this.turn]}
  stop(){this.phase='rev';this.api.stopCountdown();this.api.sfx('reveal');this.api.after(5000,()=>{this.turn++;this.go()});this.api.refresh()}
@@ -38,7 +38,7 @@ class Spy{stage='talk';word='';spy='';votes:any={};guess:string|null=null;opts:s
   if(this.stage==='guess')return sp?{k:'choice',key:'g'+this.r,prompt:'Sista chansen: vilket var ordet?',opts:this.opts.map(o=>({id:o,label:o}))}:{k:'wait',msg:'Spionen gissar',big:'🕵️'};return{k:'wait',msg:this.word,sub:'Var det hemliga ordet',key:'r'+this.r}}}
 const SpyTv=({g,show}:any)=>{const s=nameOf(show,g.spy);return <Stage kicker={`Spionen · runda ${g.r+1}/${g.rounds}`} title={{talk:'Säg ett ord var, högt',vote:'Vem är spionen?',guess:g.caught?'Spionen är avslöjad!':'Spionen klarade sig',rev:`${s?.avatar} ${s?.name} var spionen`}[g.stage]}>{g.stage==='rev'&&<div className="bignum">{g.word}</div>}{g.stage==='vote'&&<div className="ansrow">{show.players.map((p:any)=><span key={p.id} className={p.id in g.votes?'in':''} style={{borderColor:p.color}}>{p.avatar}</span>)}</div>}{g.stage==='guess'&&<p className="lead">Nu får spionen gissa ordet för bonuspoäng.</p>}</Stage>};
 class Mime{idx=0;word='';teams:any[]=[];team=0;n=0;score:any={};cur:any=null;w=0;constructor(public api:any){}
- start(){this.api.music('action');const t=this.api.teams();this.teams=t.length>1?t:(()=>{const s=shuffle(this.api.online());const a=s.filter((_:any,i:number)=>i%2===0),b=s.filter((_:any,i:number)=>i%2);return[{id:0,name:'Lag Guld',color:'#ffc23d',members:a},{id:1,name:'Lag Korall',color:'#ff5d5d',members:b}]})();this.turns=this.teams.flatMap((t:any)=>t.members.slice(0,2).map((m:any)=>({t,m})));this.turns=shuffle(this.turns);this.next()}
+ start(){this.api.music('action');const t=this.api.teams();this.teams=t.length>1?t:(()=>{const s=shuffle(this.api.online());const a=s.filter((_:any,i:number)=>i%2===0),b=s.filter((_:any,i:number)=>i%2);return[{id:0,name:'Lag Guld',color:'#ffc23d',members:a},{id:1,name:'Lag Korall',color:'#ff5d5d',members:b}]})();this.turns=this.teams.flatMap((t:any)=>t.members.filter((m:any)=>!m.bot).slice(0,2).map((m:any)=>({t,m})));this.turns=shuffle(this.turns);this.next()}
  turns:any[]=[];next(){if(this.idx>=Math.min(this.turns.length,6))return this.api.end();this.cur=this.turns[this.idx];this.w=0;this.pick();this.ready=true;this.api.stopCountdown();this.api.refresh()}ready=true;
  pick(){this.word=MIME[this.api.used('mime',1,MIME.length)[0]]}
  onInput(p:string,d:any){if(p!==this.cur.m.id)return;if(this.ready&&d.a==='go'){this.ready=false;this.api.countdown(45000,()=>{this.idx++;this.next()})}else if(d.a==='ok'){this.w++;this.api.sfx('correct');this.cur.t.members.forEach((m:any)=>this.api.award(m.id,400));this.pick()}else if(d.a==='pass')this.pick();this.api.refresh()}
@@ -58,12 +58,12 @@ class Selfie extends RB{qms=35000;revealMs=7000;stage='snap';pics:any={};order:a
  score(){Object.values(this.ans).forEach((a:any)=>{if(this.pics[a.v]){this.c[a.v]=(this.c[a.v]||0)+1;this.api.award(a.v,400)}})}}
 const SelfieTv=({g,show}:any)=>g.stage==='snap'?<Stage kicker={`Selfieuppdraget ${g.idx+1}/3`} title={g.cur}><Answered g={g} show={show}/></Stage>:<div className="pics"><h2>{g.cur}</h2><div>{g.order.map((id:string,i:number)=>{const p=nameOf(show,id);return <figure key={id} style={{animationDelay:i*.15+'s'}}><img src={g.pics[id]} alt=""/><figcaption>{p?.avatar} {p?.name}{g.phase==='reveal'?` · ${g.c[id]||0} röster`:''}</figcaption></figure>})}</div></div>;
 export const SOCIALG=[
-{id:'draw',title:'Rita och gissa',tag:'Konstnärer utan talang',how:'En ritar på telefonen. Resten gissar först.',cat:'Socialt',icon:'🎨',mins:7,make:(a:any)=>new Draw(a),Tv:DrawTv,min:3},
+{id:'draw',title:'Rita och gissa',tag:'Konstnärer utan talang',how:'En ritar på telefonen. Resten gissar först.',cat:'Socialt',icon:'🎨',mins:7,make:(a:any)=>new Draw(a),Tv:DrawTv,min:3,humans:2},
 {id:'bluff',title:'Bluffen',tag:'Luras och avslöja',how:'Skriv falska svar och hitta sanningen.',cat:'Socialt',icon:'🤥',mins:7,make:(a:any)=>new Bluff(a),Tv:BluffTv,min:3},
 {id:'who',title:'Vem av oss?',tag:'Gruppen dömer',how:'Rösta på den i gruppen som passar bäst. Poäng om du röstar med majoriteten.',cat:'Socialt',icon:'👉',mins:4,make:(a:any)=>new Who(a),Tv:WhoTv,min:3},
 {id:'like',title:'Tänk likadant',tag:'Tänk som de andra',how:'Skriv ett svar. Poäng om andra skriver samma.',cat:'Socialt',icon:'🧩',mins:5,make:(a:any)=>new Like(a),Tv:LikeTv,min:3},
-{id:'spy',title:'Spionen',tag:'Vem vet inte ordet?',how:'Alla utom en får samma hemliga plats. Avslöja spionen.',cat:'Socialt',icon:'🕵️',mins:7,make:(a:any)=>new Spy(a),Tv:SpyTv,min:3},
-{id:'mime',title:'Mimkampen',tag:'Utan ett ljud',how:'En mimar, laget gissar. 45 sekunder per person.',cat:'Socialt',icon:'🎭',mins:6,make:(a:any)=>new Mime(a),Tv:MimeTv,min:4},
+{id:'spy',title:'Spionen',tag:'Vem vet inte ordet?',how:'Alla utom en får samma hemliga plats. Avslöja spionen.',cat:'Socialt',icon:'🕵️',mins:7,make:(a:any)=>new Spy(a),Tv:SpyTv,min:3,humans:2},
+{id:'mime',title:'Mimkampen',tag:'Utan ett ljud',how:'En mimar, laget gissar. 45 sekunder per person.',cat:'Socialt',icon:'🎭',mins:6,make:(a:any)=>new Mime(a),Tv:MimeTv,min:4,humans:2,even:true},
 {id:'stop',title:'Stoppa klockan',tag:'Exakt tidskänsla',how:'Stoppa utan att se klockan.',cat:'Tajming',icon:'⏱️',mins:3,make:(a:any)=>new Stop(a),Tv:StopTv},
 {id:'selfie',title:'Selfieuppdraget',tag:'Rösta fram bästa bilden',how:'Ta en bild efter uppdraget. Alla röstar.',cat:'Kamera',icon:'📸',mins:5,needs:'camera',make:(a:any)=>new Selfie(a),Tv:SelfieTv,min:3},
 ];

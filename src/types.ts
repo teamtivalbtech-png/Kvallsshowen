@@ -1,4 +1,4 @@
-export interface Player{id:string;name:string;avatar:string;color:string;team:number;connected:boolean;seen:number}
+export interface Player{id:string;name:string;avatar:string;color:string;team:number;connected:boolean;seen:number;bot?:boolean}
 export type PV=any;
 export interface Api{
   players():Player[]; online():Player[]; refresh():void; award(pid:string,pts:number):void; raw(pid:string):number;
@@ -9,4 +9,4 @@ export interface Api{
   used(key:string,n:number,pool:number):number[]; isFinal():boolean; total(pid:string):number;
 }
 export interface Inst{start():void;onInput?(pid:string,d:any):void;onStream?(pid:string,d:any):void;tick?(dt:number):void;phone(pid:string):PV;onLeave?(pid:string):void}
-export interface GameDef{id:string;title:string;tag:string;how:string;cat:string;icon:string;min?:number;max?:number;mins:number;needs?:string;make:(a:Api)=>Inst;Tv:any;finalOnly?:boolean}
+export interface GameDef{id:string;title:string;tag:string;how:string;cat:string;icon:string;min?:number;max?:number;humans?:number;even?:boolean;mins:number;needs?:string;make:(a:Api)=>Inst;Tv:any;finalOnly?:boolean}

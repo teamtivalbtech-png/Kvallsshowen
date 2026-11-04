@@ -77,3 +77,5 @@ button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:p
 .lobby .ll{padding-bottom:18vh}.intro{padding-bottom:12vh}.res{padding-bottom:16vh}
 
 .laps{left:auto;right:3vw}.lobby{background:linear-gradient(90deg,#16081fd9,#16081f55)}.st-intro .intro,.st-result .res{background:radial-gradient(70% 70% at 50% 45%,#16081fb3,transparent)}.qt{text-shadow:0 3px 14px #0009}
+
+.seg.bots{align-items:center}.seg.bots span{flex:2;font-weight:600}.seg.bots button{flex:1;font-size:20px;padding:6px}
