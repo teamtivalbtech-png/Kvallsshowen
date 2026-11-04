@@ -52,7 +52,7 @@ Björn Borg vann Wimbledon fem år i rad|1
 Tomater är botaniskt sett bär|1
 Tungan har särskilda zoner för olika smaker|0
 Man använder bara tio procent av hjärnan|0
-Kor har fyra magavdelningar|1`);
+Kor har fyra magavdelningar|1`).map(([q,a])=>({q,a:a==='1'}));
 export const TL3=L(`Wikipedia startar|2001
 Twitter lanseras|2006
 WhatsApp lanseras|2009
@@ -104,7 +104,7 @@ Första Nobelprisen delas ut|1901
 Första Vasaloppet|1922
 Första moderna olympiska spelen|1896
 Greta Thunberg börjar skolstrejka|2018
-ChatGPT lanseras|2022`);
+ChatGPT lanseras|2022`).map(([t,y],i)=>({id:i+300,t,y:+y}));
 export const CL3=L(`Hur många länder är med i EU?|27|länder
 Hur många delstater har USA?|50|delstater
 Hur högt är Eiffeltornet?|330|meter
@@ -136,7 +136,7 @@ Hur många Oscars vann filmen Titanic?|11|Oscars
 Hur lång är Göta kanal?|190|km
 Hur många kommuner har Sverige?|290|kommuner
 Hur många länder finns i FN?|193|länder
-Hur många gånger har Tyskland vunnit herr-VM i fotboll?|4|gånger`);
+Hur många gånger har Tyskland vunnit herr-VM i fotboll?|4|gånger`).map(([q,a,u])=>({q,a:+a,u}));
 export const FIB3=L(`Vad heter plastbiten i änden på ett skosnöre?|Aglett
 Vad kallas gropen ovanför överläppen?|Philtrum
 Vad kallas rädslan för talet 13?|Triskaidekafobi
@@ -171,7 +171,7 @@ Vad heter tecknet # på fackspråk?|Oktotorp
 Vad kallas rädslan för att knappar ska röra vid en?|Koumpounofobi
 Vad heter huvudstaden i Kiribati?|Tarawa
 Vad heter huvudstaden i Burundi?|Gitega
-Vad heter huvudstaden i Sri Lanka officiellt?|Sri Jayawardenepura Kotte`);
+Vad heter huvudstaden i Sri Lanka officiellt?|Sri Jayawardenepura Kotte`).map(([q,a])=>({q,a}));
 export const PR3=L(`🥤|Burk Coca-Cola i kiosk|25
 🍫|Marabou mjölkchoklad 200 g|42
 🍬|Hekto lösgodis|17
