@@ -16,7 +16,7 @@ class Cap extends RB{qms=35000;revealMs=7000;stage='write';o:any[]=[];c:any={};
  begin(){this.stage='write';this.o=[];this.c={}}
  ask(p:string){if(this.stage==='write')return{k:'text',key:'w'+this.idx,prompt:'Skriv en rolig bildtext',max:60,sel:this.ans[p]?.v};return{k:'choice',key:'v'+this.idx,prompt:'Rösta på bästa texten',opts:this.o.filter(x=>x.id!==p).map(x=>({id:x.id,label:x.t})),sel:this.ans[p]?.v}}
  close(){if(this.phase!=='q')return;if(this.stage==='write'){this.o=shuffle(Object.entries(this.ans).map(([id,a]:any)=>({id,t:a.v})));if(this.o.length<2){super.close();return}this.stage='vote';this.ans={};this.t0=this.api.now();this.api.countdown(22000,()=>this.close());this.api.refresh();return}super.close()}
- score(){Object.values(this.ans).forEach((a:any)=>{this.c[a.v]=(this.c[a.v]||0)+1;this.api.award(a.v,400);this.api.stat(a.v,'capvotes',1)})}}
+ score(){if(this.stage!=='vote')return;Object.values(this.ans).forEach((a:any)=>{this.c[a.v]=(this.c[a.v]||0)+1;this.api.award(a.v,400);this.api.stat(a.v,'capvotes',1)})}}
 const CapTv=({g,show}:any)=><div className="capg"><div className="capi"><img src={g.cur.src} alt=""/></div><div className="capt"><div className="kick">Bildbluffen {g.idx+1}/{g.items.length}</div>{g.stage==='write'?<><h2>Skriv en bildtext</h2><Answered g={g} show={show}/></>:<div className="blf">{g.o.map((x:any)=><div key={x.id}><span>{x.t}</span>{g.phase==='reveal'&&<em>{g.c[x.id]||0} röster · {nameOf(show,x.id)?.name}</em>}</div>)}</div>}</div></div>;
 // Hemliga uppdrag avslöjas
 class Mission extends RB{qms=18000;revealMs=4500;setup(){this.items=this.api.players().filter((p:any)=>!p.bot).map((p:any)=>({p,m:this.api.mission(p.id)})).filter((x:any)=>x.m)}

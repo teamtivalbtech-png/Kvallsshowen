@@ -25,7 +25,7 @@ export class Show{
     this.players.forEach(p=>{if(p.bot)p.seen=w;const c=w-p.seen<9000;if(c!==p.connected){p.connected=c;if(!c)this.inst?.onLeave?.(p.id);this.bump()}});
     if(this.dl&&w>=this.dl){const f=this.dlFn;this.dl=0;this.dlFn=null;try{f?.()}catch(e){this.fail(e)}this.bump()}
     if(this.stage==='game'&&this.inst?.tick)try{this.inst.tick(dt)}catch(e){this.fail(e)}
-    if(this.stage==='game'&&this.inst)for(const p of this.players)if(p.bot)try{botAct(this.inst,p.id,w,FAST);this.dirty=true}catch(e){console.error(e)}
+    if(this.stage==='game'&&this.inst&&++this.botTick%2===0)for(const p of this.players)if(p.bot)try{botAct(this.inst,p.id,w,FAST)}catch(e){console.error(e)}
     if(this.dirty){this.dirty=false;this.pushAll(false)}
     this.pipes.forEach((x,id)=>{if(w-x.lastSend>2500)this.push(id,true)});
   }
@@ -61,6 +61,7 @@ export class Show{
       this.dirty=true;
     }
   }
+  boot=Math.random().toString(36).slice(2,8);botTick=0;
   stats:Record<string,any>={};album:any[]=[];customQ:any[]=[];sips=false;missions:Record<string,string>={};lastSip='';
   rtcs=new Map<string,RTCPeerConnection>();
   async rtc(id:string,x:any,m:any){try{if(m.sdp){this.rtcs.get(id)?.close();const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});this.rtcs.set(id,pc);pc.onicecandidate=e=>{if(e.candidate)x.p.send({t:'rtc',ice:e.candidate})};pc.ondatachannel=e=>{e.channel.onmessage=v=>{const p=this.players.find(q=>q.id===id);if(p)p.seen=Date.now();if(this.stage==='game')try{this.inst?.onStream?.(id,JSON.parse(v.data))}catch{}}};await pc.setRemoteDescription(m.sdp);await pc.setLocalDescription(await pc.createAnswer());x.p.send({t:'rtc',sdp:pc.localDescription})}else if(m.ice)await this.rtcs.get(id)?.addIceCandidate(m.ice)}catch(e){console.warn('rtc',e)}}
@@ -101,7 +102,7 @@ export class Show{
     try{this.inst=this.def.make(this.api());this.inst.start()}catch(e){this.fail(e)}this.bump();
   }
   endGame(){
-    if(this.stage!=='game'&&this.stage!=='intro')return;this.clear();snd.music(null);const d=this.def!;const final=(d.id==='allin'||!!d.direct)&&this.match;
+    if(this.stage!=='game'&&this.stage!=='intro')return;this.clear();stopSong();snd.music(null);const d=this.def!;const final=(d.id==='allin'||!!d.direct)&&this.match;
     const mx=Math.max(1,...Object.values(this.rawS));const rows=this.players.map(p=>{const pts=final?(this.rawS[p.id]||0):Math.round(Math.max(0,this.rawS[p.id]||0)/mx*1000);return{p,pts}}).sort((a,b)=>b.pts-a.pts);
     rows.forEach(r=>this.total[r.p.id]=Math.max(0,(this.total[r.p.id]||0)+r.pts));
     if(this.match&&!final)this.history.push({game:d.title,winner:rows[0]?.p.name,avatar:rows[0]?.p.avatar,pts:rows[0]?.pts});
@@ -139,7 +140,7 @@ export class Show{
   }
   push(id:string,force:boolean){
     const x=this.pipes.get(id);if(!x)return;const v=this.view(id);if(!v)return;const s=JSON.stringify(v);
-    if(!force&&s===x.last)return;x.last=s;x.seq++;x.lastSend=Date.now();x.p.send({t:'v',seq:x.seq,v});
+    if(!force&&s===x.last)return;x.last=s;x.seq++;x.lastSend=Date.now();x.p.send({t:'v',seq:x.seq,boot:this.boot,v});
   }
   pushAll(f:boolean){this.pipes.forEach((_,id)=>this.push(id,f))}
   resetShow(){try{localStorage.removeItem(KEY)}catch{};location.reload()}
