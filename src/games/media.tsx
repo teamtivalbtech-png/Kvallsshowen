@@ -48,22 +48,22 @@ class Zoom extends RB{qms=24000;revealMs=5000;setup(){const c=credits as any[];t
 const ZoomTv=({g,show}:any)=>{const im=g.cur;const ox=im?((im.file.charCodeAt(1)*37)%60+20):50;return <div className="zoom"><div className="zw"><img key={im.file} src={'/img/'+im.file} alt="" className={g.phase==='q'?'zin':'zout'} style={{transformOrigin:`${ox}% ${100-ox}%`,animationDuration:g.qms+'ms'}}/>{g.phase==='reveal'&&<div className="cap">{im.name}<small>{im.author} · {im.license}</small></div>}</div><div className="zs"><div className="kick">Zooma ut {g.idx+1}/{g.items.length}</div><Opts list={g.o} right={g.phase==='reveal'?im.name:null}/><Answered g={g} show={show}/></div></div>};
 // Kända klipp spelas från YouTube, fryser vid "stop" och fortsätter efter svaren. Finjustera tiderna här.
 const CLIPS=[
- {id:'_OBlgSz8sSM',t:'Charlie bit my finger',start:5,stop:14,after:8,a:'Charlie biter brodern hårt i fingret',w:['Bebisen börjar sjunga','Pappan tar över kameran','Brodern tappar bebisen']},
- {id:'txqiwrbYGrs',t:'David efter tandläkaren',start:13,stop:22,after:7,a:'David undrar om det här är på riktigt',w:['Han somnar direkt','Han hoppar ur bilen','Han börjar gråta av skratt']},
- {id:'OQSNhk5ICTI',t:'Double Rainbow',start:11,stop:20,after:8,a:'Han blir helt överväldigad av lycka',w:['Han börjar bygga ett tält','En björn dyker upp','Han lägger av att filma']},
- {id:'dQw4w9WgXcQ',t:'Klippet alla blivit lurade av',start:7,stop:15,after:8,a:'Rick sjunger att han aldrig ska ge dig upp',w:['Han tar av sig rocken','Han ramlar','Polisen kommer']},
+ {id:'_OBlgSz8sSM',t:'Charlie bit my finger',start:2,stop:11,after:9,a:'Charlie biter brodern hårt i fingret',w:['Bebisen börjar sjunga','Pappan tar över kameran','Brodern tappar bebisen']},
+ {id:'txqiwrbYGrs',t:'David efter tandläkaren',start:9,stop:18,after:10,a:'David undrar om det här är på riktigt',w:['Han somnar direkt','Han hoppar ur bilen','Han börjar gråta av skratt']},
+ {id:'OQSNhk5ICTI',t:'Double Rainbow',start:7,stop:16,after:9,a:'Han blir helt överväldigad av lycka',w:['Han börjar bygga ett tält','En björn dyker upp','Han lägger av att filma']},
+ {id:'dQw4w9WgXcQ',t:'Klippet alla blivit lurade av',start:6,stop:14,after:8,a:'Rick sjunger att han aldrig ska ge dig upp',w:['Han tar av sig rocken','Han ramlar','Polisen kommer']},
  {id:'LU8DDYz68kM',t:'Battle at Kruger',start:240,stop:250,after:10,a:'Bufflarna kommer tillbaka och jagar bort lejonen',w:['En elefant räddar kalven','Turisterna ingriper','Lejonen flyr över floden']},
  {id:'J---aiyznGQ',t:'Keyboard Cat',start:0,stop:3,after:7,a:'Katten börjar spela keyboard',w:['Katten somnar','Katten hoppar ner','Ägaren tar katten']},
 ];
 let ytLoad:Promise<void>|null=null;const yt=()=>ytLoad||=new Promise(ok=>{(window as any).onYouTubeIframeAPIReady=()=>ok();const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.onerror=()=>{};document.head.appendChild(s)});
 class Next extends RB{qms=120000;revealMs=9000;o:string[]=[];ready=false;fallback=false;
  setup(){this.items=this.api.used('clip',4,CLIPS.length).map((i:number)=>CLIPS[i])}
- begin(){const c=this.cur;this.ready=false;this.fallback=false;this.revealMs=(c.after+1)*1000;this.o=shuffle([c.a,...c.w]);const i=this.idx;this.api.after(Math.max(9000,(c.stop-c.start)*1000+7000),()=>{if(this.idx===i&&!this.ready){this.fallback=true;this.open()}})}
+ begin(){const c=this.cur;if(c.id&&!c.adj){c.adj=1;let o=0;try{o=+(localStorage.getItem('ks-clip-'+c.id)||0)}catch{};c.stop=Math.max(2,c.stop+o);c.start=Math.max(0,c.stop-10)}this.ready=false;this.fallback=false;this.revealMs=(c.after+1)*1000;this.o=shuffle([c.a,...c.w]);const i=this.idx;this.api.after(Math.max(9000,(c.stop-c.start)*1000+7000),()=>{if(this.idx===i&&!this.ready){this.fallback=true;this.open()}})}
  open(){if(this.ready)return;this.ready=true;this.t0=this.api.now();this.api.countdown(12000,()=>this.close());this.api.refresh()}
- onInput(p:string,d:any){if(this.ready)super.onInput(p,d)}
+ onInput(p:string,d:any){if(this.phase==='reveal'&&(d.a==='tidigare'||d.a==='senare')&&this.cur.id){const k='ks-clip-'+this.cur.id;let o=0;try{o=+(localStorage.getItem(k)||0)+(d.a==='tidigare'?-3:3);localStorage.setItem(k,String(o))}catch{};this.api.sfx('tick');return}if(this.ready)super.onInput(p,d)}
  ask(p:string){return this.ready?{k:'choice',prompt:'Vad händer sen?',opts:this.o.map(o=>({id:o,label:o})),sel:this.sel(p)}:{k:'wait',msg:'Titta på tv:n',sub:'Klippet fryser snart',big:'📺',key:'v'+this.idx}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(a?.v===this.cur.a)this.api.award(p.id,pts(a.t,12000))})}
- result(p:string){return{k:'wait',msg:this.ans[p]?.v===this.cur.a?'Rätt!':'Fel',sub:this.cur.a,key:'r'+this.idx}}}
+ result(p:string){const m=this.ans[p]?.v===this.cur.a?'Rätt!':'Fel';return this.cur.id&&!this.cur.emoji?{k:'actions',key:'r'+this.idx,title:m,body:`${this.cur.a}. Pausade klippet för sent eller tidigt?`,btns:[{id:'tidigare',label:'Pausa 3 s tidigare'},{id:'senare',label:'Pausa 3 s senare'}]}:{k:'wait',msg:m,sub:this.cur.a,key:'r'+this.idx}}}
 const Y:any={p:null,box:null,sound:false,cb:null};
 class Reel extends Next{setup(){const rs=this.api.used('reel',3,REELS.length).map((i:number)=>REELS[i]);const es=this.api.used('emoji',4,EMOJI.length).map((i:number)=>EMOJI[i]);const it:any[]=[];rs.forEach((r:any,i:number)=>{it.push({id:r.id,start:22,stop:32,after:0,t:'Vilken film eller serie?',a:r.a,w:shuffle(r.w).slice(0,5)});it.push({text:1,t:r.fq,a:r.fa,w:r.fw});if(es[i])it.push({emoji:es[i].emoji,t:'Gissa från emojis',a:es[i].a,w:es[i].w})});this.items=it}
  begin(){const c=this.cur;if(c.id)return super.begin();this.fallback=false;this.ready=false;this.revealMs=4500;this.o=shuffle([c.a,...c.w]);this.open()}}

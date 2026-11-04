@@ -12,7 +12,7 @@ export function botAct(g:any,id:string,now:number,fast:number){
   const sig=JSON.stringify(pv);let s=st.get(id);if(!s||s.sig!==sig){s={sig,at:now+(3500+R()*7000)/fast,done:false};st.set(id,s)}
   if(s.done||now<s.at)return;s.done=true;const send=(a:any,x:any={})=>g.onInput?.(id,{a,...x});
   if(k==='choice'){if(pv.sel!=null)return;const o=pv.opts.filter((x:any)=>!x.off).map((x:any,i:number)=>x.id??i);const h=hint(g);send(h&&o.includes(h)&&R()<.3?h:o[R()*o.length|0])}
-  else if(k==='actions'){const b=pv.btns.map((x:any)=>x.id);if(b.includes('vote'))return;if(typeof b[0]==='number'){if(g.bid<900&&R()<.6)send(b[0]);return}send(b[R()*b.length|0])}
+  else if(k==='actions'){const b=pv.btns.map((x:any)=>x.id);if(b.includes('vote')||b.includes('tidigare'))return;if(typeof b[0]==='number'){if(g.bid<900&&R()<.6)send(b[0]);return}send(b[R()*b.length|0])}
   else if(k==='text'){if(pv.sel)return;send(g.stage==='write'?FAKE[R()*FAKE.length|0]:TXT[R()*TXT.length|0])}
   else if(k==='guess'){if(R()<.08&&g.word)send(g.word)}
   else if(k==='number'){if(pv.sel!=null)return;const t=g.target?.()??100;send(Math.max(1,Math.round(t*(.45+R()*1.1))))}
