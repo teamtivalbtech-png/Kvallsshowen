@@ -10,7 +10,20 @@ export const REELS=[
  {id:'pjiJ1cL3Uss',a:'Hundraåringen',w:['En man som heter Ove','Kopps','Solsidan','Jönssonligan','Sällskapsresan'],fq:'Vem spelar hundraåringen?',fa:'Robert Gustafsson',fw:['Johan Rheborg','Henrik Dorsin','Peter Dalle']},
  {id:'mnd7sFt5c3A',a:'Stranger Things',w:['Dark','The OA','Wednesday','Riverdale','The Umbrella Academy'],fq:'Vad älskar Eleven att äta?',fa:'Eggo-våfflor',fw:['Pizza','Pannkakor','Kanelbullar']},
  {id:'VaOt6tXyf2Y',a:'Breaking Bad',w:['Better Call Saul','Ozark','Narcos','The Wire','Fargo'],fq:'Vad jobbade Walter White med från början?',fa:'Kemilärare',fw:['Läkare','Polis','Advokat']},
+ {id:'Kiz8svSUs10',a:'Titanic',w:['Pearl Harbor','The Notebook','Romeo + Juliet','Poseidon','Atonement'],fq:'Vad heter Kate Winslets rollfigur?',fa:'Rose',fw:['Anna','Jane','Emma']},
+ {id:'P4fHItoefTk',a:'Frost',w:['Trassel','Modig','Vaiana','Encanto','Isdrottningen'],fq:'Vad heter Elsas syster?',fa:'Anna',fw:['Ariel','Belle','Moana']},
+ {id:'w4b40URwStw',a:'Game of Thrones',w:['The Witcher','Vikings','The Last Kingdom','Rom','Sagan om ringen'],fq:'Var utspelar sig det mesta av serien?',fa:'Westeros',fw:['Narnia','Mordor','Azeroth']},
+ {id:'0Z1XpfbuZOA',a:'Pirates of the Caribbean',w:['Master and Commander','Hook','Skattkammarplaneten','Black Sails','The Mummy'],fq:'Vad heter Johnny Depps rollfigur?',fa:'Jack Sparrow',fw:['Will Turner','Hector Barbossa','Davy Jones']},
+ {id:'CxwTLktovTU',a:'Toy Story',w:['Monsters Inc.','Hitta Nemo','Bilar','Antz','Ett småkryps liv'],fq:'Vad heter pojken som äger leksakerna i första filmen?',fa:'Andy',fw:['Sid','Bonnie','Billy']},
+ {id:'lFzVJEksoDY',a:'Lejonkungen',w:['Djungelboken','Bambi','Tarzan','Madagaskar','Brother Bear'],fq:'Vad heter Simbas elaka farbror?',fa:'Scar',fw:['Mufasa','Zazu','Timon']},
+ {id:'r6IrEPCplxQ',a:'Bonusfamiljen',w:['Solsidan','Fjällen','Vår tid är nu','Älska mig','Rebecka Martinsson'],fq:'Vilken kanal gjorde serien?',fa:'SVT',fw:['TV4','Netflix','Viaplay']},
+ {id:'aJFdePDqKrY',a:'Kopps',w:['Jönssonligan','Hassel','Beck','Snabba Cash','Fyra nyanser av brunt'],fq:'I vilken påhittad ort utspelar sig filmen?',fa:'Högboda',fw:['Hassela','Valleby','Lönneberga']},
+ {id:'grNWo3dmzyE',a:'High School Musical',w:['Camp Rock','Hairspray','Glee','Pitch Perfect','Step Up'],fq:'Vad heter Zac Efrons rollfigur?',fa:'Troy',fw:['Ryan','Chad','Jason']},
+ {id:'PbA63a7H0bo',a:'Hungerspelen',w:['Divergent','Maze Runner','Twilight','Battle Royale','The Giver'],fq:'Vad heter huvudpersonen?',fa:'Katniss',fw:['Peeta','Primrose','Tris']},
+ {id:'TcMBFSGVi1c',a:'Avengers: Endgame',w:['Justice League','Iron Man','Thor','Guardians of the Galaxy','Doctor Strange'],fq:'Vem är huvudskurken?',fa:'Thanos',fw:['Loki','Ultron','Red Skull']},
+ {id:'unRfqHQFl9o',a:'Squid Game',w:['Alice in Borderland','The Hunger Games','Money Heist','All of Us Are Dead','Kingdom'],fq:'Vilket land kommer serien från?',fa:'Sydkorea',fw:['Japan','Kina','Thailand']},
 ];
+import {EMOJI2} from './extra2';
 const E=`🧙⚡🦉|Harry Potter|Sagan om ringen|Narnia|Merlin
 👹💚🏰|Shrek|Hulken|Grinchen|Trolls
 🧊👸⛄|Frost|Snövit|Modig|Vaiana
@@ -48,4 +61,4 @@ const E=`🧙⚡🦉|Harry Potter|Sagan om ringen|Narnia|Merlin
 📎🏢😐|The Office|Silicon Valley|Parks and Rec|Suits
 🧽🍍🌊|Svampbob Fyrkant|Hitta Nemo|Kalle Anka|Moana
 🔵⚡🐭|Pokémon|Digimon|Tom och Jerry|Musse Pigg`;
-export const EMOJI=E.split('\n').map(l=>{const[e,a,...w]=l.split('|');return{emoji:e,a,w}});
+export const EMOJI=[...E.split('\n').map(l=>{const[e,a,...w]=l.split('|');return{emoji:e,a,w}}),...EMOJI2];

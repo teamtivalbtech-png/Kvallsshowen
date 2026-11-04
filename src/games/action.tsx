@@ -1,7 +1,7 @@
 import React,{useCallback,useEffect,useRef,useState} from 'react';import {Av,Canvas,shuffle,nameOf,Stage} from './base';import {svg,S,SY,box,loadAruco,PANEL} from '../ui/aim';
 const CAM={fov:46,y:3.4,tilt:.06};
 const project=(x:number,y:number,z:number)=>{const d=9-z,f=.5/Math.tan(CAM.fov*Math.PI/360),cy=y-CAM.y,c=Math.cos(CAM.tilt),s2=Math.sin(CAM.tilt),Y=cy*c+d*s2*-1,Z=d*c+cy*s2;return{sx:.5+x*f/(Z*PANEL),sy:.5-Y*f/Z,scale:f/Z}};
-const glow=(x:any,c:string,b=18)=>{x.shadowColor=c;x.shadowBlur=b};
+const glow=(x:any,c:string,b=18)=>{};
 const pics=new Map<string,HTMLImageElement>();const pic=(p:any)=>{if(!p.photo)return null;let i=pics.get(p.id);if(!i){i=new Image();i.src=p.photo;pics.set(p.id,i)}return i.complete?i:null};
 const label=(x:any,p:any,X:number,Y:number,r:number)=>{x.shadowBlur=0;x.textAlign='center';x.textBaseline='middle';const im=pic(p);if(im){x.save();x.beginPath();x.arc(X,Y,r*.94,0,6.3);x.clip();x.drawImage(im,X-r,Y-r,r*2,r*2);x.restore()}else{x.font=`${r*1.25}px serif`;x.fillText(p.avatar,X,Y+r*.06)}x.font=`800 ${Math.max(18,r*.5)}px "DM Sans",sans-serif`;const w=x.measureText(p.name).width+r*.7,h=r*.72,Ty=Y+r*1.5;x.fillStyle='#16081fe6';x.beginPath();x.roundRect(X-w/2,Ty-h/2,w,h,h/2);x.fill();x.strokeStyle=p.color;x.lineWidth=3;x.stroke();x.fillStyle=p.color;x.fillText(p.name,X,Ty+1)};
 const count=(g:any,dt:number)=>{if(g.cd>0){const b=Math.ceil(g.cd);g.cd-=dt;if(Math.ceil(g.cd)!==b&&g.cd>0)g.api.sfx('tick');return true}return false};

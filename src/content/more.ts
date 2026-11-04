@@ -1,4 +1,7 @@
+import {WHO2,LIKE2,SPY2,MIME2,WORDS2,SELFIE2,BOXES2} from './extra2';
 import {SONGS2} from './songs2';import {SONGS3} from './songs3';
+import {SONGS4} from './songs4';
+import {TF3,TL3,CL3,FIB3,PR3} from './batch3';
 import {XTF,XTL,XCL,XSONG,XWHO,XLIKE,XMIME,XWORDS,XSPY,XSELFIE,XFIB} from './extra';
 const L=(s:string)=>s.trim().split('\n').map(x=>x.split('|'));
 const TF0=L(`Sverige har över 200 000 öar|1
@@ -100,7 +103,7 @@ Hur många år blev Astrid Lindgren?|94|år
 Hur många grader lutar jordaxeln?|23|grader
 Hur högt är Kaknästornet ungefär?|155|m
 Hur många minuter tar en fotbollsmatch utan tillägg?|90|min`).map(([q,a,u])=>({q,a:+a,u}));
-export const PRICES=L(`🍺|Stor stark på krogen i Stockholm|95
+const PRICES0=L(`🍺|Stor stark på krogen i Stockholm|95
 🍕|Vesuvio på kvarterspizzerian|120
 ☕|Latte på kaffekedja|59
 🍌|Ett kilo bananer|25
@@ -273,7 +276,7 @@ const LIKE0=`Något man gör i smyg på jobbet|Ett typiskt svenskt sommarljud|N�
 const SPY0=`Systembolaget,Ikea,Liseberg,Gekås Ullared,Arlanda,Gym,Tandläkaren,Bastu,Kyrkbröllop,Kräftskiva,Studentflak,Hockeyarena,Midsommarfest,Finlandsbåten,Dejt,Skidbacke,Fängelse,Sjukhus,Rymdstation,Kryssning,Bibliotek,Hemlig bar,Konferenshotell,Campingplats,Eurovision,Biograf,Julbord,Riksdagen,Tinder,Grillfest,Stripklubb,Polisstation`.split(',');
 const MIME0=`baksmälla,sniffa ost,simma crawl,första dejten,raka benen,tinderswipe,köra Ikea-matlåda,flygvärdinna,svära på tyska,bli jagad av gäss,fiska kräftor,diska,dansa tango,sumobrottare,bröllopstal,bli dumpad via sms,bartender,skida utför,brandman,toalettbesök utan papper,klättra på klippa,ta en selfie,bli stungen av bi,ge en massage,personlig tränare,bjuda upp på krogen,hitta nycklarna,tvätta håret,elefant,tandläkare,spela luftgitarr,sprutlackera,rocka karaoke,hoppa bungyjump,ta på strumpbyxor,svensexa,möhippa,pensionsfest,yogalärare,midsommardans,bil som inte startar,läcka i taket,snubbla i en backe,äta spaghetti,flyga drake,räkna pengar,ta för mycket chili,bada isvak`.split(',');
 const SELFIE0=`Se ut som du just blivit dumpad|Din bästa domarblick|Se ut som någon som precis hittat en tusenlapp|Din minst säljande dejtingprofilbild|Spela bakfull på en jobbintervju|Se ut som en valaffisch|Din bästa skådespelargråt|Se ut som du försöker dölja en fis|Du är Sveriges nya statsminister|Din blick när någon tar sista pizzabiten|Föreställ en tysk turist i Ullared|Din bästa modellpose|Se ut som om du fått fel paket|Din blick när någon sätter ananas på din pizza|Se romantiskt in i kameran|Din reaktion på ett sms från ditt ex|Spela arg italienare|Föreställ dig som 90-åring|Bästa dubbelhakan|Din blick när chefen säger "vi behöver prata"|Spela sjömannen som sett något|Du har precis vunnit Melodifestivalen|Den värsta passfotot någonsin|Se ut som om du spelar poker med rysk maffia|Du är influerare och säljer te`.split('|');
-export const BOXES=[['Guldklocka',1800],['Tom låda',0],['Vinflaska från 1982',1300],['En gammal tv-fjärrkontroll',20],['Bitcoin-nyckel',2500],['Skrapelott',300],['Svärmors porslin',100],['Äkta Zorn-etsning',2200],['Kvitto från Ullared',10],['Diamantörhängen',2000],['Förbannad docka',-400],['Hyresskuld',-800],['Skattekrav',-1000],['Klassisk Volvo-nyckel',1500],['Sommarstugenyckel',2800],['Gymkort som går ut idag',50],['Oöppnad Nintendo från 1985',1700],['Burk surströmming',150],['Signerad Zlatan-tröja',900],['Ex:ets breven',-200],['Guldtacka',3000],['Kassettband med Gyllene Tider',250],['Tio liter glögg',120],['Parkeringsböter',-300]];
+const BOXES0=[['Guldklocka',1800],['Tom låda',0],['Vinflaska från 1982',1300],['En gammal tv-fjärrkontroll',20],['Bitcoin-nyckel',2500],['Skrapelott',300],['Svärmors porslin',100],['Äkta Zorn-etsning',2200],['Kvitto från Ullared',10],['Diamantörhängen',2000],['Förbannad docka',-400],['Hyresskuld',-800],['Skattekrav',-1000],['Klassisk Volvo-nyckel',1500],['Sommarstugenyckel',2800],['Gymkort som går ut idag',50],['Oöppnad Nintendo från 1985',1700],['Burk surströmming',150],['Signerad Zlatan-tröja',900],['Ex:ets breven',-200],['Guldtacka',3000],['Kassettband med Gyllene Tider',250],['Tio liter glögg',120],['Parkeringsböter',-300]];
 export const SCENES=[
  {t:'Katten på bordet',icons:['🐱','🍷'],a:'Glaset välter ner på mattan',w:['Katten dricker upp vinet','Glaset flyger iväg som en raket','Katten tar selfie'],kind:'push'},
  {t:'Domino i vardagsrummet',icons:['🧍','🚪'],a:'Sista brickan slår igen dörren',w:['Allt stannar halvvägs','Brickorna börjar dansa','Dörren öppnas av sig själv'],kind:'dom'},
@@ -286,14 +289,17 @@ export const SCENES=[
 ];
 export const MEL:any=[{n:'Grattis på födelsedagen',s:[[60,1],[60,1],[62,2],[60,2],[65,2],[64,4],[60,1],[60,1],[62,2],[60,2],[67,2],[65,4]]},{n:'Bä bä vita lamm',s:[[60,2],[60,2],[67,2],[67,2],[69,2],[69,2],[67,4],[65,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,4]]},{n:'Gubben Noak',s:[[60,2],[60,2],[60,2],[64,2],[62,2],[62,2],[62,2],[65,2],[64,2],[64,2],[62,2],[62,2],[60,4]]},{n:'Broder Jakob',s:[[60,2],[62,2],[64,2],[60,2],[60,2],[62,2],[64,2],[60,2],[64,2],[65,2],[67,4],[64,2],[65,2],[67,4]]}].slice(0);
 
-export const TF=[...TF0,...XTF];
-export const TIMELINE=[...TIMELINE0,...XTL];
-export const CLOSEST=[...CLOSEST0,...XCL];
-export const SONGS=[...SONGS0,...XSONG,...SONGS2,...SONGS3].filter((s,i,a)=>a.findIndex(x=>x.t===s.t&&x.a===s.a)===i);
-export const WORDS=[...WORDS0,...XWORDS];
-export const FIB=[...FIB0,...XFIB];
-export const WHO=[...WHO0,...XWHO];
-export const LIKE=[...LIKE0,...XLIKE];
-export const SPY=[...SPY0,...XSPY];
-export const MIME=[...MIME0,...XMIME];
-export const SELFIE=[...SELFIE0,...XSELFIE];
+const NOAUDIO=/^(Jag Vill Ha Dig|Ängel|Sommar och sol|Dansa pausa)$/;
+export const PRICES=[...PRICES0,...PR3];
+export const TF=[...TF0,...XTF,...TF3];
+export const TIMELINE=[...TIMELINE0,...XTL,...TL3];
+export const CLOSEST=[...CLOSEST0,...XCL,...CL3];
+export const SONGS=[...SONGS0,...XSONG,...SONGS2,...SONGS3,...SONGS4].filter((s,i,a)=>!NOAUDIO.test(s.t)&&a.findIndex(x=>x.t===s.t&&x.a===s.a)===i);
+export const WORDS=[...WORDS0,...XWORDS,...WORDS2];
+export const FIB=[...FIB0,...XFIB,...FIB3];
+export const WHO=[...WHO0,...XWHO,...WHO2];
+export const LIKE=[...LIKE0,...XLIKE,...LIKE2];
+export const SPY=[...SPY0,...XSPY,...SPY2];
+export const MIME=[...MIME0,...XMIME,...MIME2];
+export const SELFIE=[...SELFIE0,...XSELFIE,...SELFIE2];
+export const BOXES=[...BOXES0,...BOXES2];
