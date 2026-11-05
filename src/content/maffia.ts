@@ -5,9 +5,6 @@ export const TRAITS:any[]=[
 {k:'drink',label:'Dricker',v:{Kaffe:'en halvdrucken kaffekopp','Öl':'en tom ölburk',Vin:'ett vinglas med läppstift',Läsk:'en klibbig läskburk'}},
 {k:'habit',label:'Ovana',v:{Snus:'en snusdosa',Tuggummi:'ett tuggummi under bordet',Cigg:'en nyss släckt fimp',Nagelbitare:'avbitna nagelbitar'}},
 {k:'shoe',label:'Skor',v:{Sneakers:'ett sneakersavtryck',Kängor:'ett avtryck efter kängor',Klackar:'märken efter höga klackar',Foppatofflor:'en borttappad foppatoffel'}},
-{k:'smell',label:'Doft',v:{Citrus:'en stark doft av citrus',Vanilj:'en söt doft av vanilj',Tallbarr:'en doft av tallbarr',Kebab:'en tydlig doft av kebab'}},
-{k:'item',label:'Bär',v:{Keps:'en kvarglömd keps',Glasögon:'ett par glasögon',Armbandsur:'ett trasigt armbandsur',Halsduk:'en lång halsduk'}},
-{k:'snack',label:'Äter',v:{Ostbågar:'smulor av ostbågar',Polkagris:'en bit polkagris',Kanelbulle:'smulor av kanelbulle',Salmiak:'en salmiakpastill'}},
 ];
 export const ROLES:any={
 maffia:{name:'Maffian',side:'maffia',icon:'🔪',short:'Tar ut en person varje natt.',desc:'Ni känner varandra. Varje natt väljer ni ett offer. En av er smyger dit, så andra kan märka att personen lämnade sitt rum. Ljug om var ni var. Ni vinner när ni är lika många som resten.'},
@@ -41,37 +38,35 @@ export const QUIET=['Natten var lugn. Alla vaknade.'];
 export const NIGHTS=['Natten faller över studion.','Lamporna släcks. Någon i det här rummet ljuger.','Kamerorna är av. Nu börjar den riktiga showen.','Ingen går hem i kväll. Ingen får heller lämna byggnaden.','Tyst i studion. Något rör sig i korridoren.'];
 // Regelbok och instruktioner.
 export const RULES=[
-{i:'🎭',t:'Målet',d:['Ni är gäster på Kvällsshowen, men några av er är maffian.','Staden vinner om all maffia åker ut eller om 5 ärliga sändningar går igenom.','Maffian vinner om de blir lika många som resten, om 6 fuskade sändningar går igenom, eller om Gudfadern blir producent när minst 3 fuskade har gått igenom.']},
-{i:'🔒',t:'Din roll är hemlig',d:['Håll på knappen på telefonen för att se din roll.','Släpp knappen så försvinner den. Visa aldrig telefonen för någon.','Maffian vet vilka som hör ihop. Alla andra vet ingenting.']},
-{i:'🌙',t:'Natten',d:['Alla väljer ett rum. Du ser vilka andra som är i ditt rum.','Sedan gör alla sitt jobb i hemlighet. Även vanliga gäster trycker, så ingen avslöjas av att de pillar på telefonen.','Maffian väljer ett offer och en av dem smyger dit. Den som var i samma rum kan märka att personen gick.']},
-{i:'🌅',t:'Morgonen',d:['Sixten berättar vem som dog och var. Den dödes roll visas.','Ett spår hittas på brottsplatsen, till exempel en snusdosa. Alla har en offentlig profil med vanor, så spåret pekar ut flera personer.','Maffian kan plantera falska spår. Lita inte blint på dem.','Sedan undersöker du brottsplatsen eller gästboken. Det du hittar ser bara du.']},
-{i:'📡',t:'Sändningen',d:['Varje dag sker två sändningar. Sändningsledaren väljer en producent.','Alla röstar Ja eller Nej, öppet. Hur du röstar syns på tv:n och kan användas mot dig.','Tre misslyckade val i rad, och översta kortet spelas automatiskt.','Den som nyss var ledare eller producent kan inte väljas igen direkt.']},
-{i:'🃏',t:'Korten',d:['Ledaren drar 3 kort, slänger 1 i hemlighet och ger 2 till producenten.','Producenten spelar 1 kort. Det hamnar på tavlan.','Leken har 6 ärliga och 11 fuskade kort, så även en ärlig person kan tvingas spela fusk.','Därför får båda sedan berätta vad de fick. Stämmer inte historierna ljuger någon.']},
-{i:'⚡',t:'Makten',d:['Fuskade kort ger sändningsledaren extra makt.','Efter 2 fuskade får ledaren granska en spelares sida.','Efter 3 väljer ledaren nästa ledare.','Efter 4 och 5 avskedar ledaren en spelare, som åker ut direkt.']},
-{i:'🗣️',t:'Diskussionen',d:['Säg var du var i natt. Ditt alibi syns på tv:n och du får ljuga.','Jämför vad ni såg. Vem påstår sig ha varit i ett rum där ingen såg dem?','Vem röstade Ja till ett styre som spelade fusk? Vem säger emot sig själv?','Använd telefonens anteckningar. Bara du ser dem.']},
-{i:'⚖️',t:'Åtalet',d:['Efter andra sändningen röstar ni om vem som ska åtalas.','De med flest röster får försvara sig, och sedan röstar alla om vem som åker ut.','Personens roll visas. Sedan kommer natten igen.']},
-{i:'👻',t:'Om du dör',d:['Du är ute, men du får vara kvar som spöke.','Var helt tyst. Du får inte hjälpa någon.','Gissa vem som är maffia på telefonen. Rätt gissning ger poäng i slutet.']},
+{i:'🎭',t:'Målet',d:['Några av er är maffian. Ingen vet vilka, utom maffian själv.','Staden vinner om all maffia åker ut, eller om 3 ärliga sändningar går igenom.','Maffian vinner om de blir lika många som resten, om 4 fuskade sändningar går igenom, eller om Gudfadern blir producent efter 2 fuskade.']},
+{i:'🔒',t:'Din roll är hemlig',d:['Håll på knappen på telefonen för att se din roll. Släpp, så försvinner den.','Visa aldrig telefonen för någon.','Regelboken finns alltid på ❓-knappen.']},
+{i:'🔁',t:'En dag i taget',d:['Varje dag har fem delar, och raden högst upp visar var ni är.','Natt, Morgon, Sändning, Diskussion och Röstning.','Spelet börjar om tills någon vinner.']},
+{i:'🌙',t:'Natt och morgon',d:['På natten väljer du ett rum och ser vilka andra som är där. Sedan gör alla sitt hemliga jobb.','Maffian tar en person. På morgonen får ni veta vem, och ett spår hittas.','Spåret visar en vana, till exempel snus. Alla vanor syns för alla, så spåret pekar ut flera personer.']},
+{i:'📡',t:'Sändningen',d:['En sändningsledare väljer en producent. Alla röstar öppet Ja eller Nej.','Ledaren slänger ett av tre kort, och producenten spelar ett av två.','Leken har fler fuskade än ärliga kort, så även en ärlig person kan tvingas spela fusk.','Båda berättar sedan vad de fick. Stämmer inte historierna ljuger någon.']},
+{i:'⚖️',t:'Diskussion och röstning',d:['Säg var du var i natt. Ditt alibi syns på tv:n, och du får ljuga.','Jämför vad ni såg, och vem som sagt vad.','Sedan röstar ni fram vem som åtalas, lyssnar på försvaret och röstar ut en person.','Dör du blir du spöke. Var tyst och gissa vem som är maffia.']},
 ];
 export const HELP:any={
-rules:'Lyssna på genomgången. Regelboken finns alltid på ❓-knappen.',
-length:'Programledaren väljer hur länge ni ska diskutera varje dag.',
-cards:'Håll på knappen och läs din roll i lugn och ro. Visa ingen.',
-room:'Välj rummet du är i i natt. Du kommer att se vilka fler som är där.',
+rules:'Lyssna på genomgången. Regelboken finns alltid på ❓.',
+length:'Programledaren väljer hur länge ni ska diskutera.',
+cards:'Håll på knappen och läs din roll i lugn och ro.',
+room:'Välj rummet du är i i natt. Du ser vilka fler som är där.',
 act:'Gör ditt nattjobb. Alla trycker, så ingen avslöjas.',
-dawn:'Lyssna. Skriv upp spåret i huvudet och kolla dina anteckningar.',
-search:'Välj vad du undersöker. Det du hittar ser bara du.',
-gnom:'Sändningsledaren väljer en producent. Säg gärna vad ni tycker högt.',
-gvote:'Rösta Ja om du litar på paret. Rösten syns öppet på tv:n.',
-gres:'Titta vem som röstade vad. Det kommer att spela roll.',
-gdraw:'Ledaren slänger ett av tre kort. Övriga väntar.',
-gplay:'Producenten spelar ett av två kort.',
-gclaim:'Ledare och producent berättar vad de fick. Stämmer det? Bråka!',
+dawn:'Lyssna. Programledaren går vidare när ni är klara.',
+gnom:'Ledaren väljer en producent. Säg gärna vad ni tycker högt.',
+gvote:'Rösta Ja om du litar på paret. Rösten syns öppet.',
+gres:'Titta vem som röstade vad. Programledaren går vidare.',
+gdraw:'Ledaren slänger ett kort. Övriga väntar.',
+gplay:'Producenten spelar ett kort.',
+gclaim:'Ledare och producent berättar vad de fick. Stämmer det?',
 gpower:'Ledaren använder sin makt.',
-talk:'Säg ditt alibi på telefonen, prata och jämför. Tryck Redo när ni vill rösta.',
-nom:'Rösta på vem som ska åtalas. De med flest röster får försvara sig.',
+talk:'Säg ditt alibi på telefonen. Prata och jämför. Tryck Redo när ni vill rösta.',
+nom:'Rösta på vem som ska åtalas.',
 defend:'Den åtalade har ordet. Lyssna och ställ frågor.',
-vote:'Sista chansen. Rösta om vem som ska ut.',
-verdict:'Domen visas nu.',
+vote:'Rösta om vem som ska ut.',
+verdict:'Domen visas. Programledaren går vidare.',
 end:'Nu ser ni vad som egentligen hände.',
 };
-export const TIPS:any={maffia:'Tips: Rösta ibland mot din egen sida och säg att du tvingades spela fusk. Lägg misstankar på någon annan tidigt.',gudfar:'Tips: Bygg förtroende med ärliga kort. Blir du producent efter 3 fuskade vinner ni direkt.',polis:'Tips: Vänta med att avslöja dig. Hamnar du i fara, berätta vad du vet.',lakare:'Tips: Skydda den som verkar veta mest, men inte samma person två nätter i rad.',journalist:'Tips: Kolla rummet där någon säger sig ha varit. Du kan avslöja en lögn direkt.',vakt:'Tips: Bevaka den som verkar säker på sig själv. Du ser om den smyger ut.',narr:'Tips: Var misstänkt men inte för mycket. Bete dig konstigt och förneka svagt.',gast:'Tips: Var aktiv. Fråga folk var de var och skriv upp vad som inte stämmer.'};
+export const PART:any={room:'Natt',act:'Natt',dawn:'Morgon',gnom:'Sändning',gvote:'Sändning',gres:'Sändning',gdraw:'Sändning',gplay:'Sändning',gclaim:'Sändning',gpower:'Sändning',talk:'Diskussion',nom:'Röstning',defend:'Röstning',vote:'Röstning',verdict:'Röstning'};
+export const PARTS=['Natt','Morgon','Sändning','Diskussion','Röstning'];
+export const ANN:any={room:{i:'🌙',t:'Natten faller',d:'Välj rum, och gör sedan ditt hemliga jobb.'},gnom:{i:'📡',t:'Dags för sändning',d:'Ledaren väljer producent, och alla röstar öppet.'},talk:{i:'🗣️',t:'Diskussion',d:'Säg var du var. Vem ljuger?'},nom:{i:'⚖️',t:'Dags att rösta',d:'Vem ska åtalas?'}};
+export const TIPS:any={maffia:'Tips: Säg att du tvingades spela fusk. Lägg misstankar på någon annan tidigt.',gudfar:'Tips: Bygg förtroende. Blir du producent efter 2 fuskade vinner ni direkt.',polis:'Tips: Vänta med att avslöja dig. Hamnar du i fara, berätta vad du vet.',lakare:'Tips: Skydda den som verkar veta mest.',journalist:'Tips: Kolla rummet där någon säger sig ha varit.',vakt:'Tips: Bevaka den som verkar säker. Du ser om den smyger ut.',narr:'Tips: Var misstänkt men inte för mycket.',gast:'Tips: Fråga folk var de var och skriv upp vad som inte stämmer.'};
