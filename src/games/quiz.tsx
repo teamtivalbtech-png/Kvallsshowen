@@ -37,7 +37,7 @@ class Timeline extends RB{qms=35000;revealMs=7000;ok(a:any){return Array.isArray
  ask(p:string){return{k:'order',prompt:'Äldst överst',items:shuffle(this.cur.ev).map((e:any)=>({id:e.id,label:e.t})),sel:this.sel(p)}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id]?.v;if(!a)return;let s=0;const yr=(id:number)=>this.cur.ev.find((e:any)=>e.id===id)?.y;a.forEach((id:number,i:number)=>{if(yr(this.cur.right[i])===yr(id))s+=250});if(s===1000)s+=500;p&&this.api.award(p.id,s);this.ans[p.id].s=s})}
  result(p:string){return{k:'wait',msg:`${this.ans[p]?.s||0} poäng`,big:'🕰️',key:'r'+this.idx}}}
-const TimelineTv=({g,show}:any)=><Stage kicker={`Tidslinjen ${g.idx+1}/${g.items.length}`} title={g.phase==='q'?'Sätt händelserna i rätt ordning':'Rätt ordning'}><div className="tl">{(g.phase==='q'?g.cur.ev:[...g.cur.ev].sort((a:any,b:any)=>a.y-b.y)).map((e:any)=><div key={e.id}><b>{g.phase==='q'?'?':e.y}</b><span>{e.t}</span></div>)}</div><Answered g={g} show={show}/></Stage>;
+const TimelineTv=({g,show}:any)=><Stage kicker={`Timeline ${g.idx+1}/${g.items.length}`} title={g.phase==='q'?'Sätt händelserna i rätt ordning':'Rätt ordning'}><div className="tl">{(g.phase==='q'?g.cur.ev:[...g.cur.ev].sort((a:any,b:any)=>a.y-b.y)).map((e:any)=><div key={e.id}><b>{g.phase==='q'?'?':e.y}</b><span>{e.t}</span></div>)}</div><Answered g={g} show={show}/></Stage>;
 class Num extends RB{qms=25000;revealMs=7000;rows:any[]=[];
  setup(){this.items=pick(this.api,'cl',CLOSEST,8)}unit(){return this.cur.u}target(){return this.cur.a}prompt(){return this.cur.q}
  ask(p:string){return{k:'number',prompt:this.prompt(),unit:this.unit(),sel:this.sel(p)}}
@@ -68,7 +68,7 @@ export const QUIZG=[
 {id:'fast',title:'Snabbast vinner',tag:'Frågesport där varje sekund kostar',how:'Svara rätt så snabbt du kan. Tio frågor.',cat:'Kunskap',icon:'⚡',mins:5,make:(a:any)=>new Fast(a),Tv:FastTv},
 {id:'nos',title:'Nostalgikampen',tag:'För dig född runt år 2000',how:'Minns du Club Penguin, MSN och High School Musical? Tolv frågor om uppväxten.',cat:'Kunskap',icon:'📼',mins:5,make:(a:any)=>new Nostalgi(a),Tv:FastTv},
 {id:'ladder',title:'Stegen',tag:'Säkra eller satsa vidare',how:'Poängen dubblas för varje steg. Säkra när du vill, men ett fel kostar allt osäkrat.',cat:'Kunskap',icon:'🪜',mins:6,make:(a:any)=>new Ladder(a),Tv:LadderTv},
-{id:'timeline',title:'Tidslinjen',tag:'Vad hände först?',how:'Sortera händelserna från äldst till nyast.',cat:'Kunskap',icon:'🕰️',mins:5,make:(a:any)=>new Timeline(a),Tv:TimelineTv},
+{id:'timeline',title:'Timeline',tag:'Vad hände först?',how:'Sortera händelserna från äldst till nyast.',cat:'Kunskap',icon:'🕰️',mins:5,make:(a:any)=>new Timeline(a),Tv:TimelineTv},
 {id:'closest',title:'Närmast vinner',tag:'Ingen vet, alla gissar',how:'Skriv en siffra. Närmast får flest poäng.',cat:'Kunskap',icon:'🎯',mins:5,make:(a:any)=>new Num(a),Tv:NumTv},
 {id:'price',title:'Rätt pris',tag:'Närmast utan att gå över',how:'Gissa priset, men går du över får du noll.',cat:'Kunskap',icon:'🏷️',mins:5,make:(a:any)=>new Price(a),Tv:PriceTv},
 {id:'tf',title:'Sant eller falskt',tag:'Satsa på din magkänsla',how:'Satsa hälften eller allt på varje påstående.',cat:'Kunskap',icon:'⚖️',mins:4,make:(a:any)=>new TFG(a),Tv:TFTv},
