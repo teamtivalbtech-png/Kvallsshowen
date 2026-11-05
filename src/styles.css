@@ -182,3 +182,4 @@ button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:p
 .vip{padding-bottom:10px}.big.sticky{position:sticky;bottom:4px;left:auto;right:auto;width:100%;z-index:6;flex:none;margin-top:4px}
 .big.sticky{padding:10px 14px;font-size:17px;border-radius:14px}@media(max-height:640px){.vhead h3{font-size:21px}.vhead span{display:none}.big.sticky{font-size:15px;padding:7px 10px}.big.sticky small{display:none}}
 .news h3{font-size:min(1.85vw,3.3vh)}
+.ytbox iframe{position:absolute;left:50%;top:50%;width:auto;height:calc(100% + 190px);aspect-ratio:16/9;max-width:none;transform:translate(-50%,-50%)}
