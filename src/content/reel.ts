@@ -1,5 +1,6 @@
 // Klipp är officiella trailers från YouTube. start/stop är sekunder.
-export const REELS=[
+import {SCENES} from './scenes';
+export const REELS:any[]=[
  {id:'o141_2Mj844',a:'Snabba Cash',w:['Kopps','Easy Money 2','Beck','Wallander','Hassel'],fq:'Vem spelar huvudrollen JW?',fa:'Joel Kinnaman',fw:['Alexander Skarsgård','Peter Stormare','Rolf Lassgård']},
  {id:'oHjC_sKhW_I',a:'Solsidan',w:['Hundraåringen','Bonusfamiljen','Fjällen','Kronprinsessan','Sune'],fq:'Var utspelar sig Solsidan?',fa:'Saltsjöbaden',fw:['Lidingö','Djursholm','Båstad']},
  {id:'VyHV0BRtdxo',a:'Harry Potter',w:['Sagan om ringen','Narnia','Percy Jackson','Eragon','Spiderwick'],fq:'Vilket elevhem hamnar Harry i?',fa:'Gryffindor',fw:['Slytherin','Ravenclaw','Hufflepuff']},
@@ -22,7 +23,7 @@ export const REELS=[
  {id:'PbA63a7H0bo',a:'Hungerspelen',w:['Divergent','Maze Runner','Twilight','Battle Royale','The Giver'],fq:'Vad heter huvudpersonen?',fa:'Katniss',fw:['Peeta','Primrose','Tris']},
  {id:'TcMBFSGVi1c',a:'Avengers: Endgame',w:['Justice League','Iron Man','Thor','Guardians of the Galaxy','Doctor Strange'],fq:'Vem är huvudskurken?',fa:'Thanos',fw:['Loki','Ultron','Red Skull']},
  {id:'unRfqHQFl9o',a:'Squid Game',w:['Alice in Borderland','The Hunger Games','Money Heist','All of Us Are Dead','Kingdom'],fq:'Vilket land kommer serien från?',fa:'Sydkorea',fw:['Japan','Kina','Thailand']},
-];
+...SCENES];
 import {EMOJI2} from './extra2';
 const E=`🧙⚡🦉|Harry Potter|Sagan om ringen|Narnia|Merlin
 👹💚🏰|Shrek|Hulken|Grinchen|Trolls
