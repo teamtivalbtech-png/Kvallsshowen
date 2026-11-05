@@ -1,4 +1,4 @@
-import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {say,LINES} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';import {MISSIONS,ROASTS} from './games/extras';
+import {rs} from './rand';import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {say,LINES} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';import {MISSIONS,ROASTS} from './games/extras';
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
@@ -87,7 +87,7 @@ export class Show{
   }
   startSingle(id:string){this.match=false;this.queue=[id];this.qi=0;this.intro(id)}
   startMatch(ids:string[]){
-    this.match=true;this.total={};this.history=[];this.stats={};this.album=[];this.players.forEach(p=>this.total[p.id]=0);const ms=[...MISSIONS].sort(()=>Math.random()-.5);this.missions={};this.players.filter(p=>!p.bot).forEach((p,i)=>this.missions[p.id]=ms[i]);
+    this.match=true;this.total={};this.history=[];this.stats={};this.album=[];this.players.forEach(p=>this.total[p.id]=0);const ms=[...MISSIONS].sort(rs());this.missions={};this.players.filter(p=>!p.bot).forEach((p,i)=>this.missions[p.id]=ms[i]);
     const q:string[]=[];ids.filter(i=>i!=='allin').forEach((g,i)=>{q.push(g);if((i+1)%3===0)q.push('duel')});if(q[q.length-1]==='duel')q.pop();this.queue=[...q,'missions','allin'];this.qi=0;this.save();this.intro(this.queue[0]);
   }
   intro(id:string){
@@ -120,7 +120,7 @@ export class Show{
     after:(ms,f)=>{s.timers.push(setTimeout(s.safe(f),ms/FAST))},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
     countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),stat:(p,k,n)=>s.stat(p,k,n),keep:(src,cap)=>{if(s.album.length<24)s.album.push({src,cap})},custom:()=>s.customQ.splice(0,3),mission:p=>s.missions[p],say:(t,x)=>say(t,x),quip:ok=>{if(Math.random()<.45)say(ok?LINES.right():LINES.wrong())},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
     mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
-    used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];let free=all.filter(i=>!u.includes(i)).sort(()=>Math.random()-.5);let list=free.slice(0,n);if(list.length<n){u=u.filter(i=>!all.includes(i));free=all.filter(i=>!list.includes(i)).sort(()=>Math.random()-.5);list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
+    used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];let free=all.filter(i=>!u.includes(i)).sort(rs());let list=free.slice(0,n);if(list.length<n){u=u.filter(i=>!all.includes(i));free=all.filter(i=>!list.includes(i)).sort(rs());list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
   }}
   teamList(){return Array.from({length:this.teamCount},(_,i)=>({id:i,...TEAM[i],members:this.players.filter(p=>p.team===i)})).filter(t=>t.members.length)}
   finalRows(){
