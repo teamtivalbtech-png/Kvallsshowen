@@ -20,7 +20,7 @@ export abstract class RB implements Inst{
 }
 export function Stage({kicker,title,children,img}:any){return <div className="stg">{kicker&&<div className="kick">{kicker}</div>}<h1 className="qt">{title}</h1>{children}</div>}
 export function Answered({g,show}:any){const ps=show.players;return <div className="ansrow">{ps.map((p:any)=><span key={p.id} className={(p.id in g.ans?'in ':'')+(p.connected?'':'off')} style={{borderColor:p.color}}><Av p={p}/></span>)}</div>}
-export function Opts({list,right,counts}:any){return <div className="tvopts">{list.map((o:string,i:number)=><div key={o} className={'tvo c'+(i%4)+(right!=null?(o===right?' r':' x'):'')}><b>{'ABCD'[i]}</b><span>{o}</span>{counts&&<em>{counts[o]||''}</em>}</div>)}</div>}
+export function Opts({list,right,counts}:any){return <div className="tvopts">{list.map((o:string,i:number)=><div key={i+':'+o} className={'tvo c'+(i%4)+(right!=null?(o===right?' r':' x'):'')}><b>{'ABCDEFGH'[i]}</b><span>{o}</span>{counts&&<em>{counts[o]||''}</em>}</div>)}</div>}
 export const Av=({p}:any)=>p?.photo?<img className="av" src={p.photo} alt={p.name}/>:<span className="av em">{p?.avatar}</span>;
 export const nameOf=(show:any,id:string)=>show.players.find((p:any)=>p.id===id);
 export function Canvas({draw}:{draw:(c:CanvasRenderingContext2D,w:number,h:number)=>void}){

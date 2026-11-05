@@ -1,11 +1,12 @@
-import React,{useEffect,useMemo,useState,useSyncExternalStore} from 'react';import QR from 'qrcode';import {Show} from './show';import {snd} from './audio';import {GAMES} from './games';import {unlockClips} from './games/media';import {Av} from './games/base';import {LOCAL} from './net';import {hostState,say,LINES,unlockVoice} from './host';import {audioState,unlockSong} from './games/songs';
+import React,{useEffect,useMemo,useState,useSyncExternalStore} from 'react';import QR from 'qrcode';import {Show} from './show';import {snd} from './audio';import {GAMES} from './games';import {unlockClips,armGate} from './games/media';import {Av} from './games/base';import {LOCAL} from './net';import {hostState,say,LINES,unlockVoice} from './host';import {audioState,unlockSong} from './games/songs';
 let show:Show|null=null;
 const useV=(s:Show)=>useSyncExternalStore(s.sub,()=>s.ver);
 export function Tv(){const[on,set]=useState(false);const s=useMemo(()=>show||=new Show(),[]);useV(s);useFit();
   useEffect(()=>{const t=setInterval(()=>{},1000);(window as any).__show=s;return()=>clearInterval(t)},[]);
   const go=()=>{snd.unlock();unlockSong();unlockVoice();unlockClips();set(true);document.documentElement.requestFullscreen?.().catch(()=>{});if(s.stage==='lobby')snd.music('lobby')};
+  const gb=React.useRef<HTMLButtonElement>(null);const goR=React.useRef<any>(null);goR.current=go;useEffect(()=>{if(on||LOCAL||!gb.current)return;return armGate(gb.current,()=>goR.current())},[on]);
   useEffect(()=>{if(LOCAL)snd.unlock();const k=()=>{if(!on)go()};window.addEventListener('keydown',k);return()=>window.removeEventListener('keydown',k)},[on]);
-  return <div className={'tv st-'+s.stage}><Bg/>{!on&&!LOCAL&&<div className="gate" onClick={go}><h1 className="logo">Kvälls<br/>showen</h1><button className="big">Tryck för att starta</button><p>Ljudet kräver ett klick på tv:n</p></div>}
+  return <div className={'tv st-'+s.stage}><Bg/>{!on&&!LOCAL&&<div className="gate" onClick={go}><h1 className="logo">Kvälls<br/>showen</h1><button className="big" ref={gb}>Tryck för att starta</button><p>Ljudet kräver ett klick på tv:n</p></div>}
    {s.stage==='lobby'&&<Lobby s={s}/>}{s.stage==='intro'&&<Intro s={s}/>}{s.stage==='game'&&s.inst&&s.def&&<Game s={s}/>}{s.stage==='result'&&<Result s={s}/>}{s.stage==='reveal'&&<Reveal s={s}/>}
    {s.dl>0&&s.dl-Date.now()<200000&&s.stage!=='lobby'&&<Timer s={s}/>}<Lost s={s}/><Host stage={s.stage}/><Sound/></div>}
 function Sound(){const[,f]=useState(0);useEffect(()=>{const g=()=>f(n=>n+1);audioState.sub.add(g);return()=>{audioState.sub.delete(g)}},[]);if(!audioState.blocked)return null;return <button className="soundbtn" onClick={()=>{snd.unlock();unlockSong();unlockVoice()}}>🔊 Tryck här för att slå på ljudet</button>}
