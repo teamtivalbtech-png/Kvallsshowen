@@ -39,3 +39,39 @@ export const DEATHS=[
 export const SAVED=['Något hände i {r} i natt. Någon attackerades men överlevde. Läkaren hann fram i tid.','Ett skrik hördes från {r}, men alla vaknade i morse. Någon hade tur.','I {r} ligger en välta stol och det luktar sjukhus. Någon räddades i sista sekunden.'];
 export const QUIET=['Natten var lugn. Alla vaknade.'];
 export const NIGHTS=['Natten faller över studion.','Lamporna släcks. Någon i det här rummet ljuger.','Kamerorna är av. Nu börjar den riktiga showen.','Ingen går hem i kväll. Ingen får heller lämna byggnaden.','Tyst i studion. Något rör sig i korridoren.'];
+// Regelbok och instruktioner.
+export const RULES=[
+{i:'🎭',t:'Målet',d:['Ni är gäster på Kvällsshowen, men några av er är maffian.','Staden vinner om all maffia åker ut eller om 5 ärliga sändningar går igenom.','Maffian vinner om de blir lika många som resten, om 6 fuskade sändningar går igenom, eller om Gudfadern blir producent när minst 3 fuskade har gått igenom.']},
+{i:'🔒',t:'Din roll är hemlig',d:['Håll på knappen på telefonen för att se din roll.','Släpp knappen så försvinner den. Visa aldrig telefonen för någon.','Maffian vet vilka som hör ihop. Alla andra vet ingenting.']},
+{i:'🌙',t:'Natten',d:['Alla väljer ett rum. Du ser vilka andra som är i ditt rum.','Sedan gör alla sitt jobb i hemlighet. Även vanliga gäster trycker, så ingen avslöjas av att de pillar på telefonen.','Maffian väljer ett offer och en av dem smyger dit. Den som var i samma rum kan märka att personen gick.']},
+{i:'🌅',t:'Morgonen',d:['Sixten berättar vem som dog och var. Den dödes roll visas.','Ett spår hittas på brottsplatsen, till exempel en snusdosa. Alla har en offentlig profil med vanor, så spåret pekar ut flera personer.','Maffian kan plantera falska spår. Lita inte blint på dem.','Sedan undersöker du brottsplatsen eller gästboken. Det du hittar ser bara du.']},
+{i:'📡',t:'Sändningen',d:['Varje dag sker två sändningar. Sändningsledaren väljer en producent.','Alla röstar Ja eller Nej, öppet. Hur du röstar syns på tv:n och kan användas mot dig.','Tre misslyckade val i rad, och översta kortet spelas automatiskt.','Den som nyss var ledare eller producent kan inte väljas igen direkt.']},
+{i:'🃏',t:'Korten',d:['Ledaren drar 3 kort, slänger 1 i hemlighet och ger 2 till producenten.','Producenten spelar 1 kort. Det hamnar på tavlan.','Leken har 6 ärliga och 11 fuskade kort, så även en ärlig person kan tvingas spela fusk.','Därför får båda sedan berätta vad de fick. Stämmer inte historierna ljuger någon.']},
+{i:'⚡',t:'Makten',d:['Fuskade kort ger sändningsledaren extra makt.','Efter 2 fuskade får ledaren granska en spelares sida.','Efter 3 väljer ledaren nästa ledare.','Efter 4 och 5 avskedar ledaren en spelare, som åker ut direkt.']},
+{i:'🗣️',t:'Diskussionen',d:['Säg var du var i natt. Ditt alibi syns på tv:n och du får ljuga.','Jämför vad ni såg. Vem påstår sig ha varit i ett rum där ingen såg dem?','Vem röstade Ja till ett styre som spelade fusk? Vem säger emot sig själv?','Använd telefonens anteckningar. Bara du ser dem.']},
+{i:'⚖️',t:'Åtalet',d:['Efter andra sändningen röstar ni om vem som ska åtalas.','De med flest röster får försvara sig, och sedan röstar alla om vem som åker ut.','Personens roll visas. Sedan kommer natten igen.']},
+{i:'👻',t:'Om du dör',d:['Du är ute, men du får vara kvar som spöke.','Var helt tyst. Du får inte hjälpa någon.','Gissa vem som är maffia på telefonen. Rätt gissning ger poäng i slutet.']},
+];
+export const HELP:any={
+rules:'Lyssna på genomgången. Regelboken finns alltid på ❓-knappen.',
+length:'Programledaren väljer hur länge ni ska diskutera varje dag.',
+cards:'Håll på knappen och läs din roll i lugn och ro. Visa ingen.',
+room:'Välj rummet du är i i natt. Du kommer att se vilka fler som är där.',
+act:'Gör ditt nattjobb. Alla trycker, så ingen avslöjas.',
+dawn:'Lyssna. Skriv upp spåret i huvudet och kolla dina anteckningar.',
+search:'Välj vad du undersöker. Det du hittar ser bara du.',
+gnom:'Sändningsledaren väljer en producent. Säg gärna vad ni tycker högt.',
+gvote:'Rösta Ja om du litar på paret. Rösten syns öppet på tv:n.',
+gres:'Titta vem som röstade vad. Det kommer att spela roll.',
+gdraw:'Ledaren slänger ett av tre kort. Övriga väntar.',
+gplay:'Producenten spelar ett av två kort.',
+gclaim:'Ledare och producent berättar vad de fick. Stämmer det? Bråka!',
+gpower:'Ledaren använder sin makt.',
+talk:'Säg ditt alibi på telefonen, prata och jämför. Tryck Redo när ni vill rösta.',
+nom:'Rösta på vem som ska åtalas. De med flest röster får försvara sig.',
+defend:'Den åtalade har ordet. Lyssna och ställ frågor.',
+vote:'Sista chansen. Rösta om vem som ska ut.',
+verdict:'Domen visas nu.',
+end:'Nu ser ni vad som egentligen hände.',
+};
+export const TIPS:any={maffia:'Tips: Rösta ibland mot din egen sida och säg att du tvingades spela fusk. Lägg misstankar på någon annan tidigt.',gudfar:'Tips: Bygg förtroende med ärliga kort. Blir du producent efter 3 fuskade vinner ni direkt.',polis:'Tips: Vänta med att avslöja dig. Hamnar du i fara, berätta vad du vet.',lakare:'Tips: Skydda den som verkar veta mest, men inte samma person två nätter i rad.',journalist:'Tips: Kolla rummet där någon säger sig ha varit. Du kan avslöja en lögn direkt.',vakt:'Tips: Bevaka den som verkar säker på sig själv. Du ser om den smyger ut.',narr:'Tips: Var misstänkt men inte för mycket. Bete dig konstigt och förneka svagt.',gast:'Tips: Var aktiv. Fråga folk var de var och skriv upp vad som inte stämmer.'};
