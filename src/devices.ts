@@ -29,3 +29,9 @@ export function pitch(buf:Float32Array,sr:number){
     if(c>prev)rising=true;if(rising&&c>bv){bv=c;best=lag}prev=c}
   return best>0?sr/best:0;
 }
+
+/** Spelar in tal på telefonen och lämnar tillbaka 8-bitars mono 8 kHz som base64. Samma format på iPhone och Android. */
+export async function recordPcm(ms:number):Promise<string>{const st=await getMic();const c=micCtx!;const src=c.createMediaStreamSource(st),pr=c.createScriptProcessor(4096,1,1),z=c.createGain();z.gain.value=0;const parts:Float32Array[]=[];pr.onaudioprocess=e=>parts.push(new Float32Array(e.inputBuffer.getChannelData(0)));src.connect(pr);pr.connect(z);z.connect(c.destination);await new Promise(r=>setTimeout(r,ms));pr.disconnect();src.disconnect();z.disconnect();pr.onaudioprocess=null;st.getTracks().forEach(t=>t.stop());
+ const len=parts.reduce((a,p)=>a+p.length,0),all=new Float32Array(len);let o=0;for(const p of parts){all.set(p,o);o+=p.length}
+ const k=c.sampleRate/8000,n=Math.floor(len/k),out=new Float32Array(n);let peak=.02;for(let i=0;i<n;i++){const a=Math.floor(i*k),b=Math.max(a+1,Math.floor((i+1)*k));let s=0;for(let j=a;j<b;j++)s+=all[j];out[i]=s/(b-a);peak=Math.max(peak,Math.abs(out[i]))}
+ const gain=Math.min(8,.9/peak);let bin='';for(let i=0;i<n;i++)bin+=String.fromCharCode(Math.max(0,Math.min(255,Math.round(out[i]*gain*127+128))));return btoa(bin)}

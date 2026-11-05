@@ -1,0 +1,9 @@
+// Ljud som spelas baklänges på tv:n. Låtar hämtas via vår server, inspelningar kommer från telefonerna.
+import {snd} from '../audio';
+let src:AudioBufferSourceNode|null=null,g:GainNode|null=null;
+const cache=new Map<string,AudioBuffer>();
+export async function loadSong(s:{t:string,a:string}):Promise<AudioBuffer|null>{const k=s.a+s.t;if(cache.has(k))return cache.get(k)!;if(!snd.ctx)snd.unlock();try{const r=await fetch(`/api/song?bin=1&t=${encodeURIComponent(s.t)}&a=${encodeURIComponent(s.a)}`);if(!r.ok)return null;const b=await snd.ctx!.decodeAudioData(await r.arrayBuffer());if(cache.size>6)cache.clear();cache.set(k,b);return b}catch(e){console.warn('baklänges',e);return null}}
+export function reversed(b:AudioBuffer,from=0,dur=b.duration){const c=snd.ctx!,sr=b.sampleRate,st=Math.floor(from*sr),n=Math.min(b.length-st,Math.floor(dur*sr));const o=c.createBuffer(b.numberOfChannels,n,sr);for(let ch=0;ch<b.numberOfChannels;ch++){const a=b.getChannelData(ch),d=o.getChannelData(ch);for(let i=0;i<n;i++)d[i]=a[st+n-1-i]}return o}
+export function stopBuf(){try{src?.stop()}catch{};src=null}
+export function playBuf(b:AudioBuffer,o:{from?:number,dur?:number,loop?:boolean,rate?:number,rate2?:number,ms?:number,vol?:number,end?:()=>void}={}){stopBuf();const c=snd.ctx;if(!c)return;c.resume();const s=c.createBufferSource();s.buffer=b;s.loop=!!o.loop;if(!g){g=c.createGain();g.connect(c.destination)}g.gain.value=o.vol??.8;s.connect(g);const t=c.currentTime;s.playbackRate.setValueAtTime(o.rate||1,t);if(o.rate2)s.playbackRate.linearRampToValueAtTime(o.rate2,t+(o.ms||10000)/1000);if(o.end)s.onended=o.end;s.start(0,o.from||0,o.loop?undefined:o.dur);src=s}
+export function pcmBuffer(b64:string,rev:boolean){const c=snd.ctx!,bin=atob(b64),n=bin.length,o=c.createBuffer(1,n,8000),d=o.getChannelData(0);for(let i=0;i<n;i++)d[rev?n-1-i:i]=(bin.charCodeAt(i)-128)/128;return o}
