@@ -87,7 +87,7 @@ export class Show{
   next(){
     if(this.stage==='intro')this.beginGame();else if(this.stage==='game')this.endGame();else if(this.stage==='result')this.afterResult();else if(this.stage==='reveal')this.toLobby()
   }
-  resumeMaf(m:any){const d=byId('maffia');if(!d)return;for(const p of m.pl||[])if(!this.players.some(x=>x.id===p.id))this.players.push(p);this.def=d;this.clear();resetBots();this.rawS=Object.fromEntries(m.raw||[]);this.stage='game';try{this.inst=d.make(this.api());(this.inst as any).restore(m)}catch(e){this.fail(e)}this.bump()}
+  resumeMaf(m:any){const d=byId(m.id||'maffia');if(!d)return;for(const p of m.pl||[])if(!this.players.some(x=>x.id===p.id))this.players.push(p);this.def=d;this.clear();resetBots();this.rawS=Object.fromEntries(m.raw||[]);this.stage='game';try{this.inst=d.make(this.api());(this.inst as any).restore(m)}catch(e){this.fail(e)}this.bump()}
   startSingle(id:string){this.match=false;this.queue=[id];this.qi=0;this.intro(id)}
   startMatch(ids:string[]){
     this.match=true;this.total={};this.history=[];this.stats={};this.album=[];this.players.forEach(p=>this.total[p.id]=0);const ms=[...MISSIONS].sort(rs());this.missions={};this.players.filter(p=>!p.bot).forEach((p,i)=>this.missions[p.id]=ms[i]);
