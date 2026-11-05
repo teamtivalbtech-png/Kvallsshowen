@@ -16,7 +16,7 @@ export async function askMotion():Promise<boolean>{
 let cam:MediaStream|null=null,mic:MediaStream|null=null;
 export async function getCam(facing:'user'|'environment'){
   if(cam&&(cam as any)._f===facing&&cam.active)return cam;cam?.getTracks().forEach(t=>t.stop());
-  cam=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:facing==='environment'?1280:640},height:{ideal:facing==='environment'?720:480}},audio:false});(cam as any)._f=facing;return cam;
+  cam=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:facing==='environment'?1920:640},height:{ideal:facing==='environment'?1080:480},frameRate:{ideal:facing==='environment'?60:30}},audio:false});(cam as any)._f=facing;if(facing==='environment')try{const t:any=cam.getVideoTracks()[0],c=t.getCapabilities?.()||{},adv:any[]=[];if(c.focusMode?.includes('continuous'))adv.push({focusMode:'continuous'});if(c.exposureMode?.includes('continuous'))adv.push({exposureMode:'continuous'});if(adv.length)t.applyConstraints({advanced:adv}).catch(()=>{})}catch{}return cam;
 }
 export function stopCam(){cam?.getTracks().forEach(t=>t.stop());cam=null}
 export let micCtx:AudioContext|null=null;
