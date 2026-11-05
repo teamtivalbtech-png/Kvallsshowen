@@ -5,7 +5,7 @@ const errs=[];const tv=await c.newPage();tv.on('pageerror',e=>errs.push('TV '+e.
 await tv.goto(base+`/tv?local=1&fast=${FAST}`);await tv.waitForFunction(()=>window.__show);const code=await tv.evaluate(()=>window.__show.code);
 const NP=+(process.env.NP||4);const ph=[];for(const n of ['Anna','Bo','Cia','Dan'].slice(0,NP)){const p=await c.newPage();await p.setViewportSize({width:390,height:800});p.on('pageerror',e=>errs.push(n+' '+e.message));await p.goto(base+`/?r=${code}&local=1&n=${n}`);ph.push(p)}
 await tv.waitForFunction(n=>window.__show.players.length===n,NP,{timeout:15000});
-const bot=()=>{if(window.__bot)return;window.__bot=setInterval(()=>{try{const q=s=>document.querySelector(s);const a=[...document.querySelectorAll('.op:not(:disabled)')];if(a.length){a[Math.random()*a.length|0].click();return}
+const bot=()=>{if(window.__bot)return;window.__bot=setInterval(()=>{try{const q=s=>document.querySelector(s);const kk=[...document.querySelectorAll('.kgp.tap button:not(:disabled)')];if(kk.length){kk[Math.random()*kk.length|0].click();return}const a=[...document.querySelectorAll('.op:not(:disabled)')];if(a.length){a[Math.random()*a.length|0].click();return}
  const pd=e=>e&&e.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:1,pointerType:'touch'}));
  const t=q('input.tx');if(t){const set=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;set.call(t,'svar'+(Math.random()*3|0));t.dispatchEvent(new Event('input',{bubbles:true}));setTimeout(()=>q('.big')?.click(),30);return}
  for(const s of ['.buzzer','.tapper','.fire'])if(q(s)){pd(q(s));return}

@@ -39,7 +39,7 @@ export const NIGHTS=['Natten faller över studion.','Lamporna släcks. Någon i 
 // Regelbok och instruktioner.
 export const RULES=[
 {i:'🎭',t:'Målet',d:['Några av er är maffian. Ingen vet vilka, utom maffian själv.','Staden vinner om all maffia åker ut, eller om 3 ärliga sändningar går igenom.','Maffian vinner om de blir lika många som resten, om 4 fuskade sändningar går igenom, eller om Gudfadern blir producent efter 2 fuskade.']},
-{i:'🔒',t:'Din roll är hemlig',d:['Håll på knappen på telefonen för att se din roll. Släpp, så försvinner den.','Visa aldrig telefonen för någon.','Regelboken finns alltid på ❓-knappen.']},
+{i:'🔒',t:'Din roll är hemlig',d:['Håll på knappen på telefonen för att se din roll. Släpp, så försvinner den.','Visa aldrig telefonen för någon.','Regelboken finns alltid på telefonen.']},
 {i:'🔁',t:'En dag i taget',d:['Varje dag har fem delar, och raden högst upp visar var ni är.','Natt, Morgon, Sändning, Diskussion och Röstning.','Spelet börjar om tills någon vinner.']},
 {i:'🌙',t:'Natt och morgon',d:['På natten väljer du ett rum och ser vilka andra som är där. Sedan gör alla sitt hemliga jobb.','Maffian tar en person. På morgonen får ni veta vem, och ett spår hittas.','Spåret visar en vana, till exempel snus. Alla vanor syns för alla, så spåret pekar ut flera personer.']},
 {i:'📡',t:'Sändningen',d:['En sändningsledare väljer en producent. Alla röstar öppet Ja eller Nej.','Ledaren slänger ett av tre kort, och producenten spelar ett av två.','Leken har fler fuskade än ärliga kort, så även en ärlig person kan tvingas spela fusk.','Båda berättar sedan vad de fick. Stämmer inte historierna ljuger någon.']},
