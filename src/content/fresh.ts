@@ -33,6 +33,12 @@ const E=`1995|Sverige går med i EU|Windows 95 släpps|Toy Story har premiär
 2024|Sverige går med i Nato|Sommar-OS hålls i Paris|Armand Duplantis tar OS-guld i Paris`.replace('Netflix startar sitt svenska år ett, Stranger Things är ännu inte släppt','Hoverboards blir årets pryl');
 export const ERAS=E.split('\n').map(l=>{const[y,...h]=l.split('|');return{y:+y,h}});
 const Q=`Jag är din far.|Star Wars
+Lugn, bara lugn.|Karlsson på taket
+Det stör inte en stor ande.|Karlsson på taket
+Du och jag, Alfred.|Emil i Lönneberga
+Jag har en plan.|Jönssonligan
+Jag har aldrig provat det förut, så det klarar jag helt säkert.|Pippi Långstrump
+Det är någonting man måste göra, annars är man ingen människa utan bara en liten lort.|Bröderna Lejonhjärta
 Du ska inte passera!|Sagan om ringen
 Spring, Forrest, spring!|Forrest Gump
 Livet är som en ask choklad.|Forrest Gump
