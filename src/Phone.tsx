@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake,LOCAL} from './net';import {buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {GAMES} from './games';import {Aim} from './ui/aim';
+import {rs} from './rand';import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake,LOCAL} from './net';import {buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {GAMES} from './games';import {Aim} from './ui/aim';
 const AV='🦊 🐸 🦉 🐙 🦄 🐯 🐼 🐵 🦁 🐧 🦖 🐢 🦩 🐝 👽 🤖 👻 🌶️ 🍕 🍷'.split(' ');
 let inId=Date.now()%1e6;
 class Link{
@@ -103,4 +103,4 @@ const WID:any={
  aim:(p:any)=><Aim {...p} link={L()} rate={p.rate}/>,
 };
 function AskForm(){const[open,setO]=useState(false);const[f,sf]=useState(['','','','','']);const L2=['Fråga om gruppen','Rätt svar','Fel svar','Fel svar','Fel svar'];if(!open)return <button className="tip" onClick={()=>setO(true)}>➕ Lägg till egen fråga om gruppen</button>;return <div className="askf">{L2.map((l,i)=><input key={i} className="tx" placeholder={l} value={f[i]} maxLength={i?50:140} onChange={e=>{const n=[...f];n[i]=e.target.value;sf(n)}}/>)}<div className="lr"><button onClick={()=>setO(false)}>Stäng</button><button className="ok" disabled={f.some(x=>!x.trim())} onClick={()=>{L().input({ask:{q:f[0],a:f[1],w:f.slice(2)}});sf(['','','','','']);buzz(20)}}>Spara</button></div></div>}
-function pick(n:number){return GAMES.filter(g=>!g.finalOnly&&!['allin','duck','selfie'].includes(g.id)).map(g=>g.id).sort(()=>Math.random()-.5).slice(0,n)}
+function pick(n:number){return GAMES.filter(g=>!g.finalOnly&&!['allin','duck','selfie'].includes(g.id)).map(g=>g.id).sort(rs()).slice(0,n)}

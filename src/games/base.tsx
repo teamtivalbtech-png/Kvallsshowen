@@ -1,5 +1,5 @@
-import React from 'react';import {Api,Inst} from '../types';
-export const shuffle=<T,>(a:T[])=>[...a].sort(()=>Math.random()-.5);
+import {rs} from '../rand';import React from 'react';import {Api,Inst} from '../types';
+export const shuffle=<T,>(a:T[])=>[...a].sort(rs());
 export const norm=(s:string)=>String(s).toLowerCase().normalize('NFC').replace(/[^a-zåäö0-9 ]/g,'').replace(/\s+/g,' ').trim();
 export const pts=(ms:number,lim:number,mx=1000)=>Math.round(mx*(.5+.5*Math.max(0,1-ms/lim)));
 export abstract class RB implements Inst{
