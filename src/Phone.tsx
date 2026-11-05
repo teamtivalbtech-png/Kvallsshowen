@@ -1,4 +1,4 @@
-import {rs} from './rand';import {GeoPick} from './ui/map';import {MafPhone} from './ui/maf';import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake,LOCAL} from './net';import {recordPcm,buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {GAMES} from './games';import {Aim} from './ui/aim';
+import {rs} from './rand';import {GeoPick} from './ui/map';import {MafPhone} from './ui/maf';import {LatSet,LatTurn,LatChal} from './ui/lat';import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake,LOCAL} from './net';import {recordPcm,buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {GAMES} from './games';import {Aim} from './ui/aim';
 const AV='🦊 🐸 🦉 🐙 🦄 🐯 🐼 🐵 🦁 🐧 🦖 🐢 🦩 🐝 👽 🤖 👻 🌶️ 🍕 🍷'.split(' ');
 let inId=Date.now()%1e6;
 class Link{
@@ -108,6 +108,9 @@ const WID:any={
  hotq:({q,opts,n,lock}:any)=><div className={'hotp'+(lock?' lock':'')}><h3>{lock?'Fel! Vänta…':q}</h3><div className={'opts '+(opts.length>2?'g2':'')}>{opts.map((o:string,i:number)=><button key={o} disabled={lock} className={'op c'+(i%4)} onClick={()=>send({a:o,q:n})}>{o}</button>)}</div></div>,
  hotboom:({me,name}:any)=>{useEffect(()=>{if(me){buzz([500,60,700,60,1000]);phoneBoom()}else buzz(120)},[]);return me?<div className="hotdead"><div className="hflash"/><b>💥</b><h2>BOOM!</h2><p>Du sprängdes</p></div>:<div className="center"><div className="waitmark">😅</div><h2>Puh!</h2><p>{name} sprängdes</p></div>},
  maf:(p:any)=><MafPhone {...p} send={send}/>,
+ latset:(p:any)=><LatSet {...p} send={send}/>,
+ latturn:(p:any)=><LatTurn {...p} send={send}/>,
+ latchal:(p:any)=><LatChal {...p} send={send}/>,
  aim:(p:any)=><Aim {...p} link={L()} rate={p.rate}/>,
 };
 const GROUPS=['Quiz','Musik','Bild','Party','Action','Strategi'];const GROUP=(g:any)=>(({Kunskap:'Quiz',Klassiker:'Quiz',Socialt:'Party',Kamera:'Party',Final:'Party',Tajming:'Action',Samarbete:'Strategi'}as any)[g.cat]||g.cat);

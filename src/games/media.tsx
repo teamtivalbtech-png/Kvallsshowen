@@ -1,7 +1,7 @@
 import React,{useEffect,useRef} from 'react';import {GeoReveal} from '../ui/map';import {RB,shuffle,Stage,Answered,Opts,pts,nameOf} from './base';import geo from '../content/geo.json';import {REELS,EMOJI} from '../content/reel';import {SONGS} from '../content/more';import credits from '../content/imageCredits.json';import {playSong,stopSong,resumeSong} from './songs';import {hostState} from '../host';import {snd} from '../audio';
 const near=(s:any,o:any)=>Math.abs(o.y-s.y)<9;
 export const fourTitles=(s:any,n=4)=>{const same=shuffle(SONGS.filter(x=>x.t!==s.t&&near(s,x))).map(x=>x.t);return shuffle([s.t,...[...new Set([...same,...shuffle(SONGS).map(x=>x.t)])].filter(t=>t!==s.t).slice(0,n-1)])};
-const fourArtists=(s:any,n=4)=>{const near2=shuffle(SONGS.filter(x=>x.a!==s.a&&near(s,x))).map(x=>x.a);return shuffle([s.a,...[...new Set([...near2,...shuffle(SONGS).map(x=>x.a)])].filter(a=>a!==s.a).slice(0,n-1)])};
+export const fourArtists=(s:any,n=4)=>{const near2=shuffle(SONGS.filter(x=>x.a!==s.a&&near(s,x))).map(x=>x.a);return shuffle([s.a,...[...new Set([...near2,...shuffle(SONGS).map(x=>x.a)])].filter(a=>a!==s.a).slice(0,n-1)])};
 export const Vis=({ok}:any)=><div className={'eq '+(ok===false?'mute':'')}>{Array.from({length:18},(_, i)=><i key={i} style={{animationDelay:-i*.17+'s'}}/>)}{ok===false&&<p>Ljudet nådde inte fram. Svara ändå eller hoppa vidare.</p>}</div>;
 class Song extends RB{qms=22000;revealMs=6000;mood='';audio:any=null;part=0;p2=[]as any[];
  setup(){this.items=this.api.used('song',8,SONGS.length).map((i:number)=>({...SONGS[i],ts:null}));}
