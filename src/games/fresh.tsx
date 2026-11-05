@@ -1,4 +1,4 @@
-import React from 'react';import {RB,shuffle,Stage,Answered,Opts,pts,nameOf} from './base';import {Next,NextTv,Vis,Reveal,fourTitles} from './media';import {SONGS} from '../content/more';import {ADS,BRANDS,ERAS,QUOTES,QTITLES,PHRASES} from '../content/fresh';import {loadSong,reversed,playBuf,stopBuf,pcmBuffer,bufTok} from './rev';import {playSong,stopSong} from './songs';import {snd} from '../audio';
+import React from 'react';import {hasVoice} from '../host';import {RB,shuffle,Stage,Answered,Opts,pts,nameOf} from './base';import {Next,NextTv,Vis,Reveal,fourTitles} from './media';import {SONGS} from '../content/more';import {ADS,BRANDS,ERAS,QUOTES,QTITLES,PHRASES} from '../content/fresh';import {loadSong,reversed,playBuf,stopBuf,pcmBuffer,bufTok} from './rev';import {playSong,stopSong} from './songs';import {snd} from '../audio';
 // Baklängeslåten: låten går baklänges och saktar in, så den blir lättare att känna igen.
 class Rev extends RB{qms=26000;revealMs=8000;mood='';quiet=true;audio:any=null;o:string[]=[];buf:any=null;tries=0;
  setup(){this.items=this.api.used('song',6,SONGS.length).map((i:number)=>SONGS[i])}start(){this.setup();this.nextRound()}
@@ -29,7 +29,7 @@ const EraTv=({g,show}:any)=><Stage kicker={`Tidsresan ${g.idx+1}/${g.items.lengt
 // Citatkampen: Sixten läser en känd replik.
 class Quote extends RB{qms=20000;revealMs=5000;mood='tense';o:string[]=[];
  setup(){this.items=this.api.used('quote',8,QUOTES.length).map((i:number)=>QUOTES[i])}
- begin(){const q=this.cur;this.o=shuffle([q.a,...shuffle(QTITLES.filter(t=>t!==q.a)).slice(0,3)]);this.api.say(q.q)}
+ begin(){const q=this.cur;this.o=shuffle([q.a,...shuffle(QTITLES.filter(t=>t!==q.a)).slice(0,3)]);if(hasVoice(q.q))this.api.say(q.q)}
  ask(p:string){return{k:'choice',key:'q'+this.idx,prompt:'Var kommer repliken ifrån?',opts:this.o.map(o=>({id:o,label:o})),sel:this.sel(p)}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(a?.v===this.cur.a)this.api.award(p.id,pts(a.t,this.qms))})}
  result(p:string){const ok=this.ans[p]?.v===this.cur.a;return{k:'wait',msg:ok?'Rätt!':'Fel',big:ok?'🎬':'😵',sub:this.cur.a,key:'r'+this.idx}}}
@@ -53,6 +53,6 @@ export const FRESHG=[
 {id:'rev',title:'Baklängeslåten',tag:'Låtar som går bakåt',how:'Låten spelas baklänges och går långsammare och långsammare. Gissa låten så snabbt du kan.',cat:'Musik',icon:'⏪',mins:4,make:(a:any)=>new Rev(a),Tv:RevTv},
 {id:'ads',title:'Reklamkampen',tag:'Gissa märket',how:'Se reklamfilmen. Vilket märke är det?',cat:'Bild',icon:'📺',mins:4,make:(a:any)=>new Ads(a),Tv:NextTv},
 {id:'era',title:'Tidsresan',tag:'Vilket år är vi i?',how:'Ledtrådarna och låten är från samma år. Gissa året med reglaget.',cat:'Quiz',icon:'🕰️',mins:4,make:(a:any)=>new Era(a),Tv:EraTv},
-{id:'quote',title:'Citatkampen',tag:'Kända repliker',how:'Sixten läser en känd replik. Vilken film eller serie är den från?',cat:'Quiz',icon:'🎬',mins:3,make:(a:any)=>new Quote(a),Tv:QuoteTv},
+{id:'quote',title:'Citatkampen',tag:'Kända repliker',how:'Här kommer en känd replik. Vilken film eller serie är den från?',cat:'Quiz',icon:'🎬',mins:3,make:(a:any)=>new Quote(a),Tv:QuoteTv},
 {id:'back',title:'Baklängesrösten',tag:'Spela in och gissa',how:'En spelare säger en mening i telefonen. Tv:n spelar den baklänges. De andra gissar vad som sades.',cat:'Party',icon:'🎙️',min:2,humans:1,mins:4,needs:'mic',make:(a:any)=>new Back(a),Tv:BackTv},
 ];
