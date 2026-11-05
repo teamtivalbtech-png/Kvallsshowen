@@ -1,0 +1,19 @@
+// Testar de fem nya spelen på riktigt: baklängesljud, mikrofon med falsk enhet, tv-layout.
+import {createRequire} from 'module';const {chromium}=createRequire('/')('playwright');import {execSync} from 'child_process';import fs from 'fs';
+const base='http://localhost:4173';if(!fs.existsSync('/tmp/w/t.mp3'))execSync('ffmpeg -y -v error -f lavfi -i "sine=frequency=440:duration=20" -b:a 64k /tmp/w/t.mp3');
+const b=await chromium.launch({args:['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream','--autoplay-policy=no-user-gesture-required']});const c=await b.newContext({viewport:{width:1920,height:1080},permissions:['microphone']});
+const errs=[];const tv=await c.newPage();tv.on('pageerror',e=>errs.push('TV '+e.message));tv.on('console',m=>{if(m.type()==='error'&&!/Failed to load|ERR_|404|youtube|doubleclick|ytimg|CORS|google/.test(m.text()))errs.push('TVc '+m.text().slice(0,160))});
+await tv.route('**/api/song?*',r=>{const u=r.request().url();return u.includes('bin=1')?r.fulfill({path:'/tmp/w/t.mp3',contentType:'audio/mpeg'}):r.fulfill({json:{url:null}})});
+await tv.goto(base+'/tv?local=1');await tv.waitForFunction(()=>window.__show);const code=await tv.evaluate(()=>__show.code);
+const p1=await c.newPage();await p1.setViewportSize({width:390,height:800});p1.on('pageerror',e=>errs.push('P1 '+e.message));await p1.goto(base+`/?r=${code}&local=1&n=Anna`);
+const p2=await c.newPage();await p2.setViewportSize({width:390,height:800});p2.on('pageerror',e=>errs.push('P2 '+e.message));await p2.goto(base+`/?r=${code}&local=1&n=Bo`);
+await tv.waitForFunction(()=>__show.players.filter(p=>!p.bot).length>=2,{timeout:15000});
+const state=()=>tv.evaluate(()=>{const g=__show.inst;return{st:__show.stage,ph:g?.phase,idx:g?.idx,stage:g?.stage,audio:g?.audio,hint:g?.hint,n:g?.items?.length,pcm:g?.pcm?.length,ans:Object.keys(g?.ans||{}).length}});
+const over=()=>tv.evaluate(()=>{const W=innerWidth,H=innerHeight,o=[];document.querySelectorAll('.stg *,.game *').forEach(e=>{const r=e.getBoundingClientRect();if(r.width&&(r.right>W+2||r.bottom>H+2||r.left<-2||r.top<-2))o.push(e.className||e.tagName)});return [...new Set(o)].slice(0,5)});
+const only=process.argv[2]?process.argv[2].split(','):['rev','era','quote','ads','back'];
+for(const id of only){await tv.evaluate(i=>__show.startSingle(i),id);await tv.waitForFunction(()=>__show.stage==='game',{timeout:40000});await tv.waitForTimeout(2500);console.log(id,JSON.stringify(await state()),'over',await over());await tv.screenshot({path:`/tmp/w/s_${id}1.jpg`,type:'jpeg',quality:55});
+ if(id==='back'){const who=await tv.evaluate(()=>__show.inst.cur.sp);const ps=[p1,p2];let sp=null;for(const p of ps){if(await p.locator('.recb').count())sp=p}console.log('talare',!!sp);await sp.screenshot({path:'/tmp/w/s_rec.jpg',type:'jpeg',quality:55});await sp.locator('.recb').click({force:true});await sp.waitForTimeout(800);await sp.screenshot({path:'/tmp/w/s_rec2.jpg',type:'jpeg',quality:55});await tv.waitForFunction(()=>__show.inst.stage==='guess',{timeout:9000});console.log('guess',JSON.stringify(await state()));await tv.waitForTimeout(800);await tv.screenshot({path:'/tmp/w/s_back2.jpg',type:'jpeg',quality:55});console.log('over',await over());}
+ else{await tv.waitForTimeout(id==='era'?15000:1500);await tv.screenshot({path:`/tmp/w/s_${id}2.jpg`,type:'jpeg',quality:55});console.log(JSON.stringify(await state()),await over())}
+ await tv.waitForFunction(()=>__show.inst?.phase==='reveal'||__show.stage!=='game',{timeout:60000}).catch(()=>console.log('ingen reveal'));await tv.waitForTimeout(1200);await tv.screenshot({path:`/tmp/w/s_${id}3.jpg`,type:'jpeg',quality:55});console.log('reveal',JSON.stringify(await state()),await over());
+ await tv.evaluate(()=>__show.toLobby());await tv.waitForTimeout(800)}
+console.log('fel',errs.slice(0,6));await b.close();

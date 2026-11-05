@@ -6,5 +6,6 @@ export default async function handler(req:any,res:any){
   const q=encodeURIComponent(`${a} ${t}`);let url:string|null=null,src='';
   try{const r=await fetch(`https://api.deezer.com/search?q=${q}&limit=15`);if(r.ok){const j:any=await r.json();const m=pick((j.data||[]).filter((x:any)=>x.preview),a,t);if(m){url=m.preview;src='deezer'}}}catch{}
   if(!url)try{const r=await fetch(`https://itunes.apple.com/search?term=${q}&media=music&entity=song&limit=15&country=SE`);if(r.ok){const j:any=await r.json();const m=pick((j.results||[]).filter((x:any)=>x.previewUrl),a,t);if(m){url=m.previewUrl;src='itunes'}}}catch{}
+  if(req.query.bin&&url){try{const r=await fetch(url);if(r.ok){const b=Buffer.from(await r.arrayBuffer());res.setHeader('content-type','audio/mpeg');res.setHeader('cache-control','public, s-maxage=86400');return res.status(200).send(b)}}catch{}return res.status(502).end()}
   res.setHeader('cache-control','public, s-maxage=1800');res.status(url?200:404).json({url,src});
 }

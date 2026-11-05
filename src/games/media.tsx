@@ -1,8 +1,8 @@
 import React,{useEffect,useRef} from 'react';import {RB,shuffle,Stage,Answered,Opts,pts,nameOf} from './base';import geo from '../content/geo.json';import {REELS,EMOJI} from '../content/reel';import {SONGS} from '../content/more';import credits from '../content/imageCredits.json';import {playSong,stopSong,resumeSong} from './songs';import {hostState} from '../host';import {snd} from '../audio';
 const near=(s:any,o:any)=>Math.abs(o.y-s.y)<9;
-const fourTitles=(s:any,n=4)=>{const same=shuffle(SONGS.filter(x=>x.t!==s.t&&near(s,x))).map(x=>x.t);return shuffle([s.t,...[...new Set([...same,...shuffle(SONGS).map(x=>x.t)])].filter(t=>t!==s.t).slice(0,n-1)])};
+export const fourTitles=(s:any,n=4)=>{const same=shuffle(SONGS.filter(x=>x.t!==s.t&&near(s,x))).map(x=>x.t);return shuffle([s.t,...[...new Set([...same,...shuffle(SONGS).map(x=>x.t)])].filter(t=>t!==s.t).slice(0,n-1)])};
 const fourArtists=(s:any,n=4)=>{const near2=shuffle(SONGS.filter(x=>x.a!==s.a&&near(s,x))).map(x=>x.a);return shuffle([s.a,...[...new Set([...near2,...shuffle(SONGS).map(x=>x.a)])].filter(a=>a!==s.a).slice(0,n-1)])};
-const Vis=({ok}:any)=><div className={'eq '+(ok===false?'mute':'')}>{Array.from({length:18},(_, i)=><i key={i} style={{animationDelay:-i*.17+'s'}}/>)}{ok===false&&<p>Ljudet nådde inte fram. Svara ändå eller hoppa vidare.</p>}</div>;
+export const Vis=({ok}:any)=><div className={'eq '+(ok===false?'mute':'')}>{Array.from({length:18},(_, i)=><i key={i} style={{animationDelay:-i*.17+'s'}}/>)}{ok===false&&<p>Ljudet nådde inte fram. Svara ändå eller hoppa vidare.</p>}</div>;
 class Song extends RB{qms=22000;revealMs=6000;mood='';audio:any=null;part=0;p2=[]as any[];
  setup(){this.items=this.api.used('song',8,SONGS.length).map((i:number)=>({...SONGS[i],ts:null}));}
  begin(){const s=this.cur;s.ts=fourTitles(s,6);s.as=fourArtists(s,6);this.part=0;this.audio=null;playSong(s).then(ok=>{this.audio=ok;this.api.refresh()})}
@@ -15,7 +15,7 @@ class Song extends RB{qms=22000;revealMs=6000;mood='';audio:any=null;part=0;p2=[
  result(p:string){return{k:'wait',msg:`+${this.ans[p]?.s||0}`,big:'🎵',sub:`${this.cur.t} · ${this.cur.a}`,key:'r'+this.idx}}
  nextRound(){stopSongLater(this);super.nextRound()}}
 function stopSongLater(g:any){stopSong()}
-const Reveal=({s})=> <div className="songrev"><b>{s.t}</b><span>{s.a} · {s.y}</span></div>;
+export const Reveal=({s})=> <div className="songrev"><b>{s.t}</b><span>{s.a} · {s.y}</span></div>;
 const SongTv=({g,show}:any)=>{const s=g.cur;return <Stage kicker={`Låtkampen ${g.idx+1}/${g.items.length}`} title={g.phase==='q'?'Vilken låt är det?':''}>{g.phase==='q'?<Vis ok={g.audio}/>:<Reveal s={s}/>}<Answered g={g} show={show}/></Stage>};
 class Year extends RB{qms=22000;revealMs=6500;mood='';setup(){this.items=this.api.used('song',8,SONGS.length).map((i:number)=>SONGS[i])}
  audio:any=null;begin(){this.audio=null;playSong(this.cur).then(ok=>{this.audio=ok;this.api.refresh()})}start(){this.setup();this.nextRound()}
@@ -61,16 +61,16 @@ const CLIPS=[
  {id:'J---aiyznGQ',t:'Keyboard Cat',start:0,stop:3,after:7,a:'Katten börjar spela keyboard',w:['Katten somnar','Katten hoppar ner','Ägaren tar katten']},
 ];
 let ytLoad:Promise<void>|null=null;const yt=()=>ytLoad||=new Promise(ok=>{(window as any).onYouTubeIframeAPIReady=()=>ok();const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.onerror=()=>{};document.head.appendChild(s)});
-class Next extends RB{qms=120000;revealMs=9000;o:string[]=[];ready=false;fallback=false;
+export class Next extends RB{qms=120000;get pr(){return 'Vad händer sen?'}kick='Vad händer sen?';revealMs=9000;o:string[]=[];ready=false;fallback=false;
  setup(){this.items=this.api.used('clip',4,CLIPS.length).map((i:number)=>CLIPS[i])}
  begin(){const c=this.cur;if(c.id&&!c.adj){c.adj=1;let o=0;try{o=+(localStorage.getItem('ks-clip-'+c.id)||0)}catch{};c.stop=Math.max(2,c.stop+o);c.start=Math.max(0,c.stop-10)}this.ready=false;this.fallback=false;this.revealMs=(c.after+1)*1000;this.o=shuffle([c.a,...c.w]);const i=this.idx;this.api.after(Math.max(9000,(c.stop-c.start)*1000+7000),()=>{if(this.idx===i&&!this.ready){this.fallback=true;this.open()}})}
  open(){if(this.ready)return;this.ready=true;this.t0=this.api.now();this.api.countdown(12000,()=>this.close());this.api.refresh()}
  onInput(p:string,d:any){if(this.phase==='reveal'&&(d.a==='tidigare'||d.a==='senare')&&this.cur.id){const k='ks-clip-'+this.cur.id;let o=0;try{o=+(localStorage.getItem(k)||0)+(d.a==='tidigare'?-3:3);localStorage.setItem(k,String(o))}catch{};this.api.sfx('tick');return}if(this.ready)super.onInput(p,d)}
- ask(p:string){return this.ready?{k:'choice',prompt:'Vad händer sen?',opts:this.o.map(o=>({id:o,label:o})),sel:this.sel(p)}:{k:'wait',msg:'Titta på tv:n',sub:'Klippet fryser snart',big:'📺',key:'v'+this.idx}}
+ ask(p:string){return this.ready?{k:'choice',prompt:this.pr,opts:this.o.map(o=>({id:o,label:o})),sel:this.sel(p)}:{k:'wait',msg:'Titta på tv:n',sub:'Klippet stannar snart',big:'📺',key:'v'+this.idx}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(a?.v===this.cur.a)this.api.award(p.id,pts(a.t,12000))})}
  result(p:string){const m=this.ans[p]?.v===this.cur.a?'Rätt!':'Fel';return this.cur.id&&!this.cur.emoji?{k:'actions',key:'r'+this.idx,title:m,body:`${this.cur.a}. Pausade klippet för sent eller tidigt?`,btns:[{id:'tidigare',label:'Pausa 3 s tidigare'},{id:'senare',label:'Pausa 3 s senare'}]}:{k:'wait',msg:m,sub:this.cur.a,key:'r'+this.idx}}}
 const Y:any={p:null,box:null,sound:false,cb:null};
-class Reel extends Next{spare:any[]=[];
+class Reel extends Next{spare:any[]=[];kick='Klippkampen';get pr(){return this.cur.t}
  item(r:any){const s=r.s??22;return{id:r.id,start:s,stop:s+10,after:3,t:'Vilken film eller serie?',a:r.a,w:shuffle(r.w).slice(0,5)}}
  // Går ett klipp inte att spela tas ett reservklipp i stället.
  badClip(){const r=this.spare.shift();if(!r)return false;this.items[this.idx]=this.item(r);this.items[this.idx+1]={text:1,t:r.fq,a:r.fa,w:r.fw};this.begin();this.api.refresh();return true}
@@ -101,7 +101,7 @@ function Yt({g}:any){const box=useRef<HTMLDivElement>(null),c=g.cur;const[on,set
  const sound=()=>{try{Y.sound=true;Y.p.unMute();Y.p.setVolume(70);Y.p.playVideo();setM(false)}catch{}};
  useEffect(()=>{if(!muted)return;window.addEventListener('pointerdown',sound);window.addEventListener('keydown',sound);return()=>{window.removeEventListener('pointerdown',sound);window.removeEventListener('keydown',sound)}},[muted]);
  return <><div className="yt" ref={box}/>{muted&&<button className="big vsound" onClick={sound}>🔊 Tryck för ljud</button>}{!on&&!g.ready&&<div className="vload">Laddar klippet…</div>}</>}
-const NextTv=({g,show}:any)=>{const c=g.cur;if(c.text||c.emoji)return <Stage kicker={`Klippkampen ${g.idx+1}/${g.items.length}`} title={c.t}>{c.emoji&&<div className="emoji e3">{c.emoji}</div>}<Opts list={g.o} right={g.phase==='reveal'?c.a:null}/><Answered g={g} show={show}/></Stage>;return <div className="nx"><div className="vid" key={g.idx}>{g.fallback?<div className="vfb">Videon kunde inte spelas</div>:c.file?<Vf g={g}/>:<Yt g={g}/>}{g.ready&&g.phase==='q'&&<div className="frz on">Vad händer sen?</div>}{c.by&&<small className="vby">Klipp: {c.by}</small>}</div><Stage kicker={`Vad händer sen? ${g.idx+1}/${g.items.length}`} title={c.t}>{g.ready?<Opts list={g.o} right={g.phase==='reveal'?c.a:null}/>:<p className="lead">Titta noga. Klippet fryser snart.</p>}<Answered g={g} show={show}/></Stage></div>};
+export const NextTv=({g,show}:any)=>{const c=g.cur;if(c.text||c.emoji)return <Stage kicker={`Klippkampen ${g.idx+1}/${g.items.length}`} title={c.t}>{c.emoji&&<div className="emoji e3">{c.emoji}</div>}<Opts list={g.o} right={g.phase==='reveal'?c.a:null}/><Answered g={g} show={show}/></Stage>;return <div className="nx"><div className="vid" key={g.idx}>{g.fallback?<div className="vfb">Videon kunde inte spelas</div>:c.file?<Vf g={g}/>:<Yt g={g}/>}{g.ready&&g.phase==='q'&&<div className="frz on">{g.pr}</div>}{c.by&&<small className="vby">Klipp: {c.by}</small>}</div><Stage kicker={`${g.kick} ${g.idx+1}/${g.items.length}`} title={c.t}>{g.ready?<Opts list={g.o} right={g.phase==='reveal'?c.a:null}/>:<p className="lead">Titta noga. Klippet stannar snart.</p>}<Answered g={g} show={show}/></Stage></div>};
 const km=(a:number,b:number,c:number,d:number)=>{const r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 12742*Math.asin(Math.sqrt(x))};
 const mx=(lng:number)=>(lng+180)/360*100,my=(lat:number)=>(85-lat)/145*100;
 const LM:any={'Neuschwanstein':[47.557,10.75],'Empire State Building':[40.748,-73.986],'Niagarafallen':[43.08,-79.07],'Tower Bridge':[51.505,-0.075],'Basilkatedralen':[55.753,37.623],'Petra':[30.32,35.45],'Angkor Wat':[13.41,103.87],'Chichén Itzá':[20.68,-88.57],'Eiffeltornet':[48.858,2.294],'Colosseum':[41.89,12.49],'Taj Mahal':[27.175,78.042],'Big Ben':[51.5,-0.12],'Öresundsbron':[55.57,12.85],'Globen':[59.29,18.08],'Sagrada Família':[41.4,2.17],'Pyramiderna i Giza':[29.98,31.13],'Kinesiska muren':[40.43,116.57],'Operahuset i Sydney':[-33.86,151.21],'Machu Picchu':[-13.16,-72.55],'Stonehenge':[51.18,-1.83],'Akropolis':[37.97,23.73],'Burj Khalifa':[25.2,55.27],'Frihetsgudinnan':[40.69,-74.04],'Golden Gate-bron':[37.82,-122.48],'Brandenburger Tor':[52.52,13.38]};
@@ -116,7 +116,7 @@ export const MEDIAG=[
 {id:'year',title:'Årtalet',tag:'Vilket år kom låten?',how:'Du får låten. Gissa året med reglaget.',cat:'Musik',icon:'📅',mins:5,make:(a:any)=>new Year(a),Tv:YearTv},
 {id:'intro',title:'Introduellen',tag:'Tryck först',how:'Tryck på summern när du känner igen låten. Fel svar låser dig och kostar poäng.',cat:'Musik',icon:'🔔',mins:5,make:(a:any)=>new Intro(a),Tv:IntroTv},
 {id:'mk',title:'Musikkampen',tag:'Artist, låt och år',how:'Tre snabba frågor på varje låt.',cat:'Klassiker',icon:'🎶',mins:6,make:(a:any)=>new MK(a),Tv:MKTv},
-{id:'reel',title:'Klippkampen',tag:'Film och serier',how:'Se ett kort trailerklipp eller gissa filmen från emojis. Sedan kommer följdfrågor.',cat:'Bild',icon:'🎬',mins:6,make:(a:any)=>new Reel(a),Tv:NextTv},
+{id:'reel',title:'Klippkampen',tag:'Film och serier',how:'Se ett kort klipp eller gissa filmen från emojis. Sedan kommer följdfrågor.',cat:'Bild',icon:'🎬',mins:6,make:(a:any)=>new Reel(a),Tv:NextTv},
 {id:'geo',title:'Geogissaren',tag:'Var i världen?',how:'Du ser en bild på tv:n. Sätt en nål på kartan i telefonen. Närmast får flest poäng.',cat:'Bild',icon:'🌍',mins:5,make:(a:any)=>new Geo(a),Tv:GeoTv},
 {id:'zoom',title:'Zooma ut',tag:'Från närbild till helhet',how:'Bilden zoomas ut. Svara tidigt för mest poäng.',cat:'Bild',icon:'🔍',mins:4,make:(a:any)=>new Zoom(a),Tv:ZoomTv},
 {id:'next',title:'Vad händer sen?',tag:'Klippet fryser',how:'Ett kort klipp stannar. Gissa vad som händer sen.',cat:'Bild',icon:'⏸️',mins:4,make:(a:any)=>new Next(a),Tv:NextTv},
