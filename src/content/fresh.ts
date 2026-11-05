@@ -71,6 +71,50 @@ Säg mitt namn.|Breaking Bad
 Houston, vi har ett problem.|Apollo 13
 Här är Johnny!|The Shining
 Hasta la vista, baby.|Terminator
+Maktgalna sossar med dålig smak.|Sällskapsresan
+Det finns poliser, sen finns Benny the cop!|Kopps
+Fucking shit alltså.|Kopps
+Det här, Rudolf Andersson, får du göra om.|Sunes jul
+Polis, polis, potatismos.|Beck
+Är du mör än, Knubbis?|Pippi Långstrump
+Det har jag aldrig provat förut, så det klarar jag helt säkert.|Pippi Långstrump
+Annars är man ingen människa utan bara en liten lort.|Bröderna Lejonhjärta
+Det är en världslig sak.|Karlsson på taket
+Är man väldigt stark måste man också vara väldigt snäll.|Bamse
+Bond. James Bond.|James Bond
+Yippee-ki-yay!|Die Hard
+Jag flyger, Jack!|Titanic
+Du klarar inte av sanningen!|A Few Good Men
+Visa mig pengarna!|Jerry Maguire
+Säg hej till min lilla vän!|Scarface
+Första regeln om Fight Club: man pratar inte om Fight Club.|Fight Club
+Det här är Sparta!|300
+Vad är Matrix?|The Matrix
+Vem ska du ringa? Ghostbusters!|Ghostbusters
+Hakuna matata.|Lejonkungen
+Slå dig fri!|Frost
+Det här är mitt träsk!|Shrek
+Jag kommer att hitta dig, och jag kommer att döda dig.|Taken
+Inget är viktigare än familjen.|Fast & Furious
+Mitt namn är Inigo Montoya.|The Princess Bride
+Jag har en känsla av att vi inte är i Kansas längre.|Trollkarlen från Oz
+How you doin'?|Vänner
+Vi var på paus!|Vänner
+Legendariskt!|How I Met Your Mother
+Eat my shorts!|Simpsons
+De dödade Kenny!|South Park
+Giggity!|Family Guy
+Jesse, vi måste laga mat.|Breaking Bad
+Bättre att ringa Saul!|Better Call Saul
+Bears, beets, Battlestar Galactica.|The Office
+Alla ljuger.|House
+Hodor.|Game of Thrones
+Lannisters betalar alltid sina skulder.|Game of Thrones
+Det här är vägen.|The Mandalorian
+Jag är Batman.|Batman
+Med stor makt kommer stort ansvar.|Spider-Man
+Wakanda för evigt!|Black Panther
+Jag älskar dig 3000.|Avengers: Endgame
 Ingen rör Hodor.|Game of Thrones`.split('\n').filter(l=>!l.startsWith('Ingen rör Hodor'));
 export const QUOTES=Q.map(l=>{const[q,a]=l.split('|');return{q,a}});
 export const QTITLES=[...new Set(QUOTES.map(x=>x.a)),'Solsidan','Rocky','Pulp Fiction','Shrek','Kopps','The Matrix','Jurassic Park','Peaky Blinders','Stranger Things','Ensam hemma'];

@@ -4,6 +4,7 @@ export const hostState={text:'',talking:false,level:0,sub:new Set<()=>void>()};
 const emit=()=>hostState.sub.forEach(f=>f());
 export const hash=(s:string)=>{let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)};
 const have=new Set<string>(voices as string[]);
+export const hasVoice=(s:string)=>have.has(hash(s));
 let token=0,an:AnalyserNode|null=null,buf:any=null,raf=0;
 const VOL=.5;const au=typeof Audio!=='undefined'?new Audio():null as any;if(au)au.volume=VOL;
 const pick=(a:string[])=>a[Math.random()*a.length|0];

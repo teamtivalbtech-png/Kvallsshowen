@@ -1,0 +1,335 @@
+Sumoarenan! Styr med spaken och knuffa ut de andra innan mattan krymper.
+Sista överlevaren! Allt faller från taket. Överlev längst.
+Dragkampen! Tryck eller skaka så snabbt du kan för att dra repet.
+Anjakten! 1 mot 1. Rikta kameran mot din halva av tv:n och skjut flest ankor på 45 sekunder. Guldänder ger 3, svanar kostar 2.
+Bildbluffen! En bild visas på tv:n. Skriv en rolig text och rösta på den bästa.
+Duell! Två spelare möts. Först rätt tar trehundra poäng av den andra.
+Hemliga uppdrag! Nu avslöjas era uppdrag. De andra röstar om ni klarade dem.
+Baklängeslåten! Låten spelas baklänges och går långsammare och långsammare. Gissa låten så snabbt du kan.
+Reklamkampen! Se reklamfilmen. Vilket märke är det?
+Tidsresan! Ledtrådarna och låten är från samma år. Gissa året med reglaget.
+Citatkampen! Sixten läser en känd replik. Vilken film eller serie är den från?
+Baklängesrösten! En spelare säger en mening i telefonen. Tv:n spelar den baklänges. De andra gissar vad som sades.
+Låtkampen! Lyssna på tv:n. Välj låt och sedan artist.
+Årtalet! Du får låten. Gissa året med reglaget.
+Introduellen! Tryck på summern när du känner igen låten. Fel svar låser dig och kostar poäng.
+Musikkampen! Tre snabba frågor på varje låt.
+Klippkampen! Se ett kort klipp eller gissa filmen från emojis. Sedan kommer följdfrågor.
+Geogissaren! Du ser en bild på tv:n. Sätt en nål på kartan i telefonen. Närmast får flest poäng.
+Zooma ut! Bilden zoomas ut. Svara tidigt för mest poäng.
+Vad händer sen! Ett kort klipp stannar. Gissa vad som händer sen.
+Minneskedjan! Se sekvensen på tv:n och upprepa den på telefonen.
+Auktionen! Bjud på mystiska lådor. Pengarna kvar blir dina poäng.
+Sänka skepp! Placera flottan och sänk motståndarna, tur för tur.
+Ordjakten! Tryck ihop bokstäver i rad på telefonen.
+Desarmera bomben! Alla ser olika ledtrådar. Samarbeta innan tiden tar slut.
+Snabbast vinner! Svara rätt så snabbt du kan. Tio frågor.
+Nostalgikampen! Minns du Club Penguin, MSN och High School Musical? Tolv frågor om uppväxten.
+Stegen! Poängen dubblas för varje steg. Säkra när du vill, men ett fel kostar allt osäkrat.
+Tidslinjen! Sortera händelserna från äldst till nyast.
+Närmast vinner! Skriv en siffra. Närmast får flest poäng.
+Rätt pris! Gissa priset, men går du över får du noll.
+Sant eller falskt! Satsa hälften eller allt på varje påstående.
+Stora frågesporten! Rösta på kategori och svara på tre frågor per kategori.
+Allt eller inget! Satsa i hemlighet en del av dina poäng på en sista svår fråga.
+Rita och gissa! En ritar på telefonen. Resten gissar först.
+Bluffen! Skriv falska svar och hitta sanningen.
+Vem av oss! Rösta på den i gruppen som passar bäst. Poäng om du röstar med majoriteten.
+Tänk likadant! Skriv ett svar. Poäng om andra skriver samma.
+Spionen! Alla utom en får samma hemliga plats. Avslöja spionen.
+Mimkampen! En mimar, laget gissar. 45 sekunder per person.
+Stoppa klockan! Stoppa utan att se klockan.
+Selfieuppdraget! Ta en bild efter uppdraget. Alla röstar.
+Vilken knuff!
+Ringen tillhör dig.
+Där satt balansen.
+Ut med dig, tack.
+Det där var en mycket kort sumokarriär.
+Marken ville verkligen träffa dig.
+Du lever fortfarande, grattis.
+Ren överlevnadsinstinkt.
+Sist kvar, först i kön till baren.
+Tack för att du var med.
+Du höll länge, nästan tre sekunder.
+Det gick snabbt utför.
+Vilka armar!
+Repet lyder dig.
+Starkt jobbat i laget.
+Repet vann.
+Det där var mer dragkamp mot sig själv.
+Någon släppte visst.
+Pang, och ankan är borta.
+Vilket sikte!
+Ankorna är rädda nu.
+Du sköt på himlen.
+Ankan skrattade åt dig.
+Ankorna är helt trygga här.
+Det där var roligt, tyvärr.
+Rösterna talar.
+Du borde skriva för tv.
+Den texten dör vi aldrig av.
+Vem sa att du fick skriva?
+Publiken vill ha pengarna tillbaka.
+Vinnare i duellen!
+Inget nåd i ringen.
+Kall som is.
+Du tappade duellen, och lite heder.
+Motståndaren somnade nästan.
+Det där var ingen duell, det var en olycka.
+Uppdraget är slutfört.
+Ingen märkte något.
+Du är en riktig spion.
+Avslöjad!
+Uppdraget misslyckades med besked.
+Hemligt var det inte.
+Du hör ju baklänges!
+Det där var snabbt.
+Dina öron är inte normala.
+Låten förstår inte heller.
+Du gissade med hjärtat, och fel.
+Baklänges går det visst sämre.
+Du tittar för mycket på tv.
+Rätt märke!
+Reklamen fungerade på dig.
+Marknadsavdelningen gråter nu.
+Du har visst en reklamblockerare i huvudet.
+Fel märke, men fin gissning.
+Du var där!
+Rakt på året.
+Vilken tidsmaskin du har.
+Du är i fel årtionde.
+Hallå, året ringde, det vill inte kännas vid dig.
+Det där var en lång resa åt fel håll.
+Du kan din film.
+Den repliken satt.
+Det där var filmnörd på hög nivå.
+Du har uppenbarligen aldrig sett en film.
+Filmen ifrågasätter dig.
+Den där gissningen får ingen Oscar.
+Bra öron!
+Du förstår baklängesspråket.
+Tydligt prat, trots allt.
+Det där lät som en trasig bandspelare.
+Ingen förstod någonting.
+Du måste nog öva på att prata.
+Du kan din musik.
+Rätt låt, rätt artist.
+Sångfågeln har talat.
+Du har hört låten, men inte lyssnat.
+Det där var en gissning från hjärtat.
+Spotify blir besviket.
+Rätt år!
+Du kommer ihåg allt.
+Vilken tidskänsla.
+Du missade med ett årtionde.
+Musikhistorien gråter.
+Det året fanns inte ens.
+Vilken reaktion!
+Du tryckte först, och rätt.
+Blixtsnabbt.
+Du tryckte först och visste ingenting.
+Fel låt med stort självförtroende.
+Summern ångrar sig.
+Musiknörd i huset.
+Allt på plats.
+Du kan det här.
+Musiken klarade sig utan dig.
+Fel artist, men vilken energi.
+Du borde lyssna mer och prata mindre.
+Du har sett för många filmer.
+Rätt film!
+Filmkvällen var värd det.
+Har du bara sett Shrek?
+Bioduken gråter.
+Fel film, men fin gissning.
+Du har varit där.
+Vilket lokalsinne!
+Mitt på kartan.
+Du hamnade i havet.
+Det är lite långt från rätt plats.
+Ingen ber dig leda vägen hem.
+Skarpa ögon!
+Du såg det direkt.
+Du zoomar bättre än din mobil.
+Glasögon kanske?
+Det där var något helt annat.
+Det där var en vild gissning.
+Du såg det komma.
+Spåkvinnan är här.
+Rätt gissat.
+Det såg ingen komma, särskilt inte du.
+Fel, men det hade varit en bättre historia.
+Klippet överraskade dig.
+Vilket minne!
+Du minns allt.
+Elefantminne.
+Minns du ens vad du heter?
+Kedjan brast.
+Det gick bra i två sekunder.
+Snygg affär.
+Du köpte rätt.
+Klubban har fallit.
+Du betalade för mycket.
+Det där var en dyr miss.
+Plånboken gråter.
+Träff!
+Sänkt!
+Amiralen är nöjd.
+Plask.
+Du sköt rakt i havet.
+Skeppen ligger kvar och skrattar.
+Vilket ord!
+Du kan svenska.
+Ordkonstnär.
+Det ordet finns inte.
+Svenska Akademien har ringt.
+Bokstäver är svårt.
+Bomben är desarmerad.
+Vilket lugn!
+Inga skador i kväll.
+Pang.
+Fel sladd.
+Det var den röda, eller den andra.
+Snabbt och rätt.
+Vilken fart!
+Du svarade innan frågan var slut.
+Snabbt och fel.
+Du hade tid, men valde fel.
+Det var inte så det gick till.
+Nostalgin lever.
+2000-talet tackar dig.
+Du var visst inte där.
+Minns du verkligen något?
+Barndomen ringde, den vill inte höra av dig.
+Ett steg närmare.
+Upp, upp, upp.
+Du klättrar som en apa.
+Ner igen.
+Stegen var hal i dag.
+Du föll, och det gjorde ont att se.
+Rätt ordning.
+Historiker i huset.
+Tiden är på din sida.
+Du blandade ihop århundradena.
+Historien får skrivas om.
+Tiden är inte din vän.
+Nära nog.
+Vilken känsla!
+Du räknade rätt.
+Du är långt ute.
+Det där var en rejäl överskattning.
+Matematik är inte för alla.
+Du handlar mycket, va?
+Du känner till priserna.
+Då får du handla själv.
+Var handlar du egentligen?
+Plånboken skakar på huvudet.
+Sant!
+Du genomskådade det.
+Inget lurar dig.
+Nej, det var falskt.
+Du gick på den.
+Det där lät sant, men det var det inte.
+Vilken hjärna!
+Du är smart.
+Quizmästaren talar.
+Skolan ringde.
+Tänk en gång till.
+Vi låtsas att du gissade.
+Vilket mod!
+Allt på ett kort, och det höll.
+Rena thrillern.
+Allt försvann.
+Det var modigt, men dumt.
+Ajdå, där gick pengarna.
+Vilken konstnär!
+Det såg ju ut som det ska.
+Picasso är rädd.
+Vad var det där?
+Ett barn hade gjort det bättre.
+Vi hänger inte upp den på väggen.
+Du lurade alla.
+Bluffkung!
+Vilken skådespelare.
+Den där bluffen höll inte.
+Du är för ärlig för det här.
+Gruppen har talat.
+Så är det med den saken.
+Inga protester, tack.
+Det där kommer stanna i gruppen.
+Förlåt, men gruppen röstade.
+Du kanske behöver nya vänner.
+Ni tänker likadant.
+Tvillingar?
+Samma hjärna.
+Ni har inget gemensamt.
+Vad tänkte du på?
+Det där tänkte bara du.
+Spionen är fast.
+Bra detektivarbete.
+Du lurade alla, spion.
+Fel person!
+Spionen skrattar nu.
+Ni är usla detektiver.
+Fin mim!
+Laget förstod.
+Teaterskolan ringer.
+Vad var det där för dans?
+Det såg ut som ett anfall.
+Ingen förstod, inte ens du.
+Exakt på sekunden.
+Vilken känsla för tid!
+Som en schweizisk klocka.
+Du missade med en evighet.
+Klockan skämdes.
+Du stoppade den i fel kvart.
+Vilket ansikte!
+Tv:n älskar dig.
+Du borde bli fotomodell.
+Vi måste prata om den där bilden.
+Kameran gick nästan sönder.
+Ingen av oss glömmer det där.
+Maktgalna sossar med dålig smak.
+Det finns poliser, sen finns Benny the cop!
+Fucking shit alltså.
+Det här, Rudolf Andersson, får du göra om.
+Polis, polis, potatismos.
+Är du mör än, Knubbis?
+Det har jag aldrig provat förut, så det klarar jag helt säkert.
+Annars är man ingen människa utan bara en liten lort.
+Det är en världslig sak.
+Är man väldigt stark måste man också vara väldigt snäll.
+Bond. James Bond.
+Yippee-ki-yay!
+Jag flyger, Jack!
+Du klarar inte av sanningen!
+Visa mig pengarna!
+Säg hej till min lilla vän!
+Första regeln om Fight Club: man pratar inte om Fight Club.
+Det här är Sparta!
+Vad är Matrix?
+Vem ska du ringa? Ghostbusters!
+Hakuna matata.
+Slå dig fri!
+Det här är mitt träsk!
+Jag kommer att hitta dig, och jag kommer att döda dig.
+Inget är viktigare än familjen.
+Mitt namn är Inigo Montoya.
+Jag har en känsla av att vi inte är i Kansas längre.
+How you doin'?
+Vi var på paus!
+Legendariskt!
+Eat my shorts!
+De dödade Kenny!
+Giggity!
+Jesse, vi måste laga mat.
+Bättre att ringa Saul!
+Bears, beets, Battlestar Galactica.
+Alla ljuger.
+Hodor.
+Lannisters betalar alltid sina skulder.
+Det här är vägen.
+Jag är Batman.
+Med stor makt kommer stort ansvar.
+Wakanda för evigt!
+Jag älskar dig 3000.
