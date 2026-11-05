@@ -58,6 +58,10 @@ const CLIPS=[
  {id:'OQSNhk5ICTI',t:'Double Rainbow',start:7,stop:16,after:9,a:'Han blir helt överväldigad av lycka',w:['Han börjar bygga ett tält','En björn dyker upp','Han lägger av att filma']},
  {id:'dQw4w9WgXcQ',t:'Klippet alla blivit lurade av',start:6,stop:14,after:8,a:'Rick sjunger att han aldrig ska ge dig upp',w:['Han tar av sig rocken','Han ramlar','Polisen kommer']},
  {id:'LU8DDYz68kM',t:'Battle at Kruger',start:240,stop:250,after:10,a:'Bufflarna kommer tillbaka och jagar bort lejonen',w:['En elefant räddar kalven','Turisterna ingriper','Lejonen flyr över floden']},
+ {id:'jxzD_XU6N74',t:'Ola vid stugan i Hälsingland',start:0,stop:6,after:9,a:'En björn rusar fram ur buskarna',w:['Han hittar en älg','Grannen kommer och skäller','Han ramlar i bäcken']},
+ {id:'gRrqzIYS-44',t:'Kaj badar',start:0,stop:6,after:9,a:'Kaj simmar ur bild och Eva ropar efter honom',w:['Kaj dyker och kommer aldrig upp','Eva ramlar i sjön','En båt kör förbi']},
+ {id:'ZIbLMBodWfw',t:'Peter Forsberg, OS-finalen 1994',start:0,stop:4,after:9,a:'Han fintar med ena handen och sätter pucken',w:['Han skjuter över målet','Målvakten räddar','Han tappar pucken']},
+ {id:'RM_5tJncHww',t:'Zlatan mot England 2012',start:0,stop:5,after:9,a:'Han cykelsparkar in bollen från 30 meter',w:['Han nickar i ledstången','Målvakten plockar enkelt bollen','Domaren blåser av']},
  {id:'J---aiyznGQ',t:'Keyboard Cat',start:0,stop:3,after:7,a:'Katten börjar spela keyboard',w:['Katten somnar','Katten hoppar ner','Ägaren tar katten']},
 ];
 let ytLoad:Promise<void>|null=null;const yt=()=>ytLoad||=new Promise(ok=>{(window as any).onYouTubeIframeAPIReady=()=>ok();const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.onerror=()=>{};document.head.appendChild(s)});
