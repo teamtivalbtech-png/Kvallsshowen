@@ -1,9 +1,10 @@
-import React from 'react';import {shuffle,Av,nameOf} from './base';import {ROOMS,roomName,TRAITS,ROLES,rolesFor,DEATHS,SAVED,NIGHTS,RULES,HELP,TIPS,PART,PARTS,ANN} from '../content/maffia';
+import React from 'react';import {shuffle,Av,nameOf} from './base';import {hasVoice} from '../host';import {ROOMS,roomName,TRAITS,ROLES,rolesFor,DEATHS,SAVED,NIGHTS,RULES,HELP,TIPS,PART,PARTS,ANN} from '../content/maffia';
 // Maffian: hemliga roller, rum på natten, spår på dagen, alibin och röstning. All spelstatus ligger i s så att den kan sparas.
 export const MAFKEY='ks-maf-v1';
 const LEN:any={kort:180,normal:300,lang:420};
 const CARD:any={R:'Ärlig',F:'Fuskad'};const WINC=3,WINF=4;const newDeck=()=>fy([...'RRRRR'.split(''),...'FFFFFFFF'.split('')]);
 const pick=(a:any[])=>a[Math.random()*a.length|0];
+export const ruleLine=(r:any)=>r.d.join(' ');
 const fy=<T,>(a:T[])=>{const o=[...a];for(let i=o.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[o[i],o[j]]=[o[j],o[i]]}return o};
 const save=(o:any)=>{try{localStorage.setItem(MAFKEY,JSON.stringify(o))}catch{}};
 class Maf{s:any=null;constructor(public api:any){}
@@ -21,11 +22,12 @@ class Maf{s:any=null;constructor(public api:any){}
  go(step:string,back=false){const s=this.s;s.step=step;this.api.stopCountdown();if(back){s.ann=false;this.api.music(['room','act'].includes(step)?'tense':step==='talk'?null:'reveal');this.begin();return}if(step!=='talk')s.ready={};
   if(step==='room'){s.day++;s.rooms={};s.act={};s.line=pick(NIGHTS);s.dawn=null;s.verdict=null;this.api.music('tense')}
   if(step==='dawn')this.api.music('reveal');if(step==='talk'){s.ready={};this.api.music(null)}if(step==='nom'){s.nom={};s.acc=[];s.ai=0}if(step==='vote')s.votes={};if(step==='gnom'||step==='gdraw')this.api.music(null);
-  if(step==='end'){this.finish();return}
-  this.persist();this.api.sfx('reveal');const tk=++this.tok;if(ANN[step]){s.ann=true;this.api.refresh();this.api.after(4500,()=>{if(tk!==this.tok)return;s.ann=false;this.begin()});return}s.ann=false;this.begin()}
+  if(step==='end'){this.finish();this.talk(s.win==='maffia'?'Maffian vann.':'Staden vann.');return}
+  this.persist();this.api.sfx('reveal');const tk=++this.tok;if(step==='rules')this.talk(ruleLine(RULES[s.rule]));if(step==='room')this.talk(s.line);if(ANN[step]){if(step!=='room')this.talk(ANN[step].t);s.ann=true;this.api.refresh();this.api.after(4500,()=>{if(tk!==this.tok)return;s.ann=false;this.begin()});return}s.ann=false;this.begin()}
+ talk(t:string){if(hasVoice(t))this.api.say(t)}
  tok=0;begin(){this.api.countdown(this.T(this.s.step)*1000,()=>this.timeUp());this.bots();this.api.refresh()}
  soon(f:()=>void){const tk=++this.tok,st=this.s.step;this.api.after(2500,()=>{if(tk===this.tok&&this.s.step===st)f()})}
- timeUp(){const s=this.s;switch(s.step){case'length':return this.go('rules');case'rules':if(++this.s.rule<RULES.length){this.persist();this.api.sfx('tick');this.api.countdown(this.T('rules')*1000,()=>this.timeUp());this.api.refresh();return}return this.go('cards');case'cards':return this.go('room');case'room':this.fillRooms();return this.go('act');case'act':return this.night();case'dawn':if(this.over())return;return this.startGov();case'gnom':return this.autoNom();case'gvote':return this.govTally();case'gres':return this.afterRes();case'gdraw':return this.autoDiscard();case'gplay':return this.autoPlay();case'gclaim':return this.afterClaim();case'gpower':return this.afterPower();case'talk':return this.go('nom');case'nom':return this.count();case'defend':return this.nextDef();case'vote':return this.tally();case'verdict':if(this.over())return;return this.go('room')}}
+ timeUp(){const s=this.s;switch(s.step){case'length':return this.go('rules');case'rules':if(++this.s.rule<RULES.length){this.talk(ruleLine(RULES[this.s.rule]));this.persist();this.api.sfx('tick');this.api.countdown(this.T('rules')*1000,()=>this.timeUp());this.api.refresh();return}return this.go('cards');case'cards':return this.go('room');case'room':this.fillRooms();return this.go('act');case'act':return this.night();case'dawn':if(this.over())return;return this.startGov();case'gnom':return this.autoNom();case'gvote':return this.govTally();case'gres':return this.afterRes();case'gdraw':return this.autoDiscard();case'gplay':return this.autoPlay();case'gclaim':return this.afterClaim();case'gpower':return this.afterPower();case'talk':return this.go('nom');case'nom':return this.count();case'defend':return this.nextDef();case'vote':return this.tally();case'verdict':if(this.over())return;return this.go('room')}}
  fillRooms(){for(const p of this.live())if(!this.s.rooms[p.id])this.s.rooms[p.id]=pick(ROOMS).id}
  over(){const s=this.s,m=this.maf().length,o=this.live().length-m;let w:string|null=null;if(s.clean>=WINC){w='stad';s.why='5 ärliga sändningar gick igenom'}else if(s.dirty>=WINF){w='maffia';s.why='6 fuskade sändningar gick igenom'}else if(m===0){w='stad';s.why='All maffia åkte ut'}else if(m>=o){w='maffia';s.why='Maffian blev lika många som resten'}if(w){s.win=w;this.go('end');return true}return false}
  // Sändningen: ledare väljer producent, öppen röstning, hemliga kort, påståenden och makt.
