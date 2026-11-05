@@ -82,10 +82,10 @@ const V:any={el:null,on:false};
 // Körs i tv:ns startklick. Då får spelaren rätt att spela med ljud resten av kvällen.
 export function unlockClips(){Y.sound=true;if(!V.el){const e=document.createElement('video');e.playsInline=true;e.setAttribute('playsinline','');e.preload='auto';e.className='clipv';V.el=e}try{V.el.muted=false;V.el.src=SILENT;const r=V.el.play();r?.then?.(()=>{V.on=true;V.el.pause()}).catch(()=>{})}catch{}yt().then(ytPlayer).catch(()=>{})}
 function Vf({g}:any){const box=useRef<HTMLDivElement>(null),c=g.cur;const[on,setOn]=React.useState(false);const[muted,setM]=React.useState(false);
- useEffect(()=>{if(!V.el)unlockClips();const e:HTMLVideoElement=V.el;let t:any,live=true;box.current?.appendChild(e);e.src=c.file;e.currentTime=c.start||0;e.muted=false;e.volume=1;
+ useEffect(()=>{if(!V.el)unlockClips();const e:HTMLVideoElement=V.el;let t:any,live=true;box.current?.appendChild(e);e.src=c.file;e.currentTime=c.start||0;e.muted=false;e.volume=.7;
   const go=()=>{const r=e.play();r?.catch?.(()=>{if(!live)return;e.muted=true;setM(true);e.play().catch(()=>{g.fallback=true;g.open()})})};
   e.onerror=()=>{if(live){g.fallback=true;g.open()}};e.onplaying=()=>setOn(true);e.oncanplay=()=>{e.oncanplay=null;go()};e.load();e.currentTime=c.start||0;
-  t=setInterval(()=>{e.volume=hostState.talking?.3:1;if(!g.ready&&e.currentTime>=c.stop){e.pause();g.open()}},60);
+  t=setInterval(()=>{e.volume=hostState.talking?.21:.7;if(!g.ready&&e.currentTime>=c.stop){e.pause();g.open()}},60);
   return()=>{live=false;clearInterval(t);e.oncanplay=e.onplaying=e.onerror=null;e.pause();e.remove()}},[c.file]);
  useEffect(()=>{snd.music('lobby');snd.duck(true);return()=>snd.duck(false)},[]);
  useEffect(()=>{if(g.phase==='reveal')V.el?.play().catch(()=>{})},[g.phase]);
@@ -93,12 +93,12 @@ function Vf({g}:any){const box=useRef<HTMLDivElement>(null),c=g.cur;const[on,set
  return <><div className="yt" ref={box}/>{muted&&<div className="big vsound">🔊 Tryck för ljud</div>}{!on&&!g.ready&&<div className="vload">Laddar klippet…</div>}</>}
 function Yt({g}:any){const box=useRef<HTMLDivElement>(null),c=g.cur;const[on,setOn]=React.useState(false);const[muted,setM]=React.useState(false);
  useEffect(()=>{let t:any,live=true,tried=1,t0=Date.now();Y.err=()=>{if(g.badClip?.())return;g.fallback=true;g.open()};const place=()=>{if(!Y.box||!box.current)return;const r=box.current.getBoundingClientRect();Object.assign(Y.box.style,{display:'block',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'})};
-  yt().then(ytPlayer).then((p:any)=>{if(!live)return;place();Y.cb=(s:number)=>{setOn(s===1);if(s===0&&!g.ready){g.open();return}if(s===1&&tried===0){tried=1;p.unMute();p.setVolume(100);setM(false)}else if(s===2&&!g.ready&&tried===1){tried=2;p.mute();setM(true);p.playVideo()}};p.unMute();p.setVolume(100);p.loadVideoById({videoId:c.id,startSeconds:c.start});
-   let clipT0=0;t=setInterval(()=>{place();p.setVolume?.(hostState.talking?30:100);if(tried===1&&!clipT0&&Date.now()-t0>3500&&p.getPlayerState?.()!==3){tried=2;p.mute();setM(true);p.playVideo()}if(!clipT0&&p.getPlayerState?.()===1)clipT0=Date.now();if(!g.ready&&(p.getCurrentTime()>=c.stop||(clipT0&&Date.now()-clipT0>10000))){tried=3;p.pauseVideo();g.open()}},120)});
+  yt().then(ytPlayer).then((p:any)=>{if(!live)return;place();Y.cb=(s:number)=>{setOn(s===1);if(s===0&&!g.ready){g.open();return}if(s===1&&tried===0){tried=1;p.unMute();p.setVolume(70);setM(false)}else if(s===2&&!g.ready&&tried===1){tried=2;p.mute();setM(true);p.playVideo()}};p.unMute();p.setVolume(70);p.loadVideoById({videoId:c.id,startSeconds:c.start});
+   let clipT0=0;t=setInterval(()=>{place();p.setVolume?.(hostState.talking?21:70);if(tried===1&&!clipT0&&Date.now()-t0>3500&&p.getPlayerState?.()!==3){tried=2;p.mute();setM(true);p.playVideo()}if(!clipT0&&p.getPlayerState?.()===1)clipT0=Date.now();if(!g.ready&&(p.getCurrentTime()>=c.stop||(clipT0&&Date.now()-clipT0>10000))){tried=3;p.pauseVideo();g.open()}},120)});
   return()=>{live=false;clearInterval(t);Y.cb=null;try{Y.p?.pauseVideo();if(Y.box)Y.box.style.display='none'}catch{}}},[c.id]);
  useEffect(()=>{snd.music('lobby');if(!muted)snd.duck(true);return()=>snd.duck(false)},[muted]);
  useEffect(()=>{if(g.phase==='reveal')try{Y.p?.playVideo()}catch{}},[g.phase]);
- const sound=()=>{try{Y.sound=true;Y.p.unMute();Y.p.setVolume(100);Y.p.playVideo();setM(false)}catch{}};
+ const sound=()=>{try{Y.sound=true;Y.p.unMute();Y.p.setVolume(70);Y.p.playVideo();setM(false)}catch{}};
  useEffect(()=>{if(!muted)return;window.addEventListener('pointerdown',sound);window.addEventListener('keydown',sound);return()=>{window.removeEventListener('pointerdown',sound);window.removeEventListener('keydown',sound)}},[muted]);
  return <><div className="yt" ref={box}/>{muted&&<button className="big vsound" onClick={sound}>🔊 Tryck för ljud</button>}{!on&&!g.ready&&<div className="vload">Laddar klippet…</div>}</>}
 const NextTv=({g,show}:any)=>{const c=g.cur;if(c.text||c.emoji)return <Stage kicker={`Klippkampen ${g.idx+1}/${g.items.length}`} title={c.t}>{c.emoji&&<div className="emoji e3">{c.emoji}</div>}<Opts list={g.o} right={g.phase==='reveal'?c.a:null}/><Answered g={g} show={show}/></Stage>;return <div className="nx"><div className="vid" key={g.idx}>{g.fallback?<div className="vfb">Videon kunde inte spelas</div>:c.file?<Vf g={g}/>:<Yt g={g}/>}{g.ready&&g.phase==='q'&&<div className="frz on">Vad händer sen?</div>}{c.by&&<small className="vby">Klipp: {c.by}</small>}</div><Stage kicker={`Vad händer sen? ${g.idx+1}/${g.items.length}`} title={c.t}>{g.ready?<Opts list={g.o} right={g.phase==='reveal'?c.a:null}/>:<p className="lead">Titta noga. Klippet fryser snart.</p>}<Answered g={g} show={show}/></Stage></div>};
