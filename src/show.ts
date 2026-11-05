@@ -22,7 +22,7 @@ export class Show{
   sub=(f:()=>void)=>{this.subs.add(f);return()=>{this.subs.delete(f)}};
   frame(){
     const n=performance.now(),dt=Math.min(.1,(n-this.lastTick)/1000)*FAST;this.lastTick=n;const w=Date.now();
-    this.players.forEach(p=>{if(p.bot)p.seen=w;const c=w-p.seen<9000;if(c!==p.connected){p.connected=c;if(!c)this.inst?.onLeave?.(p.id);this.bump()}});
+    this.players.forEach(p=>{if(p.bot)p.seen=w;const c=w-p.seen<9000;if(c!==p.connected){p.connected=c;if(!c)try{this.inst?.onLeave?.(p.id)}catch(e){console.error(e)}this.bump()}});
     if(this.dl&&w>=this.dl){const f=this.dlFn;this.dl=0;this.dlFn=null;try{f?.()}catch(e){this.fail(e)}this.bump()}
     if(this.stage==='game'&&this.inst?.tick)try{this.inst.tick(dt)}catch(e){this.fail(e)}
     if(this.stage==='game'&&this.inst&&++this.botTick%2===0)for(const p of this.players)if(p.bot)try{botAct(this.inst,p.id,w,FAST)}catch(e){console.error(e)}
@@ -93,6 +93,7 @@ export class Show{
   intro(id:string){
     this.clear();const d=byId(id);this.def=d;this.stage='intro';this.inst=null;snd.music(null);snd.sfx('stinger');
     const n=this.players.filter(p=>p.connected&&!p.bot).length;
+    if(this.match&&n===0&&this.players.some(p=>!p.bot)){this.timers.push(setTimeout(()=>{if(this.stage==='intro'&&this.match)this.intro(id)},2500));this.bump();return}
     if(n<(d.humans||1)){const m=`${d.title} kräver minst ${d.humans} riktiga personer.`;if(this.match){this.qi++;if(this.qi<this.queue.length)return this.intro(this.queue[this.qi]);return this.reveal()}this.toLobby();say(m);return}
     const before=this.players.length;this.fit(d);
     {const t=d.title.replace(/[!?]+$/,'')+'!',full=`${t} ${d.how}`;say(LINES.intro(d.title,d.how),hasVoice(full)?full:t)}if(this.players.length>before)setTimeout(()=>{},0);this.setCd(this.match?15000:20000,()=>this.beginGame());this.bump();
