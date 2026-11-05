@@ -156,3 +156,8 @@ button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:p
 .game:has(.hunt){background:url(/art/words.jpg) center/cover}.hunt .lead,.hunt h2{text-shadow:0 2px 8px #000}
 .game:has(.simon){background:url(/art/memory.jpg) center/cover}.game:has(.simon) .stg{justify-content:flex-start}.game:has(.simon) .qt{text-shadow:0 3px 10px #000}.simon{position:absolute;left:4.5%;right:4.5%;bottom:30vh;grid-template-columns:repeat(4,1fr);gap:3.6%}.simon div{height:32vh;background:transparent!important;opacity:.28;border-radius:50%;font-size:12vh;color:#fff;text-shadow:0 0 3vh #fff}.simon .on{opacity:1;transform:translateY(-2vh) scale(1.18);box-shadow:none;text-shadow:0 0 5vh #fff,0 0 2vh #fff}
 .game:has(.simon) .ansrow{position:absolute;bottom:2vh;left:0;right:0;justify-content:center}
+@media(max-height:640px){.cho{gap:8px}.cho h3{font-size:16px;line-height:1.2}.opts{gap:8px}.opts .op{min-height:44px;padding-top:8px;padding-bottom:8px}}
+@media(max-height:800px){.ansrow{gap:6px;margin-top:1vh}.ansrow span{width:38px;height:38px;font-size:19px;border-width:2px}.quote{font-size:min(4.6vw,7vh);margin-bottom:1vh}.disc{width:min(30vh,26vw)}}
+.ansrow span span.av{position:static;width:100%;height:100%;border:0;background:none;opacity:1;transform:none;animation:none;display:grid;place-items:center;font-size:inherit;line-height:1}.ansrow span img.av{width:100%;height:100%}
+.game:has(.simon) .ansrow{bottom:calc(2vh + 16px)}
+.stg:has(.disc):has(.tvopts) .disc{width:min(24vh,20vw)}

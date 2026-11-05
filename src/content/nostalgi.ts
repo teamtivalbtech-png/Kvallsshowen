@@ -20,13 +20,11 @@ Vad heter Teletubbiesarna?|Tinky Winky, Dipsy, Laa-Laa och Po|Bob, Pilchard, Wen
 Vad heter pingvinen i det svenska barnprogrammet från Schweiz?|Pingu|Pippi|Pengi|Plupp
 Vilken kompis har Bamse som äter dunderhonung?|Skalman|Knasen|Vargen|Reinard
 Vad heter kaninen i Bamse?|Lille Skutt|Lilla Hopp|Trampe|Stampe
-Vad heter gubben i Pettson och Findus?|Pettson|Bo|Ola|Alfons
 Vilken bok handlar om Bert?|Berts dagbok|Sunes jul|Dagbok för alla mina fans|Kalle Blomkvist
 Vad heter Twilights vampyr?|Edward Cullen|Jacob Black|Damon Salvatore|Stefan
 Vad heter Twilights tjej?|Bella Swan|Elena Gilbert|Katniss Everdeen|Hermione Granger
 Vilket Twilight-lag var varulven i?|Team Jacob|Team Edward|Team Harry|Team Peeta
 Vad heter huvudpersonen i Hunger Games?|Katniss Everdeen|Tris Prior|Bella Swan|Clary Fray
-Vilken bokserie handlar om Divergent-faktioner?|Divergent|Maze Runner|Hunger Games|Percy Jackson
 Vad heter Percy Jacksons pappa?|Poseidon|Zeus|Hades|Ares
 Vilken konsol hade Wii Sports?|Nintendo Wii|PS2|Xbox|Game Boy
 Vilket spel hade du en virtuell hund på Nintendo DS?|Nintendogs|Tamagotchi|Pokémon Snap|Petz
