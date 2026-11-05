@@ -99,7 +99,6 @@ Eurosedlarna införs|2002
 Tsunamin i Indiska oceanen|2004
 Barack Obama blir president|2009
 Högertrafik införs i Sverige|1967
-Tjernobyl-olyckan|1986
 Loreen vinner Eurovision med Euphoria|2012
 Levels av Avicii släpps|2011
 Sverige går med i Nato|2024

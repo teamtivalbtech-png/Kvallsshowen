@@ -177,7 +177,6 @@ Vad säger man i Sverige när man höjer glaset?|Skål|Prost|Cheers|Salut
 Vad heter kräftskivans klassiska snapsvisa?|Helan går|Ja må hon leva|Små grodorna|Hej tomtegubbar
 Vilken krogstad har Stureplan?|Stockholm|Göteborg|Malmö|Lund
 Vilken gata är Göteborgs krogstråk?|Avenyn|Södra Förstadsgatan|Drottninggatan|Kungsgatan
-Vilken stad har Lundakarnevalen?|Lund|Uppsala|Linköping|Umeå
 Vad kallas studentnation-festerna i Uppsala?|Nationerna|Kårerna|Spexen|Gillena
 Vad kallas en lägenhet du hyr av någon som hyr?|Andrahandskontrakt|Förstahand|Bostadsrätt|Kollektiv
 Vad heter kommunens bostadskö i Stockholm?|Bostadsförmedlingen|Hemnet|Blocket Bostad|Boplats

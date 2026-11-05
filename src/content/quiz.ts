@@ -27,12 +27,10 @@ Vad heter det italienska bubbel som ofta görs på Glera-druvan?|Prosecco|Cava|C
 Vilken ingrediens ger pesto genovese sin gröna färg?|Basilika|Spenat|Persilja|Ruccola
 Vad är huvudingrediensen i guacamole?|Avokado|Ärtor|Lime|Gurka
 Vilken fisk används traditionellt i gravlax?|Lax|Sill|Torsk|Sik
-Vilken krydda ger saffransbullen dess gula färg?|Saffran|Gurkmeja|Paprika|Curry
 Vilken dag äter vi traditionellt våfflor i Sverige?|25 mars|1 maj|13 december|6 juni
 Vad består en Bloody Mary av förutom vodka?|Tomatjuice|Apelsinjuice|Tranbärsjuice|Tonic
 Vad heter Mexikos nationalsprit från blå agave?|Tequila|Pisco|Cachaça|Grappa
 Vilken månad börjar kräftpremiären traditionellt?|Augusti|Juni|Juli|September
-Vilken fisk ingår i surströmming?|Strömming|Sill från Skagerrak|Makrill|Abborre
 Vilken är den högsta lagringsklassen för Rioja?|Gran Reserva|Crianza|Joven|Cosecha
 Vilken nöt används i marsipan?|Mandel|Hasselnöt|Valnöt|Pistage
 Vilken druva är huvuddruvan i Chablis?|Chardonnay|Riesling|Sauvignon blanc|Pinot gris

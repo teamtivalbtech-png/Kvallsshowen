@@ -7,7 +7,7 @@ class Fast extends RB{qms=15000;revealMs=5000;setup(){const c=this.api.custom();
  result(p:string){const a=this.ans[p];return{k:'wait',msg:a?.v===this.cur.a?'Rätt!':'Fel',big:a?.v===this.cur.a?'✅':'❌',sub:`Rätt svar: ${this.cur.a}`,key:'r'+this.idx}}}
 class Nostalgi extends Fast{setup(){this.items=this.api.used('nos',12,NOS.length).map((i:number)=>mc(NOS[i]))}}
 const FastTv=({g,show}:any)=>{const q=g.cur;if(!q)return null;return <Stage kicker={`${q.cat} · ${g.idx+1}/${g.items.length}`} title={q.q}><Opts list={q.o} right={g.phase==='reveal'?q.a:null}/><Answered g={g} show={show}/></Stage>};
-class Big extends RB{qms=20000;revealMs=5000;step=0;catV:any={};cat='';setup(){this.items=[0,1,2,3,4,5,6,7,8].map(i=>({i}))}
+class Big extends RB{qms=20000;revealMs=5000;step=0;catV:any={};cat='';onInput(p:string,d:any){if(this.voting&&!this.cats.includes(d?.a))return;super.onInput(p,d)}setup(){this.items=[0,1,2,3,4,5,6,7,8].map(i=>({i}))}
  voting=true;cats:string[]=[];
  begin(){if(this.idx%3===0){this.voting=true;this.cats=shuffle(CATS).slice(0,3);this.qms=10000;this.t=null}else this.loadQ()}
  t:any=null;loadQ(){this.voting=false;this.qms=20000;this.t=mc(QUIZ[this.api.used('quiz',1,QUIZ.length,(i:number)=>QUIZ[i].cat===this.cat)[0]])}
@@ -33,9 +33,9 @@ class Ladder{phase='q';idx=0;st:any={};deadline=0;LVL=[100,200,400,800,1600,3200
   if(this.phase==='bank')return s.dec?{k:'wait',msg:'Väntar'}:{k:'actions',key:'b'+this.idx,title:`${s.pot} i potten`,body:'Fel svar sedan kostar allt osäkrat.',btns:[{id:'bank',label:'Säkra'},{id:'go',label:'Fortsätt'}]};
   return{k:'wait',msg:this.ans[p]===q.a?'Rätt!':'Fel',sub:`Rätt svar: ${q.a}`}}}
 const LadderTv=({g,show}:any)=>{const q=g.qs[g.idx];return <div className="lad"><div className="rungs">{[...g.LVL].reverse().map((v:number,i:number)=>{const n=g.LVL.length-1-i;return <div key={v} className={n===g.idx?'on':n<g.idx?'past':''}><b>{n+1}</b>{v}{n===g.idx&&<span>{show.players.filter((p:any)=>g.st[p.id]?.alive).length} kvar</span>}</div>})}</div><div>{q&&<Stage kicker={g.phase==='bank'?'Säkra eller fortsätt?':'Stegen'} title={q.q}><Opts list={q.o} right={g.phase==='q'?null:q.a}/></Stage>}<div className="ansrow">{show.players.map((p:any)=>{const s=g.st[p.id];return <span key={p.id} className={s?.alive?'in':'off'} style={{borderColor:p.color}}><Av p={p}/><small>{s?.bank||''}</small></span>})}</div></div></div>};
-class Timeline extends RB{qms=35000;revealMs=7000;setup(){const n=this.api.used('tl',20,TIMELINE.length).map((i:number)=>TIMELINE[i]);this.items=[0,1,2,3,4].map(i=>n.slice(i*4,i*4+4)).map(s=>({ev:s,right:[...s].sort((a,b)=>a.y-b.y).map(e=>e.id)}))}
+class Timeline extends RB{qms=35000;revealMs=7000;ok(a:any){return Array.isArray(a)}setup(){const n=this.api.used('tl',20,TIMELINE.length).map((i:number)=>TIMELINE[i]);this.items=[0,1,2,3,4].map(i=>n.slice(i*4,i*4+4)).map(s=>({ev:s,right:[...s].sort((a,b)=>a.y-b.y).map(e=>e.id)}))}
  ask(p:string){return{k:'order',prompt:'Äldst överst',items:shuffle(this.cur.ev).map((e:any)=>({id:e.id,label:e.t})),sel:this.sel(p)}}
- score(){this.api.players().forEach(p=>{const a=this.ans[p.id]?.v;if(!a)return;let s=0;a.forEach((id:number,i:number)=>{if(this.cur.right[i]===id)s+=250});if(s===1000)s+=500;p&&this.api.award(p.id,s);this.ans[p.id].s=s})}
+ score(){this.api.players().forEach(p=>{const a=this.ans[p.id]?.v;if(!a)return;let s=0;const yr=(id:number)=>this.cur.ev.find((e:any)=>e.id===id)?.y;a.forEach((id:number,i:number)=>{if(yr(this.cur.right[i])===yr(id))s+=250});if(s===1000)s+=500;p&&this.api.award(p.id,s);this.ans[p.id].s=s})}
  result(p:string){return{k:'wait',msg:`${this.ans[p]?.s||0} poäng`,big:'🕰️',key:'r'+this.idx}}}
 const TimelineTv=({g,show}:any)=><Stage kicker={`Tidslinjen ${g.idx+1}/${g.items.length}`} title={g.phase==='q'?'Sätt händelserna i rätt ordning':'Rätt ordning'}><div className="tl">{(g.phase==='q'?g.cur.ev:[...g.cur.ev].sort((a:any,b:any)=>a.y-b.y)).map((e:any)=><div key={e.id}><b>{g.phase==='q'?'?':e.y}</b><span>{e.t}</span></div>)}</div><Answered g={g} show={show}/></Stage>;
 class Num extends RB{qms=25000;revealMs=7000;rows:any[]=[];
@@ -50,7 +50,7 @@ class Price extends Num{setup(){this.items=pick(this.api,'pr',PRICES,8)}unit(){r
  rank(){const T=this.target();return Object.entries(this.ans).map(([id,a]:any)=>({id,v:a.v,d:a.v>T?1e12+a.v:T-a.v,over:a.v>T})).sort((a,b)=>a.d-b.d)}
  score(){this.rows=this.rank();const P=[1000,600,300];let i=0;this.rows.forEach(r=>{const pt=r.over?0:(P[i++]||0);this.api.award(r.id,pt);r.p=pt})}}
 const PriceTv=({g,show}:any)=><Stage kicker={`Rätt pris ${g.idx+1}/${g.items.length} · närmast utan att gå över`} title={g.cur.n}><div className="emoji">{g.cur.e}</div>{g.phase==='q'?<Answered g={g} show={show}/>:<><div className="bignum">cirka {g.cur.p.toLocaleString('sv-SE')} kr</div><Rows g={g} show={show} u="kr"/></>}</Stage>;
-class TFG extends RB{qms=14000;revealMs=4500;bank:any={};stage='bet';
+class TFG extends RB{qms=14000;revealMs=4500;bank:any={};stage='bet';ok(a:any){return /^[tf](50|100)$/.test(String(a))}
  setup(){this.items=pick(this.api,'tf',TF,10);this.api.players().forEach(p=>this.bank[p.id]=1000)}
  ask(p:string){const s=this.sel(p);return{k:'choice',grid:1,prompt:`Satsa. Du har ${this.bank[p]||1000}`,opts:[{id:'t100',label:'Sant · allt'},{id:'f100',label:'Falskt · allt'},{id:'t50',label:'Sant · hälften'},{id:'f50',label:'Falskt · hälften'}],sel:s}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id]?.v;if(!a)return;const pct=+a.slice(1)/100,wager=Math.round((this.bank[p.id]||0)*pct),ok=(a[0]==='t')===this.cur.a;this.bank[p.id]=Math.max(100,(this.bank[p.id]||0)+(ok?wager:-wager));this.ans[p.id].ok=ok});if(this.idx===this.items.length-1)this.api.players().forEach(p=>this.api.award(p.id,this.bank[p.id]))}
