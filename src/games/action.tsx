@@ -72,5 +72,5 @@ export const ACTIONG=[
 {id:'sumo',title:'Sumoarenan',tag:'Sista kvar på mattan',how:'Styr med spaken och knuffa ut de andra innan mattan krymper.',cat:'Action',icon:'🥋',mins:5,make:(a:any)=>new Sumo(a),Tv:SumoTv},
 {id:'surv',title:'Sista överlevaren',tag:'Väj för allt',how:'Allt faller från taket. Överlev längst.',cat:'Action',icon:'☄️',mins:4,make:(a:any)=>new Surv(a),Tv:SurvTv},
 {id:'tug',title:'Dragkampen',tag:'Hamra för laget',how:'Tryck eller skaka så snabbt du kan för att dra repet.',cat:'Action',icon:'🪢',mins:3,needs:'shake',even:true,make:(a:any)=>new Tug(a),Tv:TugTv},
-{id:'duck',title:'Anjakten',tag:'Telefonen är ditt sikte',how:'1 mot 1. Rikta kameran mot din halva av tv:n och skjut flest ankor på 45 sekunder. Guldänder ger 3, svanar kostar 2.',cat:'Action',icon:'🦆',mins:6,needs:'aim',even:true,make:(a:any)=>new Duck(a),Tv:DuckTv},
+{id:'duck',title:'Duck Hunt',tag:'Telefonen är ditt sikte',how:'1 mot 1. Rikta kameran mot din halva av tv:n och skjut flest ankor på 45 sekunder. Guldänder ger 3, svanar kostar 2.',cat:'Action',icon:'🦆',mins:6,needs:'aim',even:true,make:(a:any)=>new Duck(a),Tv:DuckTv},
 ];
