@@ -2,7 +2,7 @@ import React,{useEffect,useRef,useState} from 'react';import {buzz} from '../dev
 declare const AR:any;
 let load:Promise<void>|null=null;
 export function loadAruco(){return load||=new Promise((ok,no)=>{const a=(s:string,n?:()=>void)=>{const e=document.createElement('script');e.src=s;e.onload=()=>n?n():ok();e.onerror=no;document.head.appendChild(e)};a('/aruco/cv.js',()=>a('/aruco/aruco.js'))})}
-export const PANEL=5/6;export const S=.16,SY=S*PANEL,M=.02,MY=M*PANEL;
+export const PANEL=5/6;export const S=.19,SY=S*PANEL,M=.02,MY=M*PANEL;
 export const box=(i:number)=>({x:i%2?1-M-S:M,y:i>>1?1-MY-SY:MY});
 export const CORN=(i:number)=>{const{x,y}=box(i);return[[x,y],[x+S,y],[x+S,y+SY],[x,y+SY]]};
 export const svg=(id:number)=>new AR.Dictionary('ARUCO').generateSVG(id);
@@ -16,21 +16,25 @@ export function homography(src:number[][],dst:number[][]){
   return A.map((r,i)=>r[8]/r[i]).concat(1);
 }
 export const apply=(h:number[],x:number,y:number)=>{const w=h[6]*x+h[7]*y+h[8];return[(h[0]*x+h[1]*y+h[2])/w,(h[3]*x+h[4]*y+h[5])/w]};
+/** En enda markör ger för stort brus för full perspektivberäkning, så då räknas bara flytt, rotation och skala. */
+export function similar(src:number[][],dst:number[][],cx:number,cy:number){const k=S/SY,n=src.length;let sx=0,sy=0,su=0,sv=0;for(let i=0;i<n;i++){sx+=src[i][0];sy+=src[i][1];su+=dst[i][0];sv+=dst[i][1]*k}sx/=n;sy/=n;su/=n;sv/=n;let a=0,b=0,d=0;for(let i=0;i<n;i++){const x=src[i][0]-sx,y=src[i][1]-sy,u=dst[i][0]-su,v=dst[i][1]*k-sv;a+=x*u+y*v;b+=x*v-y*u;d+=x*x+y*y}if(d<1e-6)return null;a/=d;b/=d;const X=cx-sx,Y=cy-sy;return{x:su+a*X-b*Y,y:(sv+b*X+a*Y)/k}}
+/** One Euro-filter: lugnt när siktet står still, utan fördröjning när det rör sig snabbt. */
+export function euro(min=1.2,beta=7){let x:number|null=null,dx=0,t0=0;const al=(c:number,dt:number)=>{const r=1/(2*Math.PI*c);return 1/(1+r/dt)};return(v:number,t:number)=>{if(x===null){x=v;t0=t;return v}const dt=Math.max(.008,(t-t0)/1000);t0=t;const d=(v-x)/dt;dx+=al(1,dt)*(d-dx);const c=min+beta*Math.abs(dx);x+=al(c,dt)*(v-x);return x}}
 export function locate(markers:any[],base:number,cx:number,cy:number){
   const src:number[][]=[],dst:number[][]=[];let n=0;
   for(const m of markers){const i=m.id-base;if(i<0||i>3)continue;n++;const c=CORN(i);m.corners.forEach((p:any,k:number)=>{src.push([p.x,p.y]);dst.push(c[k])})}
-  if(n<1)return null;const h=homography(src,dst);if(!h)return null;const[x,y]=apply(h,cx,cy);return{x,y,n};
+  if(n<1)return null;if(n===1){const q=similar(src,dst,cx,cy);return q?{...q,n}:null}const h=homography(src,dst);if(!h)return null;const[x,y]=apply(h,cx,cy);return{x,y,n};
 }
 export function Aim({base,color,ammo,link,rate,score}:any){
-  const v=useRef<HTMLVideoElement>(null);const[lock,setL]=useState(0);const[mode,setM]=useState<'cam'|'touch'>('cam');const[err,setE]=useState('');const[direct,setD]=useState(false);useEffect(()=>{const i=setInterval(()=>setD(link.fast()),1000);return()=>clearInterval(i)},[]);const[zoom,setZ]=useState(2);const zr=useRef(2);const dig=useRef(2);const hw=useRef<any>(null);const pos=useRef({x:.5,y:.5});const sm=useRef<any>(null);const last=useRef(0);
+  const v=useRef<HTMLVideoElement>(null);const[lock,setL]=useState(0);const[mode,setM]=useState<'cam'|'touch'>('cam');const[err,setE]=useState('');const[direct,setD]=useState(false);useEffect(()=>{const i=setInterval(()=>setD(link.fast()),1000);return()=>clearInterval(i)},[]);const[zoom,setZ]=useState(2);const zr=useRef(2);const dig=useRef(2);const hw=useRef<any>(null);const pos=useRef({x:.5,y:.5});const sm=useRef<any>(null);const fx=useRef<any>(null),fy=useRef<any>(null);const last=useRef(0);
   const[fl,setFl]=useState(0);function shot(){setFl(n=>n+1);try{const A=(window as any).__sc||=new (window.AudioContext||(window as any).webkitAudioContext)();A.resume();const o=A.createOscillator(),g=A.createGain();o.type='square';o.frequency.setValueAtTime(190,A.currentTime);o.frequency.exponentialRampToValueAtTime(60,A.currentTime+.09);g.gain.setValueAtTime(.25,A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+.1);o.connect(g);g.connect(A.destination);o.start();o.stop(A.currentTime+.11)}catch{}}
   function applyZoom(z:number){zr.current=z;setZ(z);const H=hw.current;let rest=z;if(H){const hz=Math.max(H.min,Math.min(H.max,z));H.tr.applyConstraints({advanced:[{zoom:hz}]}).catch(()=>{});rest=z/hz}dig.current=rest;if(v.current)v.current.style.transform=`scale(${rest})`}
   const wasLock=useRef(true);useEffect(()=>{const on=mode==='touch'||lock>0;if(!on&&wasLock.current)buzz([80,60,80]);wasLock.current=on},[lock,mode]);
   useEffect(()=>{if(mode!=='cam')return;let stop=false,t:any;
     (async()=>{try{await loadAruco();const s=await getCam('environment');const V=v.current!;V.srcObject=s;const tr:any=s.getVideoTracks()[0];const cap=tr.getCapabilities?.()||{};hw.current=cap.zoom?{tr,max:cap.zoom.max,min:cap.zoom.min}:null;applyZoom(zr.current);await V.play().catch(()=>{});
       const det=new AR.Detector({dictionaryName:'ARUCO',maxHammingDistance:2});const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true})!;
-      const run=()=>{if(stop)return;if(V.videoWidth){const w=640,h=Math.round(w*V.videoHeight/V.videoWidth);c.width=w;c.height=h;const z=dig.current,sw=V.videoWidth/z,sh=V.videoHeight/z;x.drawImage(V,(V.videoWidth-sw)/2,(V.videoHeight-sh)/2,sw,sh,0,0,w,h);const m=det.detect(x.getImageData(0,0,w,h));const r=locate(m,base,w/2,h/2);
-        if(r&&r.x>-.3&&r.x<1.3&&r.y>-.3&&r.y<1.3){const k=sm.current?.75:1;sm.current=sm.current?{x:sm.current.x+(r.x-sm.current.x)*k,y:sm.current.y+(r.y-sm.current.y)*k}:r;pos.current=sm.current;last.current=Date.now();setL(r.n)}else if(Date.now()-last.current>500){setL(0);sm.current=null}}
+      const run=()=>{if(stop)return;if(V.videoWidth){const w=800,h=Math.round(w*V.videoHeight/V.videoWidth);c.width=w;c.height=h;const z=dig.current,sw=V.videoWidth/z,sh=V.videoHeight/z;x.drawImage(V,(V.videoWidth-sw)/2,(V.videoHeight-sh)/2,sw,sh,0,0,w,h);const m=det.detect(x.getImageData(0,0,w,h));const r=locate(m,base,w/2,h/2);
+        if(r&&r.x>-.3&&r.x<1.3&&r.y>-.3&&r.y<1.3){const now=performance.now();const jump=r.n===1&&sm.current&&Math.hypot(r.x-sm.current.x,r.y-sm.current.y)>.3&&Date.now()-last.current<250;if(!jump){if(!sm.current){fx.current=euro();fy.current=euro()}sm.current={x:fx.current(r.x,now),y:fy.current(r.y,now)};pos.current=sm.current;last.current=Date.now();setL(r.n)}}else if(Date.now()-last.current>500){setL(0);sm.current=null}}
         t=setTimeout(run,12)};run()}catch(e){setE('Kameran kunde inte startas');setM('touch')}})();
     return()=>{stop=true;clearTimeout(t)}},[mode,base]);
   useEffect(()=>{const i=setInterval(()=>{link.stream({x:+pos.current.x.toFixed(3),y:+pos.current.y.toFixed(3),l:mode==='touch'||last.current>Date.now()-500?1:0})},link.fast()?25:Math.min(1000/rate,50));return()=>clearInterval(i)},[rate,mode,direct]);
@@ -42,4 +46,4 @@ export function Aim({base,color,ammo,link,rate,score}:any){
     <button className="mini" onClick={()=>setM(m=>m==='cam'?'touch':'cam')}>{mode==='cam'?'Byt till pekstyrning':'Byt till kamera'}</button>
   </div>;
 }
-(window as any).__locate=locate;
+(window as any).__locate=locate;(window as any).__euro=euro;

@@ -16,7 +16,7 @@ function file(src:string,text:string,n:number,next:()=>void){let moved=false;con
 export function unlockVoice(){try{au.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';au.play().catch(()=>{});const s=window.speechSynthesis;if(s){const u=new SpeechSynthesisUtterance(' ');u.volume=0;s.speak(u)}}catch{}}
 /** text visas i pratbubblan. spoken är det som läses upp; utan namn kan det spelas in i förväg. */
 export function say(text:string,spoken=text){if(new URLSearchParams(location.search).has('fast'))return;const n=++token;hostState.text=text;hostState.talking=true;emit();meter();snd.duck(true);songDuck(true);try{au?.pause();window.speechSynthesis?.cancel()}catch{}
-  if(have.has(hash(spoken)))file(`/voice/${hash(spoken)}.mp3`,spoken,n,()=>done(n));else setTimeout(()=>done(n),Math.min(6000,1200+text.length*55))}
+  setTimeout(()=>done(n),30000);if(have.has(hash(spoken)))file(`/voice/${hash(spoken)}.mp3`,spoken,n,()=>done(n));else setTimeout(()=>done(n),Math.min(6000,1200+text.length*55))}
 export const LINES={
   welcome:()=>pick(['God kväll och välkomna till Kvällsshowen! Jag heter Sixten, och i kväll ska vi ta reda på vem som är smartast, snabbast och minst pinsam.','God kväll och välkomna! Skanna koden, ta något gott i glaset och gör er redo.']),
   join:()=>pick(['Ny spelare! Modigt.','Välkommen in, det finns gott om plats för förlorare.','Där kom det en till. Bra!']),

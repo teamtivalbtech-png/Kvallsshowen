@@ -2,7 +2,7 @@ import React,{useEffect,useMemo,useState,useSyncExternalStore} from 'react';impo
 let show:Show|null=null;
 const useV=(s:Show)=>useSyncExternalStore(s.sub,()=>s.ver);
 export function Tv(){const[on,set]=useState(false);const s=useMemo(()=>show||=new Show(),[]);useV(s);useFit();
-  useEffect(()=>{const t=setInterval(()=>{},1000);(window as any).__show=s;return()=>clearInterval(t)},[]);
+  useEffect(()=>{const t=setInterval(()=>{},1000);(window as any).__show=s;(window as any).__snd=snd;return()=>clearInterval(t)},[]);
   const go=()=>{snd.unlock();unlockSong();unlockVoice();unlockClips();set(true);document.documentElement.requestFullscreen?.().catch(()=>{});if(s.stage==='lobby')snd.music('lobby')};
   const gb=React.useRef<HTMLButtonElement>(null);const goR=React.useRef<any>(null);goR.current=go;useEffect(()=>{if(on||LOCAL||!gb.current)return;return armGate(gb.current,()=>goR.current())},[on]);
   useEffect(()=>{if(LOCAL)snd.unlock();const k=()=>{if(!on)go()};window.addEventListener('keydown',k);return()=>window.removeEventListener('keydown',k)},[on]);
