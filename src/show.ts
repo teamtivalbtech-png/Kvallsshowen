@@ -15,7 +15,9 @@ export class Show{
     this.players.forEach(p=>this.pipe(p.id));
     this.lastTick=performance.now();
     this.loop=setInterval(()=>this.frame(),33);
-    if(this.match&&this.queue.length&&this.qi<this.queue.length)setTimeout(()=>this.intro(this.queue[this.qi]),1200);
+    let maf:any=null;try{maf=JSON.parse(localStorage.getItem('ks-maf-v1')||'null')}catch{}
+    if(maf&&maf.s&&maf.code===this.code&&Date.now()-maf.at<3*3600e3)setTimeout(()=>this.resumeMaf(maf),1200);
+    else if(this.match&&this.queue.length&&this.qi<this.queue.length)setTimeout(()=>this.intro(this.queue[this.qi]),1200);
   }
   save(){try{localStorage.setItem(KEY,JSON.stringify({at:Date.now(),code:this.code,players:this.players,mode:this.mode,teamCount:this.teamCount,total:this.total,queue:this.queue,qi:this.qi,match:this.match,history:this.history}));localStorage.setItem('ks-used-v1',JSON.stringify(this.usedPools))}catch{}}
   bump(){this.ver++;this.subs.forEach(f=>f());this.dirty=true}
@@ -85,6 +87,7 @@ export class Show{
   next(){
     if(this.stage==='intro')this.beginGame();else if(this.stage==='game')this.endGame();else if(this.stage==='result')this.afterResult();else if(this.stage==='reveal')this.toLobby()
   }
+  resumeMaf(m:any){const d=byId('maffia');if(!d)return;for(const p of m.pl||[])if(!this.players.some(x=>x.id===p.id))this.players.push(p);this.def=d;this.clear();resetBots();this.rawS=Object.fromEntries(m.raw||[]);this.stage='game';try{this.inst=d.make(this.api());(this.inst as any).restore(m)}catch(e){this.fail(e)}this.bump()}
   startSingle(id:string){this.match=false;this.queue=[id];this.qi=0;this.intro(id)}
   startMatch(ids:string[]){
     this.match=true;this.total={};this.history=[];this.stats={};this.album=[];this.players.forEach(p=>this.total[p.id]=0);const ms=[...MISSIONS].sort(rs());this.missions={};this.players.filter(p=>!p.bot).forEach((p,i)=>this.missions[p.id]=ms[i]);
@@ -105,7 +108,7 @@ export class Show{
   /** Sixtens egen kommentar till spelet, om den är inspelad. */
   gameLine(id:string,ok:boolean){const a=(QUIPS[id]||[]).slice(ok?0:3,ok?3:6).filter(hasVoice);return a.length&&Math.random()<.7?a[Math.random()*a.length|0]:''}
   endGame(){
-    if(this.stage!=='game'&&this.stage!=='intro')return;this.clear();stopSong();stopBuf();snd.music(null);const d=this.def!;const final=(d.id==='allin'||!!d.direct)&&this.match;
+    if(this.stage!=='game'&&this.stage!=='intro')return;this.clear();stopSong();stopBuf();snd.music(null);const d=this.def!;if(d.long)try{localStorage.removeItem('ks-maf-v1')}catch{}const final=(d.id==='allin'||!!d.direct)&&this.match;
     const mx=Math.max(1,...Object.values(this.rawS));const rows=this.players.map(p=>{const pts=final?(this.rawS[p.id]||0):Math.round(Math.max(0,this.rawS[p.id]||0)/mx*1000);return{p,pts}}).sort((a,b)=>b.pts-a.pts);
     rows.forEach(r=>this.total[r.p.id]=Math.max(0,(this.total[r.p.id]||0)+r.pts));
     if(this.match&&!final)this.history.push({game:d.title,winner:rows[0]?.p.name,avatar:rows[0]?.p.avatar,pts:rows[0]?.pts});
@@ -114,7 +117,7 @@ export class Show{
   }
   afterResult(){if(this.match&&this.qi<this.queue.length)this.intro(this.queue[this.qi]);else if(this.match)this.reveal();else this.toLobby()}
   reveal(){this.clear();this.stage='reveal';this.revealStep=-1;this.match=false;this.queue=[];this.save();this.bump()}
-  toLobby(){this.clear();stopSong();stopBuf();this.stage='lobby';this.players=this.players.filter(p=>!(p as any).auto);this.inst=null;this.def=null;this.match=false;this.queue=[];snd.music('lobby');this.save();this.bump()}
+  toLobby(){try{localStorage.removeItem('ks-maf-v1')}catch{}this.clear();stopSong();stopBuf();this.stage='lobby';this.players=this.players.filter(p=>!(p as any).auto);this.inst=null;this.def=null;this.match=false;this.queue=[];snd.music('lobby');this.save();this.bump()}
   clear(){this.timers.forEach(t=>{clearTimeout(t);clearInterval(t)});this.timers=[];this.dl=0;this.dlFn=null}
   setCd(ms:number,f:()=>void){this.dl=Date.now()+ms/FAST;this.dlFn=f}
   safe(f:()=>void){return()=>{try{f();this.bump()}catch(e){this.fail(e)}}}
@@ -122,7 +125,7 @@ export class Show{
     players:()=>s.players,online:()=>s.players.filter(p=>p.connected),refresh:()=>s.bump(),award:(p,n)=>{if(Number.isFinite(n))s.rawS[p]=(s.rawS[p]||0)+n},raw:p=>s.rawS[p]||0,
     after:(ms,f)=>{s.timers.push(setTimeout(s.safe(f),ms/FAST))},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
     countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),stat:(p,k,n)=>s.stat(p,k,n),keep:(src,cap)=>{if(s.album.length<24)s.album.push({src,cap})},custom:()=>s.customQ.splice(0,3),mission:p=>s.missions[p],say:(t,x)=>say(t,x),quip:ok=>{if(Math.random()<.45){const l=s.gameLine(s.def?.id||'',ok);say(l||(ok?LINES.right():LINES.wrong()))}},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
-    mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
+    code:()=>s.code,mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
     used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];let free=all.filter(i=>!u.includes(i)).sort(rs());let list=free.slice(0,n);if(list.length<n){u=u.filter(i=>!all.includes(i));free=all.filter(i=>!list.includes(i)).sort(rs());list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
   }}
   teamList(){return Array.from({length:this.teamCount},(_,i)=>({id:i,...TEAM[i],members:this.players.filter(p=>p.team===i)})).filter(t=>t.members.length)}
@@ -139,7 +142,7 @@ export class Show{
     else if(this.stage==='result')pv={k:'wait',msg:this.match?'Delresultat':'Resultat',sub:(()=>{const r=this.lastRes?.rows?.find((x:any)=>x.id===id);return r?`${r.pts} poäng i ${this.def?.title}`:''})()};
     else pv=isV?{k:'vipEnd'}:{k:'wait',msg:'Titta på tv:n',sub:'Sanningens ögonblick'};
     const team=this.mode==='team'?TEAM[p.team]:null;
-    return{stage:this.stage,mission:this.match?this.missions[id]:undefined,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby'};
+    return{stage:this.stage,mission:this.match?this.missions[id]:undefined,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby',long:!!this.def?.long};
   }
   push(id:string,force:boolean){
     const x=this.pipes.get(id);if(!x)return;const v=this.view(id);if(!v)return;const s=JSON.stringify(v);
