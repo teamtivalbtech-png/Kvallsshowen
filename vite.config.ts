@@ -13,6 +13,7 @@ function fallbacks(css:string){
   return css+extra.join('');
 }
 export default defineConfig({
+  define:{__BUILD__:JSON.stringify(String(Date.now()))},
   plugins:[react(),legacy({targets:['chrome>=53','safari>=11','firefox>=60','edge>=79'],modernTargets:['chrome>=64','safari>=12','firefox>=67','edge>=79'],modernPolyfills:true}),
     {name:'css-reserv',enforce:'post',generateBundle(_,b){for(const k in b){const a:any=b[k];if(a.type==='asset'&&k.endsWith('.css'))a.source=fallbacks(String(a.source))}}}],
   build:{chunkSizeWarningLimit:3000,cssTarget:['chrome61','safari11']},
