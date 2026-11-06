@@ -2,6 +2,9 @@ import {QUIPS} from './content/quips';import {rs} from './rand';import {openPipe
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
+/** Alla apparater går igenom samma blandade ordning, och startpunkten flyttas med klockan.
+ *  Då får en annan tv eller en rensad webbläsare inte samma klipp som nyss spelades, trots att minnet bara finns lokalt. */
+function walk(k:string,n:number){let h=5381;for(let i=0;i<k.length;i++)h=(h*33^k.charCodeAt(i))>>>0;const next=()=>{h=(h+0x6D2B79F5)>>>0;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296};const p=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=next()*(i+1)|0;[p[i],p[j]]=[p[j],p[i]]}const off=Math.floor(n*((Date.now()%26280000)/26280000));const o=new Array(n);p.forEach((v,i)=>{o[v]=(i-off+n)%n});return o}
 export class Show{
   code='';ver=0;subs=new Set<()=>void>();players:Player[]=[];stage:'lobby'|'intro'|'game'|'result'|'reveal'='lobby';mode:'solo'|'team'='solo';teamCount=2;
   total:Record<string,number>={};rawS:Record<string,number>={};def:GameDef|null=null;inst:Inst|null=null;queue:string[]=[];qi=0;match=false;history:any[]=[];
@@ -10,7 +13,7 @@ export class Show{
     let s:any=null;try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
     if(s&&typeof s.code==='string'&&s.code.length===4&&Array.isArray(s.players)&&Date.now()-s.at<6*3600e3){this.code=s.code;this.players=s.players.filter((p:Player)=>p&&p.id&&!p.bot).map((p:Player)=>({...p,connected:false}));this.mode=s.mode==='team'?'team':'solo';this.teamCount=[2,3,4].includes(s.teamCount)?s.teamCount:2;this.total=s.total&&typeof s.total==='object'?s.total:{};this.queue=(Array.isArray(s.queue)?s.queue:[]).filter((i:string)=>byId(i));this.qi=+s.qi||0;this.match=!!s.match&&this.queue.length>0;this.history=Array.isArray(s.history)?s.history:[]}
     else this.code=rnd('ABCDEFGHJKLMNPQRSTUVWXYZ');
-    try{this.usedPools=JSON.parse(localStorage.getItem('ks-used-v1')||'{}')}catch{}
+    try{this.usedPools=JSON.parse(localStorage.getItem('ks-used-v1')||'{}')||{}}catch{}
     this.room=openPipe('r:'+this.code,m=>this.onRoom(m));
     this.players.forEach(p=>this.pipe(p.id));
     this.lastTick=performance.now();
@@ -141,7 +144,7 @@ export class Show{
     after:(ms,f)=>{s.timers.push(setTimeout(s.safe(f),ms/FAST))},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
     countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),stat:(p,k,n)=>s.stat(p,k,n),keep:(src,cap)=>{if(s.album.length<24)s.album.push({src,cap})},custom:()=>s.customQ.splice(0,3),mission:p=>s.missions[p],say:(t,x)=>say(t,x),quip:ok=>{if(Math.random()<.45){const l=s.gameLine(s.def?.id||'',ok);say(l||(ok?LINES.right():LINES.wrong()))}},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
     code:()=>s.code,mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
-    used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];const seen=new Set(u);let free=all.filter(i=>!seen.has(i)).sort(rs());let list=free.slice(0,n);if(list.length<n){const inAll=new Set(all),got=new Set(list);u=u.filter(i=>!inAll.has(i));free=all.filter(i=>!got.has(i)).sort(rs());list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
+    used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];const seen=new Set(u),ord=walk(k,pool);let free=all.filter(i=>!seen.has(i)).sort((a,b)=>ord[a]-ord[b]);let list=free.slice(0,n);if(list.length<n){const inAll=new Set(all),got=new Set(list);u=u.filter(i=>!inAll.has(i));free=all.filter(i=>!got.has(i)).sort((a,b)=>ord[a]-ord[b]);list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
   }}
   teamList(){return Array.from({length:this.teamCount},(_,i)=>({id:i,...TEAM[i],members:this.players.filter(p=>p.team===i)})).filter(t=>t.members.length)}
   finalRows(){

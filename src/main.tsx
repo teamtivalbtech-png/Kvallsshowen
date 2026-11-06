@@ -2,6 +2,8 @@ import React,{lazy,Suspense} from 'react';import {createRoot} from 'react-dom/cl
 const Tv=lazy(()=>import('./Tv').then(m=>({default:m.Tv})));const Phone=lazy(()=>import('./Phone').then(m=>({default:m.Phone})));const Home=lazy(()=>import('./Home').then(m=>({default:m.Home})));
 const q=new URLSearchParams(location.search);const code=(q.get('r')||q.get('rum')||'').toUpperCase();const isTv=location.pathname.startsWith('/tv');
 if(isTv)startLite();
+// Äldre tv-webbläsare och iPhone saknar gap i flex. Då används marginaler i stället.
+try{const e=document.createElement('div');e.style.cssText='display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden';e.innerHTML='<div></div><div></div>';document.body.appendChild(e);if(e.scrollHeight!==1||q.has('nogap'))document.documentElement.classList.add('nogap');e.remove()}catch{}
 // Efter en ny version kan en öppen flik be om gamla filer. Då räcker det med att ladda om, rummet återställs.
 window.addEventListener('vite:preloadError',(e:any)=>{e.preventDefault?.();let last=0;try{last=+(sessionStorage.getItem('ks-rl')||0);sessionStorage.setItem('ks-rl',String(Date.now()))}catch{}if(Date.now()-last>30000)location.reload()});
 window.addEventListener('unhandledrejection',e=>console.warn('ohanterat',e.reason));
