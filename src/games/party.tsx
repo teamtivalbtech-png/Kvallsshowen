@@ -33,12 +33,12 @@ class One extends RB{qms=18000;revealMs=4500;mood='tense';o:string[]=[];setup(){
  ask(p:string){return{k:'choice',key:'q'+this.idx,prompt:'Vad är det här?',opts:this.o.map(o=>({id:o,label:o})),sel:this.sel(p)}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(a?.v===this.cur.a)this.api.award(p.id,pts(a.t,this.qms))})}
  result(p:string){const ok=this.ans[p]?.v===this.cur.a;return{k:'wait',msg:ok?'Rätt!':'Fel',big:ok?'🍿':'😵',sub:this.cur.a,key:'r'+this.idx}}}
-const OneTv=({g,show}:any)=><Stage kicker={`En mening ${g.idx+1}/${g.items.length}`} title=""><blockquote className="quote small" key={g.idx}>{g.cur.q.split(' ').map((w:string,i:number)=><span key={i} style={{animationDelay:i*.1+'s'}}>{w} </span>)}</blockquote><Opts list={g.o} right={g.phase==='reveal'?g.cur.a:null}/><Answered g={g} show={show}/></Stage>;
+const OneTv=({g,show}:any)=><Stage kicker={`En mening ${g.idx+1}/${g.items.length}`} title=""><blockquote className="quote small" key={g.idx}>{g.cur.q.split(' ').map((w:string,i:number)=><span key={i} style={{animationDelay:i*.1+'s'}}>{w} </span>)}</blockquote><Opts g={g} list={g.o} right={g.phase==='reveal'?g.cur.a:null}/><Answered g={g} show={show}/></Stage>;
 class Ends extends RB{qms=20000;revealMs=5000;mood='tense';o:string[]=[];setup(){this.items=this.api.used('ends',7,ENDS.length).map((i:number)=>ENDS[i])}begin(){const q=this.cur;this.o=shuffle([q.a,...q.w])}
  ask(p:string){return{k:'choice',key:'q'+this.idx,prompt:`Hur slutar ${this.cur.t}?`,opts:this.o.map(o=>({id:o,label:o})),sel:this.sel(p)}}
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id];if(a?.v===this.cur.a)this.api.award(p.id,pts(a.t,this.qms))})}
  result(p:string){const ok=this.ans[p]?.v===this.cur.a;return{k:'wait',msg:ok?'Rätt!':'Fel',big:ok?'🎞️':'😵',sub:this.cur.a,key:'r'+this.idx}}}
-const EndsTv=({g,show}:any)=><Stage kicker={`Hur slutar det? ${g.idx+1}/${g.items.length}`} title={g.cur.t}><Opts list={g.o} right={g.phase==='reveal'?g.cur.a:null}/><Answered g={g} show={show}/></Stage>;
+const EndsTv=({g,show}:any)=><Stage kicker={`Hur slutar det? ${g.idx+1}/${g.items.length}`} title={g.cur.t}><Opts g={g} list={g.o} right={g.phase==='reveal'?g.cur.a:null}/><Answered g={g} show={show}/></Stage>;
 // — Rösten bakom: alla spelar in samma mening med olika känsla —
 const RECMS=4000;
 class Voice extends RB{qms=22000;revealMs=7000;mood='';quiet=true;stage='rec';recs:any={};moods:any={};skip:any={};order:string[]=[];pi=-1;rows:any[]=[];line='';

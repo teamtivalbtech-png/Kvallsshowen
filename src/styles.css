@@ -370,3 +370,10 @@ html.app .ytbox.live .ytcover{display:none}
 @keyframes mpinp{from{opacity:0;transform:rotate(-45deg) scale(.4)}to{opacity:1;transform:rotate(-45deg)}}
 .mpin.bigp{width:26px;height:26px;left:-13px;top:-31px}
 .geoh2{margin:0;text-align:center}
+
+/* Vilka som valde vad */
+.tvo{position:relative}
+.tvo.x.has{opacity:.62;filter:none}
+.tvwho{display:inline-flex;align-items:center;margin-left:auto;flex:none;padding-left:.6vw}
+.tvwho .av{width:4.6vh;height:4.6vh;font-size:3.2vh;line-height:4.6vh;text-align:center;margin-left:-1vh;border-radius:50%;background:#16081f;box-shadow:0 0 0 2px var(--cream);animation:pop .4s var(--ease) both}
+.tvwho .av:first-child{margin-left:0}

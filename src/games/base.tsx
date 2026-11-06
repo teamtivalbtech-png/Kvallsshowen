@@ -20,7 +20,8 @@ export abstract class RB implements Inst{
 }
 export function Stage({kicker,title,children,img}:any){return <div className="stg">{kicker&&<div className="kick">{kicker}</div>}<h1 className="qt" key={typeof title==='string'?title:undefined}>{title}</h1>{children}</div>}
 export function Answered({g,show}:any){const ps=show.players;return <div className="ansrow">{ps.map((p:any)=><span key={p.id} className={(p.id in g.ans?'in ':'')+(p.connected?'':'off')} style={{borderColor:p.color}}><Av p={p}/></span>)}</div>}
-export function Opts({list,right,counts}:any){return <div className="tvopts">{list.map((o:string,i:number)=><div key={i+':'+o} className={'tvo c'+(i%4)+(right!=null?(o===right?' r':' x'):'')}><b>{'ABCDEFGH'[i]}</b><span>{o}</span>{counts&&<em>{counts[o]||''}</em>}</div>)}</div>}
+/** Svarsalternativen. När rätt svar visas syns också vilka som valde vad. */
+export function Opts({list,right,counts,g}:any){const ps=right!=null&&g?.ans?(g.api?.players?.()||[]):[];const who=(o:string,i:number)=>ps.filter((p:any)=>{const v=g.ans[p.id]?.v;return v===o||v===i});return <div className="tvopts">{list.map((o:string,i:number)=>{const w=who(o,i);return <div key={i+':'+o} className={'tvo c'+(i%4)+(right!=null?(o===right?' r':' x'):'')+(w.length?' has':'')}><b>{'ABCDEFGH'[i]}</b><span>{o}</span>{counts&&<em>{counts[o]||''}</em>}{w.length>0&&<i className="tvwho">{w.map((p:any)=><Av key={p.id} p={p}/>)}</i>}</div>})}</div>}
 export const Av=({p}:any)=>p?.photo?<img className="av" src={p.photo} alt={p.name}/>:<span className="av em">{p?.avatar}</span>;
 export const nameOf=(show:any,id:string)=>show.players.find((p:any)=>p.id===id);
 /** Spelyta på canvas. Ritas i lägre upplösning och skalas upp, draw får ändå elementets storlek i px. */
