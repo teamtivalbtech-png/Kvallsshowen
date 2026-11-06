@@ -347,3 +347,20 @@ html.nogap .ansrow .av{font-size:2.6vw;line-height:4.4vw}
 .apkbtn:focus{outline:3px solid var(--gold);outline-offset:2px}
 .hbtns .apkbtn{display:block;padding:12px 16px}
 .ordl>div{min-width:0;max-width:100%}.ordl p{min-width:0;overflow-wrap:anywhere}.ordl button{flex:none;min-width:40px}
+
+/* Hitster: tydligt rätt eller fel */
+.lverdict{position:absolute;left:50%;top:50%;z-index:20;display:flex;flex-direction:column;align-items:center;gap:.6vh;min-width:44vw;padding:3vh 4vw;border-radius:3vh;text-align:center;color:#fff;transform:translate(-50%,-50%);animation:lver 5s var(--ease) both;pointer-events:none}
+.lverdict.ok{background:#127a3ef2;box-shadow:0 0 0 .6vh #7dffb0,0 0 8vh #2bd66f}
+.lverdict.bad{background:#a81f2cf2;box-shadow:0 0 0 .6vh #ffb0b0,0 0 8vh #ff3b4a}
+.lverdict i{font-style:normal;font-size:11vh;line-height:1}
+.lverdict b{font-family:'Bowlby One',serif;font-weight:400;font-size:12vh;line-height:1}
+.lverdict span{font-size:3.6vh;font-weight:800}
+.lverdict em{font-style:normal;font-size:2.8vh;opacity:.9}
+@keyframes lver{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}8%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}12%{transform:translate(-50%,-50%) scale(1)}86%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.92)}}
+.llane.good{background:#2bd66f33;box-shadow:inset 6px 0 0 #2bd66f}
+.llane.bad{background:#ff3b4a33;box-shadow:inset 6px 0 0 #ff3b4a}
+
+/* Klipp: storleken sätts i place() */
+.ytbox iframe{position:absolute;left:0;top:0;width:100%;height:100%;max-width:none;transform:none;border:0}
+html.app .ytbox{border-radius:0}
+html.app .ytbox.live .ytcover{display:none}
