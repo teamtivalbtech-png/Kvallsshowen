@@ -352,8 +352,8 @@ html.nogap .ansrow .av{font-size:2.6vw;line-height:4.4vw}
 .lverdict{position:absolute;left:50%;top:50%;z-index:20;display:flex;flex-direction:column;align-items:center;gap:.6vh;min-width:44vw;padding:3vh 4vw;border-radius:3vh;text-align:center;color:#fff;transform:translate(-50%,-50%);animation:lver 5s var(--ease) both;pointer-events:none}
 .lverdict.ok{background:#127a3ef2;box-shadow:0 0 0 .6vh #7dffb0,0 0 8vh #2bd66f}
 .lverdict.bad{background:#a81f2cf2;box-shadow:0 0 0 .6vh #ffb0b0,0 0 8vh #ff3b4a}
-.lverdict i{font-style:normal;font-size:11vh;line-height:1}
-.lverdict b{font-family:'Bowlby One',serif;font-weight:400;font-size:12vh;line-height:1}
+.lverdict>i{font-style:normal;font-size:8vh;line-height:1}
+.lverdict>b{font-family:'Bowlby One',serif;font-weight:400;font-size:10vh;line-height:1}
 .lverdict span{font-size:3.6vh;font-weight:800}
 .lverdict em{font-style:normal;font-size:2.8vh;opacity:.9}
 @keyframes lver{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}8%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}12%{transform:translate(-50%,-50%) scale(1)}86%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.92)}}
@@ -393,3 +393,9 @@ html.app .ytbox.live .ytcover{display:none}
 .ltok{margin-top:.6vh;font-size:3vh;color:var(--gold)}
 @keyframes lver{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}6%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}9%{transform:translate(-50%,-50%) scale(1)}90%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.92)}}
 .lverdict{animation-duration:7s}
+
+.lchal{display:flex;flex-direction:column;gap:.6vh;margin-top:1vh;width:100%}
+.lchal p{margin:0;padding:.8vh 1.2vw;border-radius:1.2vh;background:#0006;font-size:2.6vh;font-weight:700;box-shadow:inset .5vw 0 0 var(--c)}
+.lchal b{color:var(--c)}
+.lchal .ok{outline:2px solid #7dffb0}.lchal .bad{outline:2px solid #ffb0b0}
+.lchal b{font:inherit;font-weight:900}.lverdict{max-width:84vw;padding:2.4vh 3vw}
