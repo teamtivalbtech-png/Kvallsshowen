@@ -250,7 +250,7 @@ html.lite .greel b{text-shadow:none}
 html.lite .bulbs{animation:none}
 html.lite .conf i:nth-child(3n),html.lite .conf i:nth-child(3n+1){display:none}
 html.lite .wipe i:nth-child(-n+2){display:none}
-html.lite2 .ring,html.lite2 .needs,html.lite2 .waitmark,html.lite2 .emoji,html.lite2 .eq i,html.lite2 .tsides span,html.lite2 .tsides .av,html.lite2 .host .hd,html.lite2 .host .mic,html.lite2 .host.talk .six,html.lite2 .vb .av{animation-iteration-count:1}
+html.lite2 .ring,html.lite2 .needs,html.lite2 .waitmark,html.lite2 .emoji,html.lite2 .tsides span,html.lite2 .tsides .av,html.lite2 .vb .av{animation-iteration-count:1}
 html.lite2 .wipe{display:none}
 html.lite2 .greel article:nth-child(n+9){display:none}
 
