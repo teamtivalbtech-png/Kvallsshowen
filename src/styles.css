@@ -359,3 +359,8 @@ html.nogap .ansrow .av{font-size:2.6vw;line-height:4.4vw}
 @keyframes lver{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}8%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}12%{transform:translate(-50%,-50%) scale(1)}86%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.92)}}
 .llane.good{background:#2bd66f33;box-shadow:inset 6px 0 0 #2bd66f}
 .llane.bad{background:#ff3b4a33;box-shadow:inset 6px 0 0 #ff3b4a}
+
+/* Klipp: storleken sätts i place() */
+.ytbox iframe{position:absolute;left:0;top:0;width:100%;height:100%;max-width:none;transform:none;border:0}
+html.app .ytbox{border-radius:0}
+html.app .ytbox.live .ytcover{display:none}
