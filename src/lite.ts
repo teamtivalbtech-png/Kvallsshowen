@@ -1,6 +1,6 @@
 // Anpassar utseendet efter vad apparaten orkar. Nivå 0: allt på. 1: inga dyra skuggor och oskärpa, lägre upplösning på spelytor. 2: dessutom inga dekorativa loopar.
 const q=new URLSearchParams(location.search);const KEY='ks-lite-v1';
-const TV=/SmartTV|SMART-TV|Tizen|Web0S|WebOS|BRAVIA|GoogleTV|Android TV|AFT[A-Z]|HbbTV|VIDAA|NetCast|Viera|CrKey|TV Safari/i;
+const TV=/KvallsshowenTV|SmartTV|SMART-TV|Tizen|Web0S|WebOS|BRAVIA|GoogleTV|Android TV|AFT[A-Z]|HbbTV|VIDAA|NetCast|Viera|CrKey|TV Safari/i;
 export let level=0;
 function set(n:number,keep=true){level=n;const c=document.documentElement.classList;c.toggle('lite',n>0);c.toggle('lite2',n>1);if(keep)try{localStorage.setItem(KEY,JSON.stringify({l:n,at:Date.now()}))}catch{}}
 /** Hur stor spelyta (px bredd) som ritas just nu. Skalas upp av webbläsaren. */

@@ -1,0 +1,9 @@
+// Kör reservversionen för gamla webbläsare: tar bort den moderna koden ur sidan så att bara legacy-filerna körs.
+import {createRequire} from 'module';const {chromium}=createRequire('/')('playwright');const B=process.env.BASE||'http://localhost:4173';
+const b=await chromium.launch();const c=await b.newContext({viewport:{width:1280,height:720}});const errs=[];
+await c.route(u=>/\/(tv)?(\?.*)?$/.test(u.pathname+u.search)&&!/assets/.test(u.pathname),async r=>{const x=await r.fetch();let h=await x.text();h=h.replace(/<script type="module"[^>]*><\/script>/g,'').replace(/<script type="module">[\s\S]*?<\/script>/g,'').replace(/<link rel="modulepreload"[^>]*>/g,'').replace(/<script nomodule/g,'<script');r.fulfill({response:x,body:h})});
+const tv=await c.newPage();tv.on('pageerror',e=>errs.push(e.message.slice(0,200)));const js=[];tv.on('request',r=>{if(r.url().endsWith('.js'))js.push(r.url().split('/').pop())});await tv.goto(B+'/tv?local=1&lite=2');await tv.waitForFunction(()=>window.__show,null,{timeout:15000});
+console.log('bara legacy-filer',js.filter(x=>!x.includes('legacy')).length===0,js.slice(0,4));const code=await tv.evaluate(()=>__show.code);
+const p=await c.newPage();p.on('pageerror',e=>errs.push('tel '+e.message.slice(0,200)));await p.goto(B+`/?r=${code}&local=1&n=Anna`);await tv.waitForFunction(()=>__show.players.length>=1,null,{timeout:15000});await tv.evaluate(()=>{for(let i=0;i<3;i++)__show.addBot()});await p.waitForSelector('.body',{timeout:10000});await p.waitForTimeout(1500);console.log('spelval',await p.evaluate(()=>document.querySelectorAll('.body button').length));
+for(const id of ['fast','sumo','duck','geo','lat','hot','maffia']){await tv.evaluate(i=>{const s=__show;s.toLobby();s.startSingle(i);if(s.stage==='intro')s.next()},id);await tv.waitForTimeout(1500);console.log(id,await tv.evaluate(()=>({st:__show.stage,txt:(document.querySelector('.game')?.innerText||'').length})))}
+await b.close();console.log('fel',errs);

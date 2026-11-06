@@ -13,10 +13,12 @@ export function songDuck(on:boolean){ducked=on;if(!au.paused)fade(lvl(),700)}
 const stale=()=>new Promise<any>(()=>{});let on=0;
 const binUrl=(s:any)=>`/api/song?bin=1&t=${encodeURIComponent(s.t)}&a=${encodeURIComponent(s.a)}`;
 export async function playSong(s:any){const t=++tok;const u=await previewUrl(s);if(t!==tok)return stale();if(!u)return false;on=t;
-  if(!au.paused&&au.volume>.02){await new Promise<void>(r=>fade(0,700,r));if(t!==tok)return stale()}
+  if(!au.paused&&au.volume>.02){await new Promise<void>(r=>fade(0,1800,r));if(t!==tok)return stale()}
   const go=async(src:string)=>{clearInterval(fadeT);au.volume=0;au.src=src;await au.play()};
   try{try{await go(u)}catch(e:any){if(e?.name==='NotAllowedError'||t!==tok)throw e;await go(binUrl(s))}
     if(t!==tok){if(on===t)au.pause();return stale()}fade(lvl(),2000);flag(false);return true}
   catch(e:any){if(t!==tok)return stale();console.warn('låt',e);if(e?.name==='NotAllowedError')flag(true);return false}}
-export function stopSong(ms=1500){tok++;if(au.paused)return;const t=tok;fade(0,ms,()=>{if(t===tok)au.pause()})}
+// Klippen är bara 30 sekunder. I stället för att tystna tvärt tonas de ner och börjar om mjukt.
+let wrapping=false;if(au)setInterval(()=>{if(au.paused||wrapping||!au.duration||!isFinite(au.duration)||au.duration-au.currentTime>2.4)return;const t=tok;wrapping=true;fade(0,2200,()=>{wrapping=false;if(t!==tok)return;try{au.currentTime=0;au.play().catch(()=>{});fade(lvl(),1800)}catch{}})},200);
+export function stopSong(ms=2500){tok++;if(au.paused)return;const t=tok;fade(0,ms,()=>{if(t===tok)au.pause()})}
 export function resumeSong(){tok++;au.play().catch(()=>{});fade(lvl(),1500)}
