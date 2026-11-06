@@ -377,3 +377,8 @@ html.app .ytbox.live .ytcover{display:none}
 .tvwho{display:inline-flex;align-items:center;margin-left:auto;flex:none;padding-left:.6vw}
 .tvwho .av{width:4.6vh;height:4.6vh;font-size:3.2vh;line-height:4.6vh;text-align:center;margin-left:-1vh;border-radius:50%;background:#16081f;box-shadow:0 0 0 2px var(--cream);animation:pop .4s var(--ease) both}
 .tvwho .av:first-child{margin-left:0}
+
+/* Hitster: låt och artist på korten */
+.lcard{justify-content:flex-start;padding-top:.6vh;overflow:hidden;gap:.3vh}
+.lcard span{font-size:min(.95vw,1.7vh);font-weight:800;line-height:1.1;max-height:none;overflow-wrap:anywhere}
+.lcard small{font-size:min(.8vw,1.5vh);line-height:1.1;opacity:.75;overflow-wrap:anywhere}
