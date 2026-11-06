@@ -104,9 +104,9 @@ Vilken ålder krävs för att handla på Systembolaget?|20|18|21|25
 Vad heter en cocktail med rom, lime, mynta och socker?|Mojito|Daiquiri|Cosmopolitan|Sidecar
 Vad brukar svenskar kalla mellandagarna-shoppingen?|Mellandagsrea|Black Friday|Cyber Monday|Julrea-veckan`,
 };
-import {EXTRA,CATS2} from './extra';import {QUIZ2,CATS3} from './quiz2';import {QUIZ3,HARD3} from './batch3';
-export const QUIZ=[...Object.entries(R).flatMap(([c,s])=>s.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:c,q,a,w}})),...EXTRA,...QUIZ2,...QUIZ3];
-export const CATS=[...new Set([...Object.keys(R),...CATS2,...CATS3,...QUIZ3.map(x=>x.cat)])];
+import {EXTRA,CATS2} from './extra';import {QUIZ2,CATS3} from './quiz2';import {QUIZ3,HARD3} from './batch3';import {QUIZ4,CATS4} from './quiz4';
+export const QUIZ=[...Object.entries(R).flatMap(([c,s])=>s.split('\n').map(l=>{const[q,a,...w]=l.split('|');return{cat:c,q,a,w}})),...EXTRA,...QUIZ2,...QUIZ3,...QUIZ4];
+export const CATS=[...new Set([...Object.keys(R),...CATS2,...CATS3,...QUIZ3.map(x=>x.cat),...CATS4])];
 // Allt eller inget: svårare frågor för finalen
 export const HARD=(`Vilket år grundades Stockholm enligt första skriftliga källan?|1252|1103|1397|1523
 Vilket grundämne har atomnummer 79?|Guld|Kvicksilver|Platina|Bly

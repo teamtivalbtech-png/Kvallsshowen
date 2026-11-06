@@ -105,7 +105,7 @@ export class Show{
     this.save();this.bump();
   }
   /** Programledaren hoppar över det som pågår: samma sak som att tiden tar slut, så att alla regler i spelet följs. */
-  skipStep(){if(this.stage!=='game')return this.next();const f=this.dlFn;try{if(this.dl&&f){this.dl=0;this.dlFn=null;f()}else if((this.inst as any)?.timeUp)(this.inst as any).timeUp();else if(!this.def?.long)this.endGame()}catch(e){this.fail(e)}this.bump()}
+  pend:any[]=[];skipStep(){if(this.stage!=='game')return this.next();const f=this.dlFn;try{if(this.dl&&f){this.dl=0;this.dlFn=null;f()}else if(this.pend.length){const p=this.pend.sort((a,b)=>a.at-b.at).shift();clearTimeout(p.h);p.f()}else (this.inst as any)?.timeUp?.()}catch(e){this.fail(e)}this.bump()}
   next(){
     if(this.stage==='intro')this.beginGame();else if(this.stage==='game')this.endGame();else if(this.stage==='result')this.afterResult();else if(this.stage==='reveal')this.toLobby()
   }
@@ -140,12 +140,12 @@ export class Show{
   afterResult(){if(this.match&&this.qi<this.queue.length)this.intro(this.queue[this.qi]);else if(this.match)this.reveal();else this.toLobby()}
   reveal(){this.clear();this.stage='reveal';this.revealStep=-1;this.match=false;this.queue=[];this.save();this.bump()}
   toLobby(){try{localStorage.removeItem('ks-maf-v1')}catch{}this.clear();stopSong();stopBuf();this.stage='lobby';this.players=this.players.filter(p=>!(p as any).auto);this.inst=null;this.def=null;this.match=false;this.queue=[];snd.music('lobby');this.save();this.bump()}
-  clear(){this.timers.forEach(t=>{clearTimeout(t);clearInterval(t)});this.timers=[];this.dl=0;this.dlFn=null}
+  clear(){this.timers.forEach(t=>{clearTimeout(t);clearInterval(t)});this.timers=[];this.pend=[];this.dl=0;this.dlFn=null}
   setCd(ms:number,f:()=>void){this.dl=Date.now()+ms/FAST;this.dlFn=f}
   safe(f:()=>void){return()=>{try{f();this.bump()}catch(e){this.fail(e)}}}
   api():Api{const s=this;return{
     players:()=>s.players,online:()=>s.players.filter(p=>p.connected),refresh:()=>s.bump(),award:(p,n)=>{if(Number.isFinite(n))s.rawS[p]=(s.rawS[p]||0)+n},raw:p=>s.rawS[p]||0,
-    after:(ms,f)=>{s.timers.push(setTimeout(s.safe(f),ms/FAST))},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
+    after:(ms,f)=>{const p:any={at:Date.now()+ms/FAST,f:s.safe(f)};p.h=setTimeout(()=>{s.pend=s.pend.filter(x=>x!==p);p.f()},ms/FAST);s.pend.push(p);s.timers.push(p.h)},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
     countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),stat:(p,k,n)=>s.stat(p,k,n),keep:(src,cap)=>{if(s.album.length<24)s.album.push({src,cap})},custom:()=>s.customQ.splice(0,3),mission:p=>s.missions[p],say:(t,x)=>say(t,x),quip:ok=>{if(Math.random()<.45){const l=s.gameLine(s.def?.id||'',ok);say(l||(ok?LINES.right():LINES.wrong()))}},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
     code:()=>s.code,mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
     used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];const seen=new Set(u),ord=walk(k,pool);let free=all.filter(i=>!seen.has(i)).sort((a,b)=>ord[a]-ord[b]);let list=free.slice(0,n);if(list.length<n){const inAll=new Set(all),got=new Set(list);u=u.filter(i=>!inAll.has(i));free=all.filter(i=>!got.has(i)).sort((a,b)=>ord[a]-ord[b]);list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
