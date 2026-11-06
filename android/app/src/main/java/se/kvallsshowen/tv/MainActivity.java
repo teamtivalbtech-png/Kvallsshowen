@@ -4,7 +4,7 @@ import android.app.Activity;import android.os.Bundle;import android.view.KeyEven
 public class MainActivity extends Activity{
   static final String URL="https://kvallsshowen.vercel.app/tv";WebView w;
   @Override protected void onCreate(Bundle b){super.onCreate(b);getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);w=new WebView(this);setContentView(w);hide();
-    WebSettings s=w.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setMediaPlaybackRequiresUserGesture(false);s.setUserAgentString(s.getUserAgentString()+" KvallsshowenTV");
+    WebSettings s=w.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setMediaPlaybackRequiresUserGesture(false);s.setUserAgentString(s.getUserAgentString()+" KvallsshowenTV");s.setTextZoom(100);s.setUseWideViewPort(true);s.setLoadWithOverviewMode(true);s.setSupportZoom(false);s.setBuiltInZoomControls(false);s.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);android.webkit.CookieManager.getInstance().setAcceptCookie(true);android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(w,true);w.setFocusable(true);w.setFocusableInTouchMode(true);w.requestFocus();w.setOverScrollMode(View.OVER_SCROLL_NEVER);w.setVerticalScrollBarEnabled(false);w.setHorizontalScrollBarEnabled(false);
     w.setBackgroundColor(0xFF16081F);w.setWebChromeClient(new WebChromeClient());
     w.setWebViewClient(new WebViewClient(){@Override public void onReceivedError(WebView v,WebResourceRequest r,WebResourceError e){if(r.isForMainFrame())v.postDelayed(()->v.loadUrl(URL),4000);}});
     if(b==null)w.loadUrl(URL);else w.restoreState(b);}
