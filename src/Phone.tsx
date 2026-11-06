@@ -1,6 +1,8 @@
-import {rs} from './rand';import {GeoPick} from './ui/map';import {MafPhone} from './ui/maf';import {LatSet,LatTurn,LatChal} from './ui/lat';import {KodP,WaveP,ViskDesc} from './ui/classics';import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake,LOCAL} from './net';import {recordPcm,buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {GAMES} from './games';import {Aim} from './ui/aim';
+import {rs} from './rand';import {GeoPick} from './ui/map';import {MafPhone} from './ui/maf';import {LatSet,LatTurn,LatChal} from './ui/lat';import {KodP,WaveP,ViskDesc} from './ui/classics';import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake,LOCAL} from './net';import {recordPcm,buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {Aim} from './ui/aim';import {Guard} from './ui/guard';
 const AV='🦊 🐸 🦉 🐙 🦄 🐯 🐼 🐵 🦁 🐧 🦖 🐢 🦩 🐝 👽 🤖 👻 🌶️ 🍕 🍷'.split(' ');
 let inId=Date.now()%1e6;
+// Spellistan drar med allt innehåll, så den hämtas bara när den behövs (spelvalet).
+let GAMES:any[]=[];const loadGames=()=>import('./games').then(m=>{GAMES=m.GAMES});
 class Link{
   boot='';
   pipe:any;room:any;v:any=null;seq=0;off=0;rtt=0;pend=new Map<number,{d:any,n:number}>();on:(v:any)=>void=()=>{};lastHost=0;up=false;t:any;
@@ -50,17 +52,18 @@ export function Phone({code}:{code:string}){
 }
 function Clock({dl}:{dl:number}){const [,f]=useState(0);useEffect(()=>{const i=setInterval(()=>f(n=>n+1),300);return()=>clearInterval(i)},[]);const s=Math.max(0,Math.ceil((dl-L().host())/1000));return s<300?<b className="clk">{s}</b>:null}
 function W({p,rate}:{p:any,rate:number}){
-  if(!p)return null;const C=(WID as any)[p.k]||WID.wait;return <C key={p.key||p.k} {...p} rate={rate}/>;
+  const[,f]=useState(0);const need=p?.k==='vipLobby'&&!GAMES.length;useEffect(()=>{if(need)loadGames().then(()=>f(n=>n+1)).catch(e=>console.warn(e))},[need]);
+  if(!p)return null;if(need)return <div className="center"><div className="spin"/></div>;const C=(WID as any)[p.k]||WID.wait;return <Guard keyed={p.key||p.k} fallback={<div className="center"><h2>Något krånglade</h2><button className="big" onClick={()=>location.reload()}>Ladda om</button></div>}><C key={p.key||p.k} {...p} rate={rate}/></Guard>;
 }
 const send=(d:any)=>{buzz();L().input(d)};
 const WID:any={
  vipEnd:()=><div className="center"><div className="waitmark">🏆</div><h2>Tack för i kväll!</h2><button className="big" onClick={()=>send({vip:'lobby'})}>Till menyn</button></div>,
- wait:({msg,sub,big}:any)=><div className="center"><div className="waitmark">{big||'📺'}</div><h2>{msg}</h2>{sub&&<p>{sub}</p>}</div>,
+ wait:({msg,sub,big}:any)=>{const m=String(msg||''),good=/^\+[1-9]|^Rätt/.test(m),bad=/^Fel|^\+0$/.test(m);useEffect(()=>{if(good)buzz([30,40,60]);else if(bad)buzz(140)},[m]);return <div className={'center wt'+(good?' good':bad?' bad':'')}>{good&&<div className="burst" key={m}>{Array.from({length:14},(_,i)=><i key={i} style={{'--a':i*25.7+'deg','--c':['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a'][i%4]} as any}/>)}</div>}<div className="waitmark">{big||'📺'}</div><h2>{msg}</h2>{sub&&<p>{sub}</p>}</div>},
  intro:({title,how,needs}:any)=>{const [ok,set]=useState('');async function allow(){try{if(needs==='tilt'||needs==='shake'){set(await askMotion()?'yes':'no')}if(needs==='camera'||needs==='aim'){await getCam(needs==='aim'?'environment':'user');set('yes')}if(needs==='mic'){await getMic();set('yes')}}catch{set('no')}}
    return <div className="center"><h2>{title}</h2><p>{how}</p>{needs&&!ok&&<button className="big" onClick={allow}>{{tilt:'Tillåt rörelsesensor',shake:'Tillåt rörelsesensor',camera:'Tillåt kamera',aim:'Tillåt kamera',mic:'Tillåt mikrofon'}[needs]}</button>}{ok==='yes'&&<p className="good">Klart ✓</p>}{ok==='no'&&<p className="bad">Inte tillåtet. Du kan spela ändå med knapparna på skärmen{isIOS?'. Ändra i Inställningar › Safari om du vill använda sensorn':''}.</p>}</div>},
- vipLobby:(p:any)=>{const [tab,setTab]=useState('match');const [flt,setFlt]=useState('Alla');const [sel,setSel]=useState<string[]>(()=>GAMES.filter(g=>!g.finalOnly&&g.id!=='allin'&&!g.needs&&!g.long).map(g=>g.id).slice(0,8));const list=GAMES.filter(g=>!g.finalOnly);
+ vipLobby:(p:any)=>{const [tab,setTab]=useState('match');const [flt,setFlt]=useState('Alla');const [sel,setSel]=useState<string[]>(()=>GAMES.filter((g:any)=>!g.finalOnly&&g.id!=='allin'&&!g.needs&&!g.long).map(g=>g.id).slice(0,8));const list=GAMES.filter((g:any)=>!g.finalOnly);
    const v=(d:any)=>send({vip:d.vip,...d});
-   const shown=list.filter(g=>flt==='Alla'||GROUP(g)===flt),mins=sel.reduce((n,id)=>n+(GAMES.find(g=>g.id===id)?.mins||0),0);const NEED:any={tilt:'rörelse',shake:'rörelse',camera:'kamera',aim:'kamera',mic:'mikrofon'};
+   const shown=list.filter(g=>flt==='Alla'||GROUP(g)===flt),mins=sel.reduce((n,id)=>n+(GAMES.find((g:any)=>g.id===id)?.mins||0),0);const NEED:any={tilt:'rörelse',shake:'rörelse',camera:'kamera',aim:'kamera',mic:'mikrofon'};
    return <div className="vip"><div className="vhead"><span>Du är programledare · {p.n} {p.n===1?'spelare':'spelare'}</span><h3>Vad ska vi spela?</h3></div>
    <div className={'vtabs '+tab}><i/><button className={tab==='match'?'on':''} onClick={()=>setTab('match')}><b>🏆 Hela kvällen</b><small>Flera spel och final</small></button><button className={tab==='one'?'on':''} onClick={()=>setTab('one')}><b>🎯 Ett spel</b><small>Starta direkt</small></button></div>
    <details className="vset"><summary><span>⚙️ Inställningar</span><em>{p.mode==='team'?`${p.teams} lag`:'Var för sig'} · {p.bots} botar{p.sips?' · 🍻':''}</em></summary><div className="vsetb">
@@ -121,4 +124,4 @@ function phoneBoom(){try{const A=(window as any).__sc||=new (window.AudioContext
 if(typeof window!=='undefined')window.addEventListener('pointerdown',()=>{try{const A=(window as any).__sc||=new (window.AudioContext||(window as any).webkitAudioContext)();A.resume()}catch{}},{passive:true});
 function LongExit(){const[a,set]=useState(false);useEffect(()=>{if(!a)return;const t=setTimeout(()=>set(false),4000);return()=>clearTimeout(t)},[a]);return <footer className="vipbar one">{a?<button className="bad" onClick={()=>L().input({vip:'lobby'})}>Ja, avsluta hela spelet</button>:<button onClick={()=>set(true)}>Avsluta spelet</button>}</footer>}
 function AskForm(){const[open,setO]=useState(false);const[f,sf]=useState(['','','','','']);const L2=['Fråga om gruppen','Rätt svar','Fel svar','Fel svar','Fel svar'];if(!open)return <button className="tip" onClick={()=>setO(true)}>➕ Egen fråga</button>;return <div className="askf">{L2.map((l,i)=><input key={i} className="tx" placeholder={l} value={f[i]} maxLength={i?50:140} onChange={e=>{const n=[...f];n[i]=e.target.value;sf(n)}}/>)}<div className="lr"><button onClick={()=>setO(false)}>Stäng</button><button className="ok" disabled={f.some(x=>!x.trim())} onClick={()=>{L().input({ask:{q:f[0],a:f[1],w:f.slice(2)}});sf(['','','','','']);buzz(20)}}>Spara</button></div></div>}
-function pick(n:number){return GAMES.filter(g=>!g.finalOnly&&!g.long&&!['allin','duck','selfie'].includes(g.id)).map(g=>g.id).sort(rs()).slice(0,n)}
+function pick(n:number){return GAMES.filter((g:any)=>!g.finalOnly&&!g.long&&!['allin','duck','selfie'].includes(g.id)).map(g=>g.id).sort(rs()).slice(0,n)}

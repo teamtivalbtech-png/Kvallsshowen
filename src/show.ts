@@ -1,4 +1,4 @@
-import {QUIPS} from './content/quips';import {rs} from './rand';import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {stopBuf} from './games/rev';import {say,hasVoice,LINES} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';import {MISSIONS,ROASTS} from './games/extras';
+import {QUIPS} from './content/quips';import {rs} from './rand';import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {stopBuf} from './games/rev';import {say,hasVoice,LINES} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';import {MISSIONS,ROASTS} from './games/extras';import {wake} from './net';import {keepAwake} from './devices';
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
@@ -8,46 +8,57 @@ export class Show{
   dl=0;dlFn:any=null;timers:any[]=[];room:Pipe|null=null;pipes=new Map<string,{p:Pipe,last:string,seq:number,ids:Set<number>,lastSend:number}>();lastRes:any=null;loop:any=0;lastTick=0;dirty=false;usedPools:Record<string,number[]>={};revealStep=-1;error='';
   constructor(){
     let s:any=null;try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
-    if(s&&Date.now()-s.at<6*3600e3){this.code=s.code;this.players=s.players.filter((p:Player)=>!p.bot).map((p:Player)=>({...p,connected:false}));this.mode=s.mode;this.teamCount=s.teamCount;this.total=s.total;this.queue=s.queue;this.qi=s.qi;this.match=s.match;this.history=s.history}
+    if(s&&typeof s.code==='string'&&s.code.length===4&&Array.isArray(s.players)&&Date.now()-s.at<6*3600e3){this.code=s.code;this.players=s.players.filter((p:Player)=>p&&p.id&&!p.bot).map((p:Player)=>({...p,connected:false}));this.mode=s.mode==='team'?'team':'solo';this.teamCount=[2,3,4].includes(s.teamCount)?s.teamCount:2;this.total=s.total&&typeof s.total==='object'?s.total:{};this.queue=(Array.isArray(s.queue)?s.queue:[]).filter((i:string)=>byId(i));this.qi=+s.qi||0;this.match=!!s.match&&this.queue.length>0;this.history=Array.isArray(s.history)?s.history:[]}
     else this.code=rnd('ABCDEFGHJKLMNPQRSTUVWXYZ');
     try{this.usedPools=JSON.parse(localStorage.getItem('ks-used-v1')||'{}')}catch{}
     this.room=openPipe('r:'+this.code,m=>this.onRoom(m));
     this.players.forEach(p=>this.pipe(p.id));
     this.lastTick=performance.now();
     this.loop=setInterval(()=>this.frame(),33);
+    keepAwake();const up=()=>{if(document.visibilityState==='visible'){wake();this.lastTick=performance.now();this.pushAll(true)}};document.addEventListener('visibilitychange',up);window.addEventListener('online',up);window.addEventListener('pagehide',()=>{if(this.saveAt)this.saveNow()});
     let maf:any=null;try{maf=JSON.parse(localStorage.getItem('ks-maf-v1')||'null')}catch{}
     if(maf&&maf.s&&maf.code===this.code&&Date.now()-maf.at<3*3600e3)setTimeout(()=>this.resumeMaf(maf),1200);
     else if(this.match&&this.queue.length&&this.qi<this.queue.length)setTimeout(()=>this.intro(this.queue[this.qi]),1200);
   }
-  save(){try{localStorage.setItem(KEY,JSON.stringify({at:Date.now(),code:this.code,players:this.players,mode:this.mode,teamCount:this.teamCount,total:this.total,queue:this.queue,qi:this.qi,match:this.match,history:this.history}));localStorage.setItem('ks-used-v1',JSON.stringify(this.usedPools))}catch{}}
+  /** Sparar högst ett par gånger per sekund. Selfies gör rummet stort och spara blockerar bilden. */
+  saveAt=0;save(){if(!this.saveAt)this.saveAt=Date.now()+400}
+  saveNow(){this.saveAt=0;try{localStorage.setItem(KEY,JSON.stringify({at:Date.now(),code:this.code,players:this.players,mode:this.mode,teamCount:this.teamCount,total:this.total,queue:this.queue,qi:this.qi,match:this.match,history:this.history}));localStorage.setItem('ks-used-v1',JSON.stringify(this.usedPools))}catch{}}
   bump(){this.ver++;this.subs.forEach(f=>f());this.dirty=true}
   sub=(f:()=>void)=>{this.subs.add(f);return()=>{this.subs.delete(f)}};
   frame(){
     const n=performance.now(),dt=Math.min(.1,(n-this.lastTick)/1000)*FAST;this.lastTick=n;const w=Date.now();
-    this.players.forEach(p=>{if(p.bot)p.seen=w;const c=w-p.seen<9000;if(c!==p.connected){p.connected=c;if(!c)try{this.inst?.onLeave?.(p.id)}catch(e){console.error(e)}this.bump()}});
+    this.players.forEach(p=>{if(p.bot)p.seen=w;const c=w-p.seen<9000;if(c!==p.connected){p.connected=c;if(!c){try{this.inst?.onLeave?.(p.id)}catch(e){console.error(e)}try{this.rtcs.get(p.id)?.close()}catch{}this.rtcs.delete(p.id)}this.bump()}});
     if(this.dl&&w>=this.dl){const f=this.dlFn;this.dl=0;this.dlFn=null;try{f?.()}catch(e){this.fail(e)}this.bump()}
     if(this.stage==='game'&&this.inst?.tick)try{this.inst.tick(dt)}catch(e){this.fail(e)}
     if(this.stage==='game'&&this.inst&&++this.botTick%2===0)for(const p of this.players)if(p.bot)try{botAct(this.inst,p.id,w,FAST)}catch(e){console.error(e)}
-    if(this.dirty){this.dirty=false;this.pushAll(false)}
+    if(this.dirty&&w-this.pushed>=80){this.dirty=false;this.pushed=w;this.pushAll(false)}
     this.pipes.forEach((x,id)=>{if(w-x.lastSend>2500)this.push(id,true)});
+    if(this.saveAt&&w>=this.saveAt)this.saveNow();
+    if(w-this.woke>5000){this.woke=w;wake()}
   }
-  fail(e:any){console.error(e);this.error=String(e);this.bump();this.endGame()}
+  pushed=0;woke=0;fail(e:any){console.error(e);this.error=String(e);this.bump();if(this.stage==='game'||this.stage==='intro')try{this.endGame()}catch(x){console.error(x);this.toLobby()}}
   pipe(id:string){
     if(this.pipes.has(id))return this.pipes.get(id)!;
     const x={p:null as any,last:'',seq:0,ids:new Set<number>(),lastSend:0};
     x.p=openPipe(`p:${this.code}:${id}`,m=>this.onPlayer(id,m),ok=>{if(ok)this.push(id,true)});this.pipes.set(id,x);return x;
   }
   onRoom(m:any){
-    if(m.t!=='hello')return;
+    if(m.t!=='hello'||typeof m.pid!=='string'||!m.pid||m.pid.length>40)return;
     let p=this.players.find(x=>x.id===m.pid);
     if(!p){
-      if(this.players.length>=12)return;
+      // Rummet fullt: en dator får lämna plats åt en riktig person, annars får telefonen veta varför den inte kommer in.
+      if(this.players.length>=12&&this.stage==='lobby')this.dropBot();
+      if(this.players.length>=12){this.full.add(m.pid);this.pipe(m.pid);this.push(m.pid,true);return}
+      this.full.delete(m.pid);
       const taken=new Set(this.players.map(x=>x.color));
-      p={id:m.pid,name:String(m.name||'Spelare').slice(0,14),avatar:m.avatar||'🙂',photo:typeof m.photo==='string'&&m.photo.length<30000?m.photo:undefined,color:COL.find(c=>!taken.has(c))||COL[0],team:0,connected:true,seen:Date.now()};
-      this.players.push(p);this.assignTeams();snd.sfx('join');if(this.players.length===1)say(LINES.welcome());else if(Math.random()<.5)say(LINES.join());
-    }else if(m.name){p.name=String(m.name).slice(0,14);p.avatar=m.avatar||p.avatar;if(typeof m.photo==='string'&&m.photo.length<30000)p.photo=m.photo}
+      p={id:m.pid,name:String(m.name||'Spelare').slice(0,14),avatar:String(m.avatar||'🙂').slice(0,8),photo:typeof m.photo==='string'&&m.photo.length<30000?m.photo:undefined,color:COL.find(c=>!taken.has(c))||COL[0],team:this.smallest(),connected:true,seen:Date.now()};
+      this.players.push(p);snd.sfx('join');if(this.players.length===1)say(LINES.welcome());else if(Math.random()<.5)say(LINES.join());
+    }else if(m.name){p.name=String(m.name).slice(0,14);p.avatar=String(m.avatar||p.avatar).slice(0,8);if(typeof m.photo==='string'&&m.photo.length<30000)p.photo=m.photo}
     p.seen=Date.now();p.connected=true;this.pipe(p.id);this.save();this.bump();this.push(p.id,true);
   }
+  full=new Set<string>();
+  /** Nya spelare hamnar i minsta laget, så att bytta lag inte slumpas om när någon ansluter. */
+  smallest(){const n=Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);return n.indexOf(Math.min(...n))}
   assignTeams(){this.players.forEach((p,i)=>p.team=i%this.teamCount)}
   onPlayer(id:string,m:any){
     const p=this.players.find(x=>x.id===id);if(!p)return;p.seen=Date.now();const x=this.pipes.get(id)!;
@@ -72,16 +83,20 @@ export class Show{
   addBot(auto=false){if(this.players.length>=12)return;const used=new Set(this.players.map(p=>p.name));let n=0;while(n<10&&used.has(botInfo(n).name))n++;const taken=new Set(this.players.map(x=>x.color)),i=botInfo(n);const sizes=Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);this.players.push({id:'bot'+n+Math.random().toString(36).slice(2,6),...i,color:COL.find(x=>!taken.has(x))||COL[0],team:sizes.indexOf(Math.min(...sizes)),connected:true,seen:Date.now(),bot:true,auto} as any);this.total[this.players[this.players.length-1].id]=this.total[this.players[this.players.length-1].id]||0;}
   dropBot(){const i=this.players.map(p=>!!p.bot).lastIndexOf(true);if(i>=0)this.players.splice(i,1)}
   fit(d:GameDef){let guard=12;while(this.players.length<(d.min||2)&&guard--)this.addBot(true);if(d.even&&this.players.length%2)this.addBot(true);if(this.mode==='team'){const sz=()=>Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);while(Math.max(...sz())>Math.min(...sz())&&this.players.length<12&&guard--)this.addBot(true)}}
-  vipCmd(d:any){
-    if(d.vip==='mode'){this.mode=d.v;this.assignTeams()}
-    if(d.vip==='teams'){this.teamCount=d.v;this.assignTeams()}
-    if(d.vip==='bot+')this.addBot();if(d.vip==='bot-')this.dropBot();
-    if(d.vip==='sips')this.sips=!this.sips;
-    if(d.vip==='swap'){const p=this.players.find(x=>x.id===d.p);if(p)p.team=(p.team+1)%this.teamCount}
-    if(d.vip==='single')this.startSingle(d.v);
-    if(d.vip==='match')this.startMatch(d.v);
-    if(d.vip==='skip')this.next();
-    if(d.vip==='lobby')this.toLobby();
+  skipped=0;vipCmd(d:any){
+    const lobby=this.stage==='lobby',n=Date.now();
+    if(lobby){
+      if(d.vip==='mode'&&(d.v==='solo'||d.v==='team')){this.mode=d.v;this.assignTeams()}
+      if(d.vip==='teams'&&[2,3,4].includes(d.v)){this.teamCount=d.v;this.assignTeams()}
+      if(d.vip==='bot+')this.addBot();if(d.vip==='bot-')this.dropBot();
+      if(d.vip==='sips')this.sips=!this.sips;
+      if(d.vip==='swap'){const p=this.players.find(x=>x.id===d.p);if(p)p.team=(p.team+1)%this.teamCount}
+      if(d.vip==='single'&&byId(d.v))this.startSingle(d.v);
+      if(d.vip==='match'&&Array.isArray(d.v)){const l=d.v.filter((i:any)=>typeof i==='string'&&byId(i));if(l.length)this.startMatch(l)}
+    }
+    // Ett dubbeltryck ska bara hoppa ett steg
+    if(d.vip==='skip'&&!lobby&&n-this.skipped>700){this.skipped=n;this.next()}
+    if(d.vip==='lobby'&&!lobby)this.toLobby();
     this.save();this.bump();
   }
   next(){
@@ -94,7 +109,7 @@ export class Show{
     const q:string[]=[];ids.filter(i=>i!=='allin').forEach((g,i)=>{q.push(g);if((i+1)%3===0)q.push('duel')});if(q[q.length-1]==='duel')q.pop();this.queue=[...q,'missions','allin'];this.qi=0;this.save();this.intro(this.queue[0]);
   }
   intro(id:string){
-    this.clear();const d=byId(id);this.def=d;this.stage='intro';this.inst=null;snd.music(null);snd.sfx('stinger');
+    const d=byId(id);if(!d){if(this.match&&++this.qi<this.queue.length)return this.intro(this.queue[this.qi]);return this.match?this.reveal():this.toLobby()}this.clear();this.def=d;this.stage='intro';this.inst=null;snd.music(null);snd.sfx('stinger');
     const n=this.players.filter(p=>p.connected&&!p.bot).length;
     if(this.match&&n===0&&this.players.some(p=>!p.bot)){this.timers.push(setTimeout(()=>{if(this.stage==='intro'&&this.match)this.intro(id)},2500));this.bump();return}
     if(n<(d.humans||1)){const m=`${d.title} kräver minst ${d.humans} riktiga personer.`;if(this.match){this.qi++;if(this.qi<this.queue.length)return this.intro(this.queue[this.qi]);return this.reveal()}this.toLobby();say(m);return}
@@ -126,7 +141,7 @@ export class Show{
     after:(ms,f)=>{s.timers.push(setTimeout(s.safe(f),ms/FAST))},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
     countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),stat:(p,k,n)=>s.stat(p,k,n),keep:(src,cap)=>{if(s.album.length<24)s.album.push({src,cap})},custom:()=>s.customQ.splice(0,3),mission:p=>s.missions[p],say:(t,x)=>say(t,x),quip:ok=>{if(Math.random()<.45){const l=s.gameLine(s.def?.id||'',ok);say(l||(ok?LINES.right():LINES.wrong()))}},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
     code:()=>s.code,mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
-    used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];let free=all.filter(i=>!u.includes(i)).sort(rs());let list=free.slice(0,n);if(list.length<n){u=u.filter(i=>!all.includes(i));free=all.filter(i=>!list.includes(i)).sort(rs());list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
+    used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];const seen=new Set(u);let free=all.filter(i=>!seen.has(i)).sort(rs());let list=free.slice(0,n);if(list.length<n){const inAll=new Set(all),got=new Set(list);u=u.filter(i=>!inAll.has(i));free=all.filter(i=>!got.has(i)).sort(rs());list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
   }}
   teamList(){return Array.from({length:this.teamCount},(_,i)=>({id:i,...TEAM[i],members:this.players.filter(p=>p.team===i)})).filter(t=>t.members.length)}
   finalRows(){
@@ -134,6 +149,7 @@ export class Show{
     return this.players.map(p=>({id:p.id,name:p.name,avatar:p.avatar,photo:p.photo,color:p.color,pts:this.total[p.id]||0})).sort((a,b)=>b.pts-a.pts);
   }
   view(id:string){
+    if(this.full.has(id)&&!this.players.some(x=>x.id===id))return{stage:'lobby',me:{name:'',avatar:'📺',color:'#ffc23d'},vip:false,dl:0,pv:{k:'wait',msg:'Rummet är fullt',sub:'Max 12 spelare. Vänta tills någon lämnar.',big:'🚪'},rate:1,canSkip:false,long:false};
     const p=this.players.find(x=>x.id===id);if(!p)return null;const v=this.vip();const isV=v?.id===id;
     let pv:any;
     if(this.stage==='lobby')pv=isV?{k:'vipLobby',mode:this.mode,teams:this.teamCount,n:this.players.length,bots:this.players.filter(x=>x.bot).length,sips:this.sips,list:this.players.map(x=>({id:x.id,name:x.name,avatar:x.avatar,team:x.team}))}:{k:'wait',msg:'Du är med!',sub:`${v?.name||'Första spelaren'} väljer spel`};
@@ -146,9 +162,9 @@ export class Show{
   }
   push(id:string,force:boolean){
     const x=this.pipes.get(id);if(!x)return;const v=this.view(id);if(!v)return;const s=JSON.stringify(v);
-    if(!force&&s===x.last)return;x.last=s;x.seq++;x.lastSend=Date.now();x.p.send({t:'v',seq:x.seq,boot:this.boot,v});
+    if(!force&&s===x.last)return;x.lastSend=Date.now();x.seq++;if(x.p.send({t:'v',seq:x.seq,boot:this.boot,v}))x.last=s;else x.last=''
   }
   pushAll(f:boolean){this.pipes.forEach((_,id)=>this.push(id,f))}
-  resetShow(){try{localStorage.removeItem(KEY)}catch{};location.reload()}
+  resetShow(){this.saveAt=0;try{localStorage.removeItem(KEY)}catch{};location.reload()}
 }
 export const allGames=GAMES;

@@ -38,7 +38,7 @@ class Timeline extends RB{qms=35000;revealMs=7000;ok(a:any){return Array.isArray
  score(){this.api.players().forEach(p=>{const a=this.ans[p.id]?.v;if(!a)return;let s=0;const yr=(id:number)=>this.cur.ev.find((e:any)=>e.id===id)?.y;a.forEach((id:number,i:number)=>{if(yr(this.cur.right[i])===yr(id))s+=250});if(s===1000)s+=500;p&&this.api.award(p.id,s);this.ans[p.id].s=s})}
  result(p:string){return{k:'wait',msg:`${this.ans[p]?.s||0} poäng`,big:'🕰️',key:'r'+this.idx}}}
 const TimelineTv=({g,show}:any)=><Stage kicker={`Timeline ${g.idx+1}/${g.items.length}`} title={g.phase==='q'?'Sätt händelserna i rätt ordning':'Rätt ordning'}><div className="tl">{(g.phase==='q'?g.cur.ev:[...g.cur.ev].sort((a:any,b:any)=>a.y-b.y)).map((e:any)=><div key={e.id}><b>{g.phase==='q'?'?':e.y}</b><span>{e.t}</span></div>)}</div><Answered g={g} show={show}/></Stage>;
-class Num extends RB{qms=25000;revealMs=7000;rows:any[]=[];
+class Num extends RB{qms=25000;revealMs=7000;rows:any[]=[];ok(a:any){return typeof a==='number'&&Number.isFinite(a)}
  setup(){this.items=pick(this.api,'cl',CLOSEST,8)}unit(){return this.cur.u}target(){return this.cur.a}prompt(){return this.cur.q}
  ask(p:string){return{k:'number',prompt:this.prompt(),unit:this.unit(),sel:this.sel(p)}}
  rank(){const T=this.target();return Object.entries(this.ans).map(([id,a]:any)=>({id,v:a.v,d:Math.abs(a.v-T)})).sort((a,b)=>a.d-b.d)}

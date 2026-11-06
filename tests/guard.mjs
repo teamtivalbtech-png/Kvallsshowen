@@ -1,0 +1,17 @@
+// Skyddsnäten: fullt rum, trasig sparfil, dubbeltryck, krasch i spelvy, trasiga kommandon.
+import {createRequire} from 'module';const {chromium}=createRequire('/')('playwright');
+const b=await chromium.launch();const c=await b.newContext({viewport:{width:1280,height:720}});const errs=[];let bad=0;const ok=(n,v)=>{console.log(v?'ok ':'FEL',n);if(!v)bad++};
+// trasig sparfil
+{const t=await c.newPage();await t.goto('http://localhost:4173/tv?local=1');await t.evaluate(()=>{localStorage.setItem('ks-host-v1','{"at":'+Date.now()+',"code":"ABCD","players":"x"}');localStorage.setItem('ks-used-v1','{{{');localStorage.setItem('ks-maf-v1','[1,2')});await t.reload();await t.waitForFunction(()=>window.__show,null,{timeout:5000});ok('trasig sparfil ger ny lobby',await t.evaluate(()=>__show.stage==='lobby'&&!!document.querySelector('.lobby')));
+ await t.evaluate(()=>{localStorage.setItem('ks-host-v1',JSON.stringify({at:Date.now(),code:'ABCD',players:[],mode:'solo',teamCount:2,total:{},queue:['race','fast'],qi:0,match:true,history:[]}))});await t.reload();await t.waitForFunction(()=>window.__show);await t.waitForTimeout(1600);ok('borttaget spel i kön hoppas över',await t.evaluate(()=>!__show.queue.includes('race')));await t.evaluate(()=>{localStorage.clear()});await t.close()}
+const tv=await c.newPage();tv.on('pageerror',e=>errs.push(e.message));await tv.goto('http://localhost:4173/tv?local=1');await tv.waitForFunction(()=>window.__show);const code=await tv.evaluate(()=>__show.code);
+await tv.evaluate(()=>{const s=__show;for(let i=0;i<8;i++)s.onRoom({t:'hello',pid:'h'+i,name:'H'+i,avatar:'🦊'});for(let i=0;i<4;i++)s.addBot();window.__k=setInterval(()=>s.players.forEach(p=>p.seen=Date.now()),500)});
+ok('12 i rummet',await tv.evaluate(()=>__show.players.length===12));
+const r=await tv.evaluate(()=>{const s=__show;s.onRoom({t:'hello',pid:'h8',name:'Ny',avatar:'🐸'});return{n:s.players.length,ny:s.players.some(p=>p.id==='h8'),bots:s.players.filter(p=>p.bot).length}});ok('människa tar datorns plats',r.n===12&&r.ny&&r.bots===3);
+await tv.evaluate(()=>{const s=__show;s.players.filter(p=>p.bot).forEach(p=>p.bot=false)});
+const ph=await c.newPage();await ph.setViewportSize({width:390,height:800});await ph.goto(`http://localhost:4173/?r=${code}&local=1&n=Sen`);await ph.waitForFunction(()=>/Rummet är fullt/.test(document.body.innerText),null,{timeout:8000}).then(()=>ok('13:e får besked',true),()=>ok('13:e får besked',false));await ph.close();
+const d=await tv.evaluate(()=>{const s=__show;const out={};const v=(x)=>s.vipCmd(x);v({vip:'single',v:'finnsinte'});out.okänt=s.stage;v({vip:'match',v:'x'});out.tom=s.stage;v({vip:'mode',v:'lol'});out.mode=s.mode;v({vip:'teams',v:99});out.t=s.teamCount;v({vip:'single',v:'fast'});out.start=s.stage;v({vip:'single',v:'quote'});out.id=s.def.id;v({vip:'bot+'});v({vip:'skip'});v({vip:'skip'});out.skip=s.stage;return out});console.log(d);
+ok('okänt spel ignoreras',d.okänt==='lobby'&&d.tom==='lobby');ok('trasiga val ignoreras',d.mode==='solo'&&d.t===2);ok('start under spel ignoreras',d.id==='fast');ok('dubbeltryck hoppar ett steg',d.skip==='game');
+// krasch i tv-vyn ska gå vidare, inte ge svart skärm
+await tv.evaluate(()=>{const s=__show;s.def.Tv=()=>{throw new Error('test')};s.bump()});await tv.waitForTimeout(600);const st=await tv.evaluate(()=>({st:__show.stage,kids:document.querySelector('.tv').innerText.length}));console.log(st);ok('krasch i vyn avslutar spelet',st.st==='result'&&st.kids>5);
+await b.close();console.log('fel på sidan',errs.filter(e=>!/test/.test(e)),'antal fel',bad);

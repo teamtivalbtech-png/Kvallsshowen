@@ -1,4 +1,4 @@
-import * as T from 'three';
+import * as T from 'three';import {scene3d} from '../lite';
 const CAM={fov:46,y:3.4,tilt:.06}; // samma värden som träfflogiken i action.tsx
 const SUN=new T.Vector3(-.35,.2,-1).normalize();
 const noise=`float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p*=2.03;a*=.5;}return v;}`;
@@ -10,8 +10,8 @@ function shore(){const g=new T.Group();const mk=(w:number,x:number,z:number)=>{c
 function cottage(){const g=new T.Group(),red=new T.MeshLambertMaterial({color:0x8f2317}),wh=new T.MeshLambertMaterial({color:0xf5ece0});const b=new T.Mesh(new T.BoxGeometry(4.6,2.4,3),red);b.position.y=1.3;g.add(b);const r=new T.Mesh(new T.ConeGeometry(3.8,1.8,4).rotateY(Math.PI/4),new T.MeshLambertMaterial({color:0x2a2030}));r.scale.set(1,1,.72);r.position.y=3.2;g.add(r);[-1.3,1.3].forEach(x=>{const w=new T.Mesh(new T.PlaneGeometry(.8,.9),new T.MeshBasicMaterial({color:0xffc66a}));w.position.set(x,1.4,1.52);g.add(w);const f=new T.Mesh(new T.PlaneGeometry(1,1.1),wh);f.position.set(x,1.4,1.51);g.add(f)});g.position.set(-18,.1,-74);g.scale.setScalar(1.4);return g}
 function jetty(){const g=new T.Group(),w=new T.MeshLambertMaterial({color:0x4d3322});const d=new T.Mesh(new T.BoxGeometry(2.2,.14,14),w);d.position.set(10.5,.65,-14);g.add(d);for(let i=0;i<5;i++)for(const s of [-1,1]){const p=new T.Mesh(new T.CylinderGeometry(.09,.09,1.6),w);p.position.set(10.5+s,.05,-20+i*3);g.add(p)}return g}
 function reeds(){const G=new T.PlaneGeometry(.035,2.6,1,4);G.translate(0,1.3,0);const mat=new T.ShaderMaterial({side:T.DoubleSide,uniforms:{t:{value:0}},vertexShader:`attribute vec3 c;varying vec3 v;varying float y;uniform float t;void main(){v=c;y=position.y;vec4 w=instanceMatrix*vec4(position,1.);w.x+=sin(t*1.4+w.x*1.3+w.z)*.05*position.y*position.y;gl_Position=projectionMatrix*modelViewMatrix*w;}`,fragmentShader:`varying vec3 v;varying float y;void main(){gl_FragColor=vec4(mix(v*.35,v+vec3(.35,.2,.05),smoothstep(.5,2.6,y)),1.);}`});const n=160,m=new T.InstancedMesh(G,mat,n);const cols=new Float32Array(n*3),d=new T.Object3D();for(let i=0;i<n;i++){const s=i%2?1:-1;d.position.set(s*(1.5+Math.random()*7.5),-.05,6.2-Math.random()*2.6);d.scale.set(1.2,.5+Math.random()*.75,1);d.rotation.set(0,Math.random()*3,(Math.random()-.5)*.14);d.updateMatrix();m.setMatrixAt(i,d.matrix);cols[i*3]=.2+Math.random()*.1;cols[i*3+1]=.26+Math.random()*.1;cols[i*3+2]=.08}G.setAttribute('c',new T.InstancedBufferAttribute(cols,3));return m}
-const L=(c:number,o:any={})=>new T.MeshStandardMaterial({color:c,roughness:.65,...o});
-export function bird(kind:string){const g=new T.Group(),gold=kind==='g',sw=kind==='s';const M=(c:number)=>gold?L(0xffc23d,{metalness:.9,roughness:.25,emissive:0x8a5a00,emissiveIntensity:.8}):L(c);
+const L=(c:number,o:any={})=>o.metalness?new T.MeshStandardMaterial({color:c,roughness:.65,...o}):new T.MeshLambertMaterial({color:c,...o});
+function makeBird(kind:string){const g=new T.Group(),gold=kind==='g',sw=kind==='s';const M=(c:number)=>gold?L(0xffc23d,{metalness:.9,roughness:.25,emissive:0x8a5a00,emissiveIntensity:.8}):L(c);
   const body=new T.Mesh(new T.SphereGeometry(.5,10,8),M(sw?0xf7f4ee:0x8d8478));body.scale.set(1.55,.82,.82);g.add(body);const chest=new T.Mesh(new T.SphereGeometry(.42,8,6),M(sw?0xffffff:0x6b3b22));chest.position.set(.42,.02,0);g.add(chest);
   const neck=new T.Mesh(new T.CylinderGeometry(.12,.19,sw?1.15:.42,10),M(sw?0xffffff:0x0f5a3a));neck.position.set(sw?1.05:.72,sw?.34:.27,0);neck.rotation.z=sw?-1.05:-.75;g.add(neck);
   const head=new T.Mesh(new T.SphereGeometry(.24,12,10),M(sw?0xffffff:0x0f6a44));head.position.set(sw?1.56:.92,sw?.62:.46,0);g.add(head);if(!sw&&!gold){const ring=new T.Mesh(new T.TorusGeometry(.17,.03,6,14),L(0xffffff));ring.position.set(.72,.2,0);ring.rotation.y=Math.PI/2;ring.rotation.x=.7;g.add(ring)}
@@ -19,27 +19,31 @@ export function bird(kind:string){const g=new T.Group(),gold=kind==='g',sw=kind=
   [-1,1].forEach(s=>{const e=new T.Mesh(new T.SphereGeometry(.045,6,6),new T.MeshBasicMaterial({color:0x000000}));e.position.set(head.position.x+.13,head.position.y+.07,s*.19);g.add(e)});
   const tail=new T.Mesh(new T.ConeGeometry(.2,.5,6),M(sw?0xffffff:0xf0ece2));tail.position.set(-.86,.05,0);tail.rotation.z=1.5;g.add(tail);
   const wing=(s:number)=>{const sh=new T.Shape();sh.moveTo(0,0);sh.bezierCurveTo(.3,.35*1,.65,1.0,.28,1.75);sh.bezierCurveTo(-.05,1.45,-.42,.7,-.5,0);sh.lineTo(0,0);const G=new T.ExtrudeGeometry(sh,{depth:.03,bevelEnabled:false,steps:1,curveSegments:8});G.rotateX(Math.PI/2);if(s<0)G.scale(1,1,-1);const w=new T.Mesh(G,M(sw?0xf5f2ea:0x5e5548));w.position.set(.1,.2,s*.3);const tip=new T.Mesh(new T.PlaneGeometry(.26,.34),M(sw?0xffffff:0x1f5ec2));tip.rotation.x=Math.PI/2;tip.position.set(-.2,.0,s*.66);w.add(tip);return w};
-  const w1=wing(1),w2=wing(-1);g.add(w1,w2);(g as any).wings=[w1,w2];return g}
+  const w1=wing(1),w2=wing(-1);w1.userData.w=1;w2.userData.w=1;g.add(w1,w2);return g}
+const TPL:Record<string,T.Group>={};
+/** Fågelkroppen byggs en gång per sort och delas. Förr byggdes en ny för varje fågel och läckte grafikminne. */
+export function bird(kind:string){const g=(TPL[kind]||=makeBird(kind)).clone(true);const w:any[]=[];g.traverse(o=>{if(o.userData.w)w.push(o)});(g as any).wings=w;return g}
+const RING=new T.RingGeometry(.3,.42,32).rotateX(-Math.PI/2);
 export class DuckScene{
-  scene=new T.Scene();cam=new T.PerspectiveCamera(CAM.fov,1,.1,800);pool=new Map<any,T.Group>();mats:any[]=[];puffs:any[]=[];rips:any[]=[];r:T.WebGLRenderer;off=false;jet:any;
+  scene=new T.Scene();cam=new T.PerspectiveCamera(CAM.fov,1,.1,800);pool=new Map<any,T.Group>();free:Record<string,T.Group[]>={};w=0;h=0;q=0;mats:any[]=[];puffs:any[]=[];rips:any[]=[];r:T.WebGLRenderer;off=false;jet:any;
   constructor(public canvas:HTMLCanvasElement){
-    this.r=new T.WebGLRenderer({canvas,antialias:false,powerPreference:'default'});this.r.toneMapping=T.ACESFilmicToneMapping;this.r.toneMappingExposure=1.05;this.r.outputColorSpace=T.SRGBColorSpace;
-    const S=this.scene;S.fog=new T.Fog(0xe88a70,70,300);const hs=new T.HemisphereLight(0xffc9a3,0x28324a,1.5);const d=new T.DirectionalLight(0xffd0a0,3);d.position.copy(SUN).multiplyScalar(50);d.position.y=30;S.add(hs,d);
-    const sk=sky(),w=water(),rd=reeds();this.mats=[sk.material,w.material,rd.material];const hz=[sk,ridge(-160,34,0x5a5a8c,1.2),ridge(-125,22,0x3b4a6b,4.4),ridge(-100,11,0x24413f,7.1),forest(420),shore(),cottage()];hz.forEach(o=>(o as any).isHorizon=true);this.jet=jetty();S.add(...hz,w,this.jet,rd);
+    this.r=new T.WebGLRenderer({canvas,antialias:false,powerPreference:'default',stencil:false,alpha:false});this.r.toneMapping=T.ACESFilmicToneMapping;this.r.toneMappingExposure=1.05;this.r.outputColorSpace=T.SRGBColorSpace;
+    this.r.setClearColor(0x2a1a3a);const S=this.scene;const hs=new T.HemisphereLight(0xffc9a3,0x28324a,1.5);const d=new T.DirectionalLight(0xffd0a0,3);d.position.copy(SUN).multiplyScalar(50);d.position.y=30;S.add(hs,d);
+    const sk=sky(),w=water(),rd=reeds();this.mats=[sk.material,w.material,rd.material];const hz=[sk,ridge(-160,34,0x5a5a8c,1.2),ridge(-125,22,0x3b4a6b,4.4),ridge(-100,11,0x24413f,7.1),forest(420),shore(),cottage()];hz.forEach(o=>(o as any).isHorizon=true);this.jet=jetty();hz.forEach(o=>o.visible=false);this.jet.visible=false;w.visible=false;S.add(...hz,w,this.jet,rd);
     // Valfri AI-bild: ersätter himmel och fjärran landskap, 3D-vatten och ankor ligger kvar ovanpå
-    new T.TextureLoader().load('/art/duck-backdrop.jpg',t=>{t.colorSpace=T.SRGBColorSpace;t.repeat.set(.47,1);t.offset.set(.5,0);S.background=t;[...S.children].forEach(o=>{if((o as any).isHorizon)o.visible=false});S.fog=null;this.jet.visible=false;w.visible=false},undefined,()=>{});
+    new T.TextureLoader().load('/art/duck-backdrop.jpg',t=>{t.colorSpace=T.SRGBColorSpace;t.generateMipmaps=false;t.minFilter=T.LinearFilter;t.repeat.set(.47,1);t.offset.set(.5,0);S.background=t;},undefined,()=>{S.fog=new T.Fog(0xe88a70,70,300);hz.forEach(o=>o.visible=true);this.jet.visible=true;w.visible=true});
     this.cam.position.set(0,CAM.y,9);this.cam.rotation.x=CAM.tilt;
   }
-  size(w:number,h:number){if(!w)return;this.r.setPixelRatio(1);this.r.setSize(w,h,false);this.cam.aspect=w/h;this.cam.updateProjectionMatrix()}
-  sync(list:any[],t:number){const live=new Set(list);for(const[k,m]of this.pool)if(!live.has(k)){this.scene.remove(m);this.pool.delete(k)}
-    for(const k of list){let m=this.pool.get(k);if(!m){m=bird(k.k);m.scale.setScalar(k.size);this.scene.add(m);this.pool.set(k,m)}
+  size(w:number,h:number){const q=scene3d();if(!w||!h||(w===this.w&&h===this.h&&q===this.q))return;this.w=w;this.h=h;this.q=q;this.r.setPixelRatio(1);this.r.setSize(Math.round(w*q),Math.round(h*q),false);this.cam.aspect=w/h;this.cam.updateProjectionMatrix()}
+  sync(list:any[],t:number){const live=new Set(list);for(const[k,m]of this.pool)if(!live.has(k)){this.scene.remove(m);(this.free[k.k]||=[]).push(m);this.pool.delete(k)}
+    for(const k of list){let m=this.pool.get(k);if(!m){m=this.free[k.k]?.pop()||bird(k.k);m.rotation.set(0,0,0);m.scale.setScalar(k.size);this.scene.add(m);this.pool.set(k,m)}
       m.position.set(k.wx,k.wy,k.wz);m.rotation.y=k.vx>0?0:Math.PI;m.rotation.y+=(k.vz||0)*.7;
       if(k.dead){m.rotation.z+=.25;(m as any).wings[0].rotation.x=1;(m as any).wings[1].rotation.x=-1;if(!k.fx){k.fx=1;this.puff(k)}if(k.wy<.1&&!k.splash){k.splash=1;this.ripple(k.wx,k.wz)}}
       else{const a=Math.sin(k.ph*2.4)*.85;(m as any).wings[0].rotation.x=-a;(m as any).wings[1].rotation.x=a;m.position.y+=Math.sin(k.ph*2.4)*.05}}
-    this.puffs=this.puffs.filter(p=>{p.life-=.016;const a=p.geometry.attributes.position;for(let i=0;i<a.count;i++){a.setXYZ(i,a.getX(i)+p.v[i*3]*.016,a.getY(i)+(p.v[i*3+1]-=.03)*.016,a.getZ(i)+p.v[i*3+2]*.016)}a.needsUpdate=true;p.material.opacity=Math.max(0,p.life);if(p.life<=0){this.scene.remove(p);return false}return true});
-    this.rips=this.rips.filter(r=>{r.life-=.016;r.scale.multiplyScalar(1.03);r.material.opacity=Math.max(0,r.life);if(r.life<=0){this.scene.remove(r);return false}return true});
+    this.puffs=this.puffs.filter(p=>{p.life-=.016;const a=p.geometry.attributes.position;for(let i=0;i<a.count;i++){a.setXYZ(i,a.getX(i)+p.v[i*3]*.016,a.getY(i)+(p.v[i*3+1]-=.03)*.016,a.getZ(i)+p.v[i*3+2]*.016)}a.needsUpdate=true;p.material.opacity=Math.max(0,p.life);if(p.life<=0){this.scene.remove(p);p.geometry.dispose();p.material.dispose();return false}return true});
+    this.rips=this.rips.filter(r=>{r.life-=.016;r.scale.multiplyScalar(1.03);r.material.opacity=Math.max(0,r.life);if(r.life<=0){this.scene.remove(r);r.material.dispose();return false}return true});
     this.mats.forEach(m=>m.uniforms.t.value=t);this.r.render(this.scene,this.cam)}
   puff(k:any){const n=26,p=new Float32Array(n*3),v:number[]=[];for(let i=0;i<n;i++){p.set([k.wx,k.wy,k.wz],i*3);v.push((Math.random()-.5)*6,Math.random()*5,(Math.random()-.5)*6)}const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(p,3));const m=new T.Points(g,new T.PointsMaterial({color:k.k==='g'?0xffd86a:0xfff4e0,size:.22*k.size,transparent:true,depthWrite:false}));(m as any).v=v;(m as any).life=1;this.scene.add(m);this.puffs.push(m as any)}
-  ripple(x:number,z:number){const r=new T.Mesh(new T.RingGeometry(.3,.42,32).rotateX(-Math.PI/2),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.8}));r.position.set(x,.05,z);(r as any).life=.9;this.scene.add(r);this.rips.push(r as any)}
-  dispose(){this.r.dispose()}
+  ripple(x:number,z:number){const r=new T.Mesh(RING,new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.8}));r.position.set(x,.05,z);(r as any).life=.9;this.scene.add(r);this.rips.push(r as any)}
+  dispose(){this.r.dispose();try{this.r.forceContextLoss()}catch{}}
 }
