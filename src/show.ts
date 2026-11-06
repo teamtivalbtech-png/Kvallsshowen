@@ -158,7 +158,7 @@ export class Show{
     if(this.full.has(id)&&!this.players.some(x=>x.id===id))return{stage:'lobby',me:{name:'',avatar:'📺',color:'#ffc23d'},vip:false,dl:0,pv:{k:'wait',msg:'Rummet är fullt',sub:'Max 12 spelare. Vänta tills någon lämnar.',big:'🚪'},rate:1,canSkip:false,long:false};
     const p=this.players.find(x=>x.id===id);if(!p)return null;const v=this.vip();const isV=v?.id===id;
     let pv:any;
-    if(this.stage==='lobby')pv=isV?{k:'vipLobby',mode:this.mode,teams:this.teamCount,n:this.players.length,bots:this.players.filter(x=>x.bot).length,sips:this.sips,list:this.players.map(x=>({id:x.id,name:x.name,avatar:x.avatar,team:x.team}))}:{k:'wait',msg:'Du är med!',sub:`${v?.name||'Första spelaren'} väljer spel`};
+    if(this.stage==='lobby')pv=isV?{k:'vipLobby',mode:this.mode,teams:this.teamCount,n:this.players.length,bots:this.players.filter(x=>x.bot).length,sips:this.sips,list:this.players.map(x=>({id:x.id,name:x.name,avatar:x.avatar,team:x.team}))}:{k:'seeGames',leader:v?.name||'Första spelaren'};
     else if(this.stage==='intro')pv={k:'intro',title:this.def?.title,how:this.def?.how,needs:this.def?.needs};
     else if(this.stage==='game'&&this.inst)try{pv=this.inst.phone(id)}catch(e){console.error(e);pv={k:'wait',msg:'Ett ögonblick'}}
     else if(this.stage==='result')pv={k:'wait',msg:this.match?'Delresultat':'Resultat',sub:(()=>{const r=this.lastRes?.rows?.find((x:any)=>x.id===id);return r?`${r.pts} poäng i ${this.def?.title}`:''})()};

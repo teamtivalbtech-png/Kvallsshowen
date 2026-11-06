@@ -239,7 +239,7 @@ button,input{font:inherit;color:inherit}button{border:0;background:none;cursor:p
 .wipe i:nth-child(2){background:var(--coral);animation-delay:.09s}
 .wipe i:nth-child(3){background:#2a0f3d}
 @keyframes wipe{from{transform:translate3d(0,0,0) skewX(-12deg)}to{transform:translate3d(118%,0,0) skewX(-12deg)}}
-.body>*{animation:viewin .3s var(--ease) both}
+.body>*{animation:viewin .3s var(--ease) backwards}
 @keyframes viewin{from{opacity:0;transform:translateY(16px) scale(.98)}}
 /* Lägre kvalitet på svaga apparater */
 html.lite .six,html.lite .glist span,html.lite .mstar,html.lite .greel article>span{filter:none}
@@ -336,3 +336,13 @@ html.nogap .ansrow .av{font-size:2.6vw;line-height:4.4vw}
 .lname{font-size:3vh}.lname small{font-size:2.1vh}
 .lmem{gap:.3vh .7vw;max-height:9vh}.lmem span{font-size:2.2vh}.lmem .av{width:3vh;height:3vh;font-size:2.1vh;line-height:3vh}
 .lmyst{background:var(--gold);color:var(--ink);font-size:min(1.6vw,3vh)}
+
+/* Spellistan för alla på telefonen */
+.see{padding-bottom:12px}
+.seehow{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;background:#0009}
+.seehow>div{width:100%;padding:20px 18px 24px;border-radius:20px 20px 0 0;background:var(--plum);text-align:center;animation:rise .25s both}
+.seehow span{font-size:44px}.seehow h3{margin:4px 0 8px;font-size:22px}.seehow p{margin-bottom:14px;line-height:1.35}
+
+.apkbtn{display:inline-block;margin-top:.8vh;padding:1vh 1.4vw;border-radius:99px;background:#ffffff1f;box-shadow:inset 0 0 0 2px var(--gold);color:var(--cream);font-weight:800;font-size:clamp(14px,2vh,24px);text-decoration:none;text-align:center}
+.apkbtn:focus{outline:3px solid var(--gold);outline-offset:2px}
+.hbtns .apkbtn{display:block;padding:12px 16px}
