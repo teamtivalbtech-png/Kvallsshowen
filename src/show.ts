@@ -99,9 +99,12 @@ export class Show{
     }
     // Ett dubbeltryck ska bara hoppa ett steg
     if(d.vip==='skip'&&!lobby&&n-this.skipped>700){this.skipped=n;this.next()}
+    if(d.vip==='step'&&!lobby&&n-this.skipped>700){this.skipped=n;this.skipStep()}
     if(d.vip==='lobby'&&!lobby)this.toLobby();
     this.save();this.bump();
   }
+  /** Programledaren hoppar över det som pågår: samma sak som att tiden tar slut, så att alla regler i spelet följs. */
+  skipStep(){if(this.stage!=='game')return this.next();const f=this.dlFn;try{if(this.dl&&f){this.dl=0;this.dlFn=null;f()}else if((this.inst as any)?.timeUp)(this.inst as any).timeUp();else if(!this.def?.long)this.endGame()}catch(e){this.fail(e)}this.bump()}
   next(){
     if(this.stage==='intro')this.beginGame();else if(this.stage==='game')this.endGame();else if(this.stage==='result')this.afterResult();else if(this.stage==='reveal')this.toLobby()
   }

@@ -12,7 +12,7 @@ class Lat{s:any=null;tok=0;constructor(public api:any){}
  deal(n:number){const s=this.s,pl=fy(this.api.online() as any[]);s.n=n;s.teams=COL.slice(0,n).map((c:any,i:number)=>({id:i,...c,members:[],cards:[],tok:3}));pl.forEach((p:any,i:number)=>s.teams[i%n].members.push(p.id))}
  team(p:string){return this.s.teams.find((t:any)=>t.members.includes(p))}
  go(step:string,back=false){const s=this.s;s.step=step;this.api.stopCountdown();const T:any={setup:600,turn:60,challenge:30,reveal:25,end:30};this.persist();if(step!=='setup'&&step!=='end'){this.api.countdown(T[step]*1000,()=>this.timeUp())}else if(step==='end'){this.api.countdown(30000,()=>this.api.end())}if(!back&&step==='reveal')this.api.sfx('reveal');if(back&&step==='turn')this.playCur();this.bots();this.api.refresh()}
- timeUp(){const s=this.s;if(s.step==='turn'){if(s.slot==null)s.slot=Math.min(s.pos||0,this.cur().cards.length);return this.go('challenge')}if(s.step==='challenge')return this.reveal();if(s.step==='reveal')return this.next()}
+ timeUp(){const s=this.s;if(s.step==='setup')return this.begin();if(s.step==='turn'){if(s.slot==null)s.slot=Math.min(s.pos||0,this.cur().cards.length);return this.go('challenge')}if(s.step==='challenge')return this.reveal();if(s.step==='reveal')return this.next()}
  cur(){return this.s.teams[this.s.ti]}
  draw(){const i=this.api.used('song',1,SONGS.length)[0];return (SONGS as any)[i]}
  begin(){const s=this.s;for(const t of s.teams){const k=this.draw();t.cards=[{t:k.t,a:k.a,y:k.y}]}s.ti=Math.random()*s.teams.length|0;this.turn()}
