@@ -9,7 +9,7 @@ class Nostalgi extends Fast{setup(){this.items=this.api.used('nos',12,NOS.length
 const FastTv=({g,show}:any)=>{const q=g.cur;if(!q)return null;return <Stage kicker={`${q.cat} · ${g.idx+1}/${g.items.length}`} title={q.q}><Opts list={q.o} right={g.phase==='reveal'?q.a:null}/><Answered g={g} show={show}/></Stage>};
 class Big extends RB{qms=20000;revealMs=5000;step=0;catV:any={};cat='';onInput(p:string,d:any){if(this.voting&&!this.cats.includes(d?.a))return;super.onInput(p,d)}setup(){this.items=[0,1,2,3,4,5,6,7,8].map(i=>({i}))}
  voting=true;cats:string[]=[];
- begin(){if(this.idx%3===0){this.voting=true;this.cats=shuffle(CATS).slice(0,3);this.qms=10000;this.t=null}else this.loadQ()}
+ begin(){if(this.idx%3===0){this.voting=true;this.cats=shuffle(CATS).slice(0,4);this.qms=10000;this.t=null}else this.loadQ()}
  t:any=null;loadQ(){this.voting=false;this.qms=20000;this.t=mc(QUIZ[this.api.used('quiz',1,QUIZ.length,(i:number)=>QUIZ[i].cat===this.cat)[0]])}
  get qq(){return this.t}
  ask(p:string){return this.voting?{k:'choice',prompt:'Välj kategori',opts:this.cats.map(c=>({id:c,label:c})),sel:this.sel(p)}:{k:'choice',prompt:'Dubbla med snabbhet',opts:this.t.o.map((o:string)=>({id:o,label:o})),sel:this.sel(p)}}
