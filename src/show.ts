@@ -2,6 +2,7 @@ import {QUIPS} from './content/quips';import {rs} from './rand';import {openPipe
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
+declare const __BUILD__:string;
 /** Alla apparater går igenom samma blandade ordning, och startpunkten flyttas med klockan.
  *  Då får en annan tv eller en rensad webbläsare inte samma klipp som nyss spelades, trots att minnet bara finns lokalt. */
 function walk(k:string,n:number){let h=5381;for(let i=0;i<k.length;i++)h=(h*33^k.charCodeAt(i))>>>0;const next=()=>{h=(h+0x6D2B79F5)>>>0;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296};const p=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=next()*(i+1)|0;[p[i],p[j]]=[p[j],p[i]]}const off=Math.floor(n*((Date.now()%26280000)/26280000));const o=new Array(n);p.forEach((v,i)=>{o[v]=(i-off+n)%n});return o}
@@ -164,7 +165,7 @@ export class Show{
     else if(this.stage==='result')pv={k:'wait',msg:this.match?'Delresultat':'Resultat',sub:(()=>{const r=this.lastRes?.rows?.find((x:any)=>x.id===id);return r?`${r.pts} poäng i ${this.def?.title}`:''})()};
     else pv=isV?{k:'vipEnd'}:{k:'wait',msg:'Titta på tv:n',sub:'Sanningens ögonblick'};
     const team=this.mode==='team'?TEAM[p.team]:null;
-    return{stage:this.stage,mission:this.match?this.missions[id]:undefined,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby',long:!!this.def?.long};
+    return{stage:this.stage,mission:this.match?this.missions[id]:undefined,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby',long:!!this.def?.long,b:__BUILD__};
   }
   push(id:string,force:boolean){
     const x=this.pipes.get(id);if(!x)return;const v=this.view(id);if(!v)return;const s=JSON.stringify(v);
