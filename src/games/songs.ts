@@ -1,3 +1,4 @@
+import {onBg,isBg} from '../bg';
 // Spelar 30-sekundersklipp som hämtas via /api/song.
 const cache=new Map<string,string|null>();
 export async function previewUrl(s:{t:string,a:string}):Promise<string|null>{
@@ -17,7 +18,7 @@ export async function playSong(s:any){const t=++tok;const u=await previewUrl(s);
   if(!au.paused&&au.volume>.02){leaving=true;await new Promise<void>(r=>fade(0,1800,r));leaving=false;if(t!==tok)return stale()}
   const go=async(src:string)=>{clearInterval(fadeT);au.volume=0;au.src=src;await au.play()};
   try{try{await go(u)}catch(e:any){if(e?.name==='NotAllowedError'||t!==tok)throw e;await go(binUrl(s))}
-    if(t!==tok){if(on===t)au.pause();return stale()}wanted=t;leaving=false;fade(lvl(),2000);flag(false);return true}
+    if(t!==tok){if(on===t)au.pause();return stale()}wanted=t;leaving=false;fade(lvl(),2000);flag(false);if(isBg()){bgWas=true;au.pause()}return true}
   catch(e:any){if(t!==tok)return stale();console.warn('låt',e);if(e?.name==='NotAllowedError')flag(true);return false}}
 // Klippen är bara 30 sekunder. I stället för att tystna tvärt tonas de ner och börjar om mjukt.
 // Längden är okänd för vissa ljudkällor, då räknas klippet som 30 sekunder.
@@ -27,3 +28,6 @@ if(au){setInterval(()=>{if(au.paused||leaving)return;const d=au.duration&&isFini
  au.addEventListener('ended',()=>{if(wanted===tok)again()})}
 export function stopSong(ms=2500){tok++;if(au.paused)return;const t=tok;leaving=true;fade(0,ms,()=>{leaving=false;if(t===tok)au.pause()})}
 export function resumeSong(){tok++;au.play().catch(()=>{});fade(lvl(),1500)}
+
+// Tystnar när tv-sidan läggs i bakgrunden och fortsätter när den kommer tillbaka.
+let bgWas=false;onBg(h=>{if(!au)return;if(h){bgWas=!au.paused;au.pause()}else if(bgWas){bgWas=false;au.play().catch(()=>{})}});

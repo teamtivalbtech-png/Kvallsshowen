@@ -1,14 +1,15 @@
+import {isBg,onBg} from './bg';
 // All musik och alla ljudeffekter syntetiseras i webbläsaren, så inga rättigheter behövs.
 class Snd{
   ctx:AudioContext|null=null;master:GainNode|null=null;cur:string|null=null;timer:any=0;step=0;next=0;on=false;want:string|null=null;
   mg:GainNode|null=null;ducked=false;level=1;token=0;
   ramp(v:number,s:number){if(!this.mg||!this.ctx)return;this.fading=Date.now()+s*1000+200;const g=this.mg.gain,t=this.ctx.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(v,t+s)}
   duck(on:boolean){this.ducked=on;if(this.cur)this.ramp(on?.25:.9,.35)}
-  unlock(){if(!this.ctx){this.ctx=new (window.AudioContext||(window as any).webkitAudioContext)();this.master=this.ctx.createGain();this.master.gain.value=.5;const c=this.ctx.createDynamicsCompressor();this.master.connect(c);c.connect(this.ctx.destination);this.mg=this.ctx.createGain();this.mg.gain.value=0;this.mg.connect(this.master)}this.ctx.resume();this.on=true;if(this.want)this.music(this.want);if(!this.guard)this.guard=setInterval(()=>this.heal(),1500)}
+  unlock(){if(!this.ctx){this.ctx=new (window.AudioContext||(window as any).webkitAudioContext)();this.master=this.ctx.createGain();this.master.gain.value=.5;const c=this.ctx.createDynamicsCompressor();this.master.connect(c);c.connect(this.ctx.destination);this.mg=this.ctx.createGain();this.mg.gain.value=0;this.mg.connect(this.master)}if(!isBg())this.ctx.resume();this.on=true;if(this.want)this.music(this.want);if(!this.guard)this.guard=setInterval(()=>this.heal(),1500)}
   guard:any=0;fading=0;
   /** Tv-apparater kan pausa ljudmotorn när en video spelar. Väck den och fortsätt musiken. */
   beat=0;
-  heal(){const c=this.ctx;if(!c)return;if(c.state!=='running'){c.resume().catch(()=>{});return}
+  heal(){const c=this.ctx;if(!c)return;if(isBg()){if(c.state==='running')c.suspend().catch(()=>{});return}if(c.state!=='running'){c.resume().catch(()=>{});this.beat=Date.now();return}
     // Skyddsnät: har musikslingan stannat eller försvunnit startas den om med mjuk upptoning.
     if(this.want&&this.bar[this.want]&&Date.now()>this.fading+1500&&((this.cur&&Date.now()-this.beat>2500)||(!this.cur&&Date.now()-this.beat>4000))){console.warn('musik startas om');const n=this.want;clearInterval(this.timer);this.timer=0;this.cur=null;this.music(n);return}if(this.cur&&this.bar[this.cur]){if(this.next<c.currentTime-1)this.next=c.currentTime+.05;const want=this.ducked?.25:.9;if(this.mg&&Math.abs(this.mg.gain.value-want)>.05&&Date.now()>this.fading)this.ramp(want,1.2)}}
   tone(f:number,t:number,d:number,type:OscillatorType='sine',v=.2,dest?:AudioNode){if(!this.ctx)return;const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.008);g.gain.exponentialRampToValueAtTime(.0008,t+d);o.connect(g);g.connect(dest||this.master!);o.start(t);o.stop(t+d+.02)}
@@ -28,3 +29,4 @@ class Snd{
     if(was&&old){this.ramp(0,1);setTimeout(start,1050)}else start()}
 }
 export const snd=new Snd();
+onBg(h=>{const c=snd.ctx;if(!c)return;if(h)c.suspend().catch(()=>{});else{snd.beat=Date.now();snd.fading=Date.now();c.resume().catch(()=>{})}});
