@@ -1,13 +1,9 @@
-// Hämtar en trailer för en film via iTunes, så att tv:n kan visa ett riktigt filmklipp i Filmster.
-const norm=(s:string)=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\(.*?\)/g,'').replace(/[^a-z0-9]/g,'');
+// Letar upp en trailer på YouTube för en film. Används bara för att ta fram listan i content/films.ts.
 export default async function handler(req:any,res:any){
   const t=String(req.query.t||'').slice(0,90),y=+req.query.y||0;if(!t)return res.status(400).end();
-  const T=norm(t);let url:string|null=null,poster='';const dbg:any[]=[];
-  for(const c of ['US','SE','GB']){if(url)break;
-    try{const r=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(t)}&media=movie&limit=25&country=${c}`);if(!r.ok){dbg.push({c,st:r.status});continue}const j:any=await r.json();if(req.query.dbg)dbg.push({c,n:j.resultCount,r:(j.results||[]).slice(0,5).map((x:any)=>[x.kind,x.trackName,x.releaseDate,!!x.previewUrl])});
-      const a=(j.results||[]).filter((x:any)=>x.previewUrl&&x.kind==='feature-movie');
-      const yr=(x:any)=>Math.abs(new Date(x.releaseDate).getFullYear()-y);const nm=(x:any)=>{const n=norm(x.trackName);return n===T?0:n.startsWith(T)||T.startsWith(n)?1:n.includes(T)?2:9};
-      const m=a.filter((x:any)=>nm(x)<9&&(!y||yr(x)<=1)).sort((p:any,q:any)=>nm(p)-nm(q)||yr(p)-yr(q))[0];
-      if(m){url=m.previewUrl;poster=(m.artworkUrl100||'').replace('100x100','600x600')}}catch(e:any){dbg.push({c,e:String(e)})}}
-  res.setHeader('cache-control','public, s-maxage=86400');res.status(url?200:404).json(req.query.dbg?{url,poster,dbg}:{url,poster});
+  const out:any[]=[];
+  try{const r=await fetch(`https://www.youtube.com/results?search_query=${encodeURIComponent(`${t} ${y||''} official trailer`)}&hl=en&gl=US`,{headers:{'accept-language':'en-US,en;q=0.9','user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'}});
+    const h=await r.text();const m=h.match(/var ytInitialData = (\{.*?\});<\/script>/s);
+    if(m){const j=JSON.parse(m[1]);const walk=(o:any)=>{if(!o||typeof o!=='object'||out.length>=6)return;if(o.videoRenderer){const v=o.videoRenderer;out.push({id:v.videoId,ti:v.title?.runs?.[0]?.text,ch:v.ownerText?.runs?.[0]?.text,len:v.lengthText?.simpleText});return}for(const k in o)walk(o[k])};walk(j)}else out.push({err:'no data',st:r.status,len:h.length})}catch(e:any){out.push({err:String(e)})}
+  res.setHeader('cache-control','no-store');res.status(200).json(out);
 }
