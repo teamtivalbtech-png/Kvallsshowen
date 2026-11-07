@@ -434,3 +434,7 @@ html.app .ytbox.live .ytcover{display:none}
 .lfilm i{font-size:3.4vh}.lfilm b{font-size:3.2vh;white-space:nowrap}
 .lcard span{font-size:min(1.1vw,2vh)}
 .gm-filmster .lat{background:linear-gradient(#000b,#000c),url(/art/filmster.jpg) center/cover,#150a22}
+
+/* Filmster: trailern */
+.lvid{position:fixed;right:2vw;bottom:3vh;z-index:1;width:40vw;aspect-ratio:16/9;border-radius:16px;box-shadow:0 0 0 .4vh var(--gold),0 1.5vh 5vh #000a;animation:pop .5s var(--ease)}.lvid.small{width:27vw}.lvid.tiny{width:20vw}.lvid.top{bottom:auto;top:11vh}.lvid.top.small{top:calc(52vh - 15.2vw)}.lvid.top.tiny{top:calc(52vh - 11.25vw)}.lvid .yt{position:absolute;inset:0}.lvid .vload{border-radius:16px}
+@supports not (aspect-ratio:1){.lvid{height:22.5vw}.lvid.small{height:15.2vw}.lvid.tiny{height:11.25vw}}

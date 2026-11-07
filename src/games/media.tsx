@@ -140,3 +140,18 @@ export const MEDIAG=[
 {id:'zoom',title:'Zooma ut',tag:'Från närbild till helhet',how:'Bilden zoomas ut. Svara tidigt för mest poäng.',cat:'Bild',icon:'🔍',mins:4,make:(a:any)=>new Zoom(a),Tv:ZoomTv},
 {id:'next',title:'Vad händer sen?',tag:'Klippet fryser',how:'Ett kort klipp stannar. Gissa vad som händer sen.',cat:'Bild',icon:'⏸️',mins:4,make:(a:any)=>new Next(a),Tv:NextTv},
 ];
+/** Filmster: visar filmens trailer i en ruta på tv:n. Börjar en bit in och hoppar tillbaka före slutet, där premiärdatumet brukar stå. */
+export function FilmClip({ids,small,tiny,top}:{ids:string[],small?:boolean,tiny?:boolean,top?:boolean}){const box=useRef<HTMLDivElement>(null);const[n,setN]=React.useState(0);const[on,setOn]=React.useState(false);const[muted,setM]=React.useState(false);const[gone,setGone]=React.useState(false);const id=ids[n];
+ useEffect(()=>{if(!id){setGone(true);return}let live=true,t:any,t0=Date.now(),started=0;setOn(false);const bad=()=>{if(!live)return;live=false;setN(x=>x+1)};Y.err=bad;
+  const place=()=>{if(!Y.box||!box.current)return;const r=box.current.getBoundingClientRect();Object.assign(Y.box.style,{display:'block',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});const f=Y.box.querySelector('iframe') as HTMLIFrameElement|null;if(f&&!Y.box.classList.contains('gatehit')){const H=r.height+190,W=Math.max(r.width,H*16/9);Object.assign(f.style,{width:W+'px',height:H+'px',left:(r.width-W)/2+'px',top:(r.height-H)/2+'px'})}};
+  yt().then(ytPlayer).then((p:any)=>{if(!live)return;place();let vol=0;const S=6;
+   Y.cb=(s:number)=>{if(!live)return;setOn(s===1);if(s===1&&!started)started=Date.now();if(s===1&&p.isMuted?.()){p.unMute();setTimeout(()=>{if(live&&p.isMuted?.())setM(true)},700)}if(s===0){p.seekTo(S,true);p.playVideo()}};
+   p.unMute();p.setVolume(0);p.loadVideoById({videoId:id,startSeconds:S});
+   t=setInterval(()=>{if(!live)return;place();const want=hostState.talking?18:65;vol+=Math.max(-6,Math.min(6,want-vol));p.setVolume?.(Math.round(vol));const ps=p.getPlayerState?.(),ct=p.getCurrentTime?.()||0,d=p.getDuration?.()||0;
+    if(ps===1&&ct>=S-.5)Y.box?.classList.add('live');else if(ps!==3)Y.box?.classList.remove('live');
+    if(d>40&&ct>d-22){p.seekTo(S,true)}if(!started&&Date.now()-t0>4000&&ps!==1&&ps!==3)p.playVideo();if(!started&&Date.now()-t0>14000){clearInterval(t);bad()}},150)}).catch(()=>setGone(true));
+  return()=>{live=false;clearInterval(t);Y.cb=null;Y.err=null;try{Y.p?.pauseVideo();if(Y.box){Y.box.style.display='none';Y.box.classList.remove('tap','live')}}catch{}}},[id]);
+ useEffect(()=>{if(gone)return;snd.duck(true);return()=>snd.duck(false)},[gone]);
+ useEffect(()=>{if(!muted)return;const f=()=>{try{Y.p.unMute();Y.p.setVolume(65);Y.p.playVideo();setM(false)}catch{}};window.addEventListener('pointerdown',f);window.addEventListener('keydown',f);return()=>{window.removeEventListener('pointerdown',f);window.removeEventListener('keydown',f)}},[muted]);
+ if(gone)return null;
+ return <div className={'lvid'+(tiny?' tiny':small?' small':'')+(top?' top':'')}><div className="yt" ref={box}/>{!on&&<div className="vload">Trailern laddas…</div>}{muted&&<div className="big vsound">🔊 Tryck för ljud</div>}</div>}
