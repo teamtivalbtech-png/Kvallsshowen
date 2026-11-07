@@ -1,4 +1,4 @@
-import {QUIPS} from './content/quips';import {rs} from './rand';import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {stopBuf} from './games/rev';import {say,hasVoice,LINES,hush} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';import {MISSIONS,ROASTS} from './games/extras';import {wake} from './net';import {keepAwake} from './devices';
+import {QUIPS} from './content/quips';import {rs} from './rand';import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {stopBuf} from './games/rev';import {say,hasVoice,LINES,hush} from './host';import {setPaused} from './bg';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';import {MISSIONS,ROASTS} from './games/extras';import {wake} from './net';import {keepAwake} from './devices';
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
@@ -33,7 +33,7 @@ export class Show{
     const n=performance.now(),dt=Math.min(.1,(n-this.lastTick)/1000)*FAST;this.lastTick=n;const w=Date.now();
     this.players.forEach(p=>{if(p.bot)p.seen=w;const c=w-p.seen<9000;if(c!==p.connected){p.connected=c;if(!c){try{this.inst?.onLeave?.(p.id)}catch(e){console.error(e)}try{this.rtcs.get(p.id)?.close()}catch{}this.rtcs.delete(p.id)}this.bump()}});
     if(this.dl&&w>=this.dl){const f=this.dlFn;this.dl=0;this.dlFn=null;try{f?.()}catch(e){this.fail(e)}this.bump()}
-    if(this.stage==='game'&&this.inst?.tick)try{this.inst.tick(dt)}catch(e){this.fail(e)}
+    if(this.stage==='game'&&this.inst?.tick&&!this.paused)try{this.inst.tick(dt)}catch(e){this.fail(e)}
     if(this.stage==='game'&&this.inst&&++this.botTick%2===0)for(const p of this.players)if(p.bot)try{botAct(this.inst,p.id,w,FAST)}catch(e){console.error(e)}
     if(this.dirty&&w-this.pushed>=80){this.dirty=false;this.pushed=w;this.pushAll(false)}
     this.pipes.forEach((x,id)=>{if(w-x.lastSend>2500)this.push(id,true)});
@@ -74,7 +74,7 @@ export class Show{
       const d=m.d;
       if(d?.ask){const a=d.ask;if(a.q&&a.a&&a.w?.length===3){this.customQ.push({cat:`Från ${p.name}`,q:String(a.q).slice(0,140),a:String(a.a).slice(0,50),w:a.w.map((x:any)=>String(x).slice(0,50))});this.bump()}return}
       if(d?.vip!==undefined){if(id===this.vip()?.id)this.vipCmd(d);return}
-      if(this.stage==='game'&&d&&typeof d==='object')try{this.inst?.onInput?.(id,d)}catch(e){console.error(e)}
+      if(this.stage==='game'&&!this.paused&&d&&typeof d==='object')try{this.inst?.onInput?.(id,d)}catch(e){console.error(e)}
       this.dirty=true;
     }
   }
@@ -88,6 +88,7 @@ export class Show{
   dropBot(){const i=this.players.map(p=>!!p.bot).lastIndexOf(true);if(i>=0)this.players.splice(i,1)}
   fit(d:GameDef){let guard=12;while(this.players.length<(d.min||2)&&guard--)this.addBot(true);if(d.even&&this.players.length%2)this.addBot(true);if(this.mode==='team'){const sz=()=>Array.from({length:this.teamCount},(_,t)=>this.players.filter(p=>p.team===t).length);while(Math.max(...sz())>Math.min(...sz())&&this.players.length<12&&guard--)this.addBot(true)}}
   skipped=0;vipCmd(d:any){
+    if(d.vip==='pause')return this.pause();if(d.vip==='resume')return this.resume();if(this.paused)this.resume();
     const lobby=this.stage==='lobby',n=Date.now();
     if(lobby){
       if(d.vip==='mode'&&(d.v==='solo'||d.v==='team')){this.mode=d.v;this.assignTeams()}
@@ -140,13 +141,17 @@ export class Show{
   afterResult(){if(this.match&&this.qi<this.queue.length)this.intro(this.queue[this.qi]);else if(this.match)this.reveal();else this.toLobby()}
   reveal(){this.clear();this.stage='reveal';this.revealStep=-1;this.match=false;this.queue=[];this.save();this.bump()}
   toLobby(){try{localStorage.removeItem('ks-maf-v1')}catch{}this.clear();stopSong();stopBuf();this.stage='lobby';this.players=this.players.filter(p=>!(p as any).auto);this.inst=null;this.def=null;this.match=false;this.queue=[];snd.music('lobby');this.save();this.bump()}
-  clear(){this.timers.forEach(t=>{clearTimeout(t);clearInterval(t)});this.timers=[];this.pend=[];this.dl=0;this.dlFn=null}
+  clear(){this.timers.forEach(t=>{clearTimeout(t);clearInterval(t)});this.timers=[];this.pend=[];this.dl=0;this.dlFn=null;if(this.paused){this.paused=0;this.pFn=null;setPaused(false)}}
+  paused=0;pDl=0;pFn:any=null;pAcc=0;
+  /** Spelledaren pausar: nedräkning och väntande steg fryses, ljudet tystnar, inmatning ignoreras. */
+  pause(){if(this.paused||(this.stage!=='game'&&this.stage!=='intro'))return;const n=Date.now();this.paused=n;if(this.dl){this.pDl=Math.max(0,this.dl-n);this.pFn=this.dlFn;this.dl=0;this.dlFn=null}this.pend.forEach(p=>{clearTimeout(p.h);p.left=Math.max(0,p.at-n)});setPaused(true);this.bump()}
+  resume(){if(!this.paused)return;const n=Date.now();this.pAcc+=n-this.paused;this.paused=0;if(this.pFn){this.dl=n+this.pDl;this.dlFn=this.pFn;this.pFn=null}this.pend.forEach(p=>{p.at=n+(p.left||0);p.h=setTimeout(()=>{this.pend=this.pend.filter(x=>x!==p);p.f()},p.left||0);this.timers.push(p.h)});setPaused(false);this.bump()}
   setCd(ms:number,f:()=>void){this.dl=Date.now()+ms/FAST;this.dlFn=f}
   safe(f:()=>void){return()=>{try{f();this.bump()}catch(e){this.fail(e)}}}
   api():Api{const s=this;return{
     players:()=>s.players,online:()=>s.players.filter(p=>p.connected),refresh:()=>s.bump(),award:(p,n)=>{if(Number.isFinite(n))s.rawS[p]=(s.rawS[p]||0)+n},raw:p=>s.rawS[p]||0,
-    after:(ms,f)=>{const p:any={at:Date.now()+ms/FAST,f:s.safe(f)};p.h=setTimeout(()=>{s.pend=s.pend.filter(x=>x!==p);p.f()},ms/FAST);s.pend.push(p);s.timers.push(p.h)},every:(ms,f)=>{s.timers.push(setInterval(s.safe(f),ms/FAST))},clearTimers:()=>s.clear(),
-    countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>Date.now(),stat:(p,k,n)=>s.stat(p,k,n),keep:(src,cap)=>{if(s.album.length<24)s.album.push({src,cap})},custom:()=>s.customQ.splice(0,3),mission:p=>s.missions[p],say:(t,x)=>say(t,x),quip:ok=>{if(Math.random()<.45){const l=s.gameLine(s.def?.id||'',ok);say(l||(ok?LINES.right():LINES.wrong()))}},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
+    after:(ms,f)=>{const p:any={at:Date.now()+ms/FAST,f:s.safe(f)};p.h=setTimeout(()=>{s.pend=s.pend.filter(x=>x!==p);p.f()},ms/FAST);s.pend.push(p);s.timers.push(p.h)},every:(ms,f)=>{const g=s.safe(f);s.timers.push(setInterval(()=>{if(!s.paused)g()},ms/FAST))},clearTimers:()=>s.clear(),
+    countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>(s.paused||Date.now())-s.pAcc,stat:(p,k,n)=>s.stat(p,k,n),keep:(src,cap)=>{if(s.album.length<24)s.album.push({src,cap})},custom:()=>s.customQ.splice(0,3),mission:p=>s.missions[p],say:(t,x)=>say(t,x),quip:ok=>{if(Math.random()<.45){const l=s.gameLine(s.def?.id||'',ok);say(l||(ok?LINES.right():LINES.wrong()))}},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
     code:()=>s.code,mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
     used(k,n,pool,only){const all=[...Array(pool).keys()].filter(i=>!only||only(i));let u=s.usedPools[k]||[];const seen=new Set(u),ord=walk(k,pool);let free=all.filter(i=>!seen.has(i)).sort((a,b)=>ord[a]-ord[b]);let list=free.slice(0,n);if(list.length<n){const inAll=new Set(all),got=new Set(list);u=u.filter(i=>!inAll.has(i));free=all.filter(i=>!got.has(i)).sort((a,b)=>ord[a]-ord[b]);list=[...list,...free.slice(0,n-list.length)]}s.usedPools[k]=[...u,...list];s.save();return list},
   }}
@@ -165,7 +170,7 @@ export class Show{
     else if(this.stage==='result')pv={k:'wait',msg:this.match?'Delresultat':'Resultat',sub:(()=>{const r=this.lastRes?.rows?.find((x:any)=>x.id===id);return r?`${r.pts} poäng i ${this.def?.title}`:''})()};
     else pv=isV?{k:'vipEnd'}:{k:'wait',msg:'Titta på tv:n',sub:'Sanningens ögonblick'};
     const team=this.mode==='team'?TEAM[p.team]:null;
-    return{stage:this.stage,mission:this.match?this.missions[id]:undefined,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby',long:!!this.def?.long,b:__BUILD__};
+    return{paused:!!this.paused,stage:this.stage,mission:this.match?this.missions[id]:undefined,me:{name:p.name,avatar:p.avatar,color:team?.color||p.color,team:team?.name},vip:isV,dl:this.dl,pv,rate:Math.min(12,Math.floor(70/Math.max(1,this.players.filter(x=>!x.bot).length))),canSkip:isV&&this.stage!=='lobby',long:!!this.def?.long,b:__BUILD__};
   }
   push(id:string,force:boolean){
     const x=this.pipes.get(id);if(!x)return;const v=this.view(id);if(!v)return;const s=JSON.stringify(v);
