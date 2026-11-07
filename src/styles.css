@@ -250,7 +250,7 @@ html.lite .greel b{text-shadow:none}
 html.lite .bulbs{animation:none}
 html.lite .conf i:nth-child(3n),html.lite .conf i:nth-child(3n+1){display:none}
 html.lite .wipe i:nth-child(-n+2){display:none}
-html.lite2 .ring,html.lite2 .needs,html.lite2 .waitmark,html.lite2 .emoji,html.lite2 .tsides span,html.lite2 .tsides .av,html.lite2 .vb .av{animation-iteration-count:1}
+html.lite2 .ring,html.lite2 .needs,html.lite2 .waitmark,html.lite2 .emoji,html.lite2 .tsides span,html.lite2 .tsides .av,html.lite2 .host .hd,html.lite2 .host .mic,html.lite2 .host.talk .six,html.lite2 .vb .av{animation-iteration-count:1}
 html.lite2 .wipe{display:none}
 html.lite2 .greel article:nth-child(n+9){display:none}
 
@@ -438,3 +438,6 @@ html.app .ytbox.live .ytcover{display:none}
 /* Filmster: trailern */
 .lvid{position:fixed;right:2vw;bottom:3vh;z-index:1;width:40vw;aspect-ratio:16/9;border-radius:16px;box-shadow:0 0 0 .4vh var(--gold),0 1.5vh 5vh #000a;animation:pop .5s var(--ease)}.lvid.small{width:27vw}.lvid.tiny{width:20vw}.lvid.top{bottom:auto;top:11vh}.lvid.top.small{top:calc(52vh - 15.2vw)}.lvid.top.tiny{top:calc(52vh - 11.25vw)}.lvid .yt{position:absolute;inset:0}.lvid .vload{border-radius:16px}
 @supports not (aspect-ratio:1){.lvid{height:22.5vw}.lvid.small{height:15.2vw}.lvid.tiny{height:11.25vw}}
+
+/* Medan en video spelar står alla andra animationer still, så att svaga tv-apparater hinner rita videon. */
+html.vidon *{animation-play-state:paused!important}html.vidon .ytcover i{animation-play-state:running!important}

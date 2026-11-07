@@ -90,11 +90,11 @@ export function armGate(el:HTMLElement,pass:()=>void){let done=false,live=true;c
  return()=>{live=false;off();Y.cb=null;try{Y.p?.stopVideo?.();Y.p?.setVolume?.(70);if(Y.box){Y.box.classList.remove('gatehit');Y.box.style.display='none'}window.focus()}catch{}}}
 export function unlockClips(){Y.sound=true;if(!V.el){const e=document.createElement('video');e.playsInline=true;e.setAttribute('playsinline','');e.preload='auto';e.className='clipv';V.el=e}try{V.el.muted=false;V.el.src=SILENT;const r=V.el.play();r?.then?.(()=>{V.on=true;V.el.pause()}).catch(()=>{})}catch{}yt().then(ytPlayer).catch(()=>{})}
 function Vf({g}:any){const box=useRef<HTMLDivElement>(null),c=g.cur;const[on,setOn]=React.useState(false);const[muted,setM]=React.useState(false);
- useEffect(()=>{if(!V.el)unlockClips();const e:HTMLVideoElement=V.el;let t:any,live=true;box.current?.appendChild(e);e.src=c.file;e.currentTime=c.start||0;e.muted=false;e.volume=.7;
+ useEffect(()=>{if(!V.el)unlockClips();const e:HTMLVideoElement=V.el;let t:any,live=true;box.current?.appendChild(e);document.documentElement.classList.add('vidon');e.src=c.file;e.currentTime=c.start||0;e.muted=false;e.volume=.7;
   const go=()=>{const r=e.play();r?.catch?.(()=>{if(!live)return;e.muted=true;setM(true);e.play().catch(()=>{g.fallback=true;g.open()})})};
   e.onerror=()=>{if(live){g.fallback=true;g.open()}};e.onplaying=()=>setOn(true);e.oncanplay=()=>{e.oncanplay=null;go()};e.load();e.currentTime=c.start||0;
   t=setInterval(()=>{e.volume=hostState.talking?.21:.7;if(!g.ready&&e.currentTime>=c.stop){e.pause();g.open()}},60);
-  return()=>{live=false;clearInterval(t);e.oncanplay=e.onplaying=e.onerror=null;e.pause();e.remove()}},[c.file]);
+  return()=>{live=false;clearInterval(t);e.oncanplay=e.onplaying=e.onerror=null;e.pause();e.remove();document.documentElement.classList.remove('vidon')}},[c.file]);
  useEffect(()=>{snd.music('lobby');snd.duck(true);return()=>snd.duck(false)},[]);
  useEffect(()=>{if(g.phase==='reveal')V.el?.play().catch(()=>{})},[g.phase]);
  useEffect(()=>{if(!muted)return;const f=()=>{V.el.muted=false;setM(false);V.el.play().catch(()=>{})};window.addEventListener('pointerdown',f);window.addEventListener('keydown',f);return()=>{window.removeEventListener('pointerdown',f);window.removeEventListener('keydown',f)}},[muted]);
@@ -102,7 +102,7 @@ function Vf({g}:any){const box=useRef<HTMLDivElement>(null),c=g.cur;const[on,set
 // Telefonlayouten av YouTube (många tv-webbläsare) visar titeln de första sekunderna. Då startar klippet tidigare bakom skyddet.
 const lead=/Android|Mobile/i.test(navigator.userAgent)&&!/KvallsshowenTV/.test(navigator.userAgent)?3.5:0;
 function Yt({g}:any){const box=useRef<HTMLDivElement>(null),c=g.cur;const[on,setOn]=React.useState(false);const[muted,setM]=React.useState(false);
- useEffect(()=>{let t:any,live=true,tried=1,t0=Date.now();Y.err=()=>{if(g.badClip?.())return;g.fallback=true;g.open()};const place=()=>{if(!Y.box||!box.current)return;const r=box.current.getBoundingClientRect();Object.assign(Y.box.style,{display:'block',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});
+ useEffect(()=>{let t:any,live=true,tried=1,t0=Date.now();Y.err=()=>{if(g.badClip?.())return;g.fallback=true;g.open()};const place=()=>{if(!Y.box||!box.current)return;const r=box.current.getBoundingClientRect();document.documentElement.classList.add('vidon');Object.assign(Y.box.style,{display:'block',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});
    // Spelaren görs större än rutan så att YouTubes titel och logga hamnar utanför bild. Inga transforms: videon syns annars inte i tv-appen.
    const f=Y.box.querySelector('iframe') as HTMLIFrameElement|null;if(f&&!Y.box.classList.contains('gatehit')){const H=r.height+190,W=Math.max(r.width,H*16/9);Object.assign(f.style,{width:W+'px',height:H+'px',left:(r.width-W)/2+'px',top:(r.height-H)/2+'px'})}};
   yt().then(ytPlayer).then((p:any)=>{if(!live)return;place();const silent=(on:boolean)=>{setM(on);Y.box?.classList.toggle('tap',on)};let checking=false;
@@ -112,7 +112,7 @@ function Yt({g}:any){const box=useRef<HTMLDivElement>(null),c=g.cur;const[on,set
     // Skärmen täcks tills klippet verkligen rullar: YouTube visar annars titeln, alltså svaret, medan det laddar.
     if(ps===1&&(p.getCurrentTime?.()||0)>=(lead?c.start:c.start+.3))Y.box?.classList.add('live');else if(ps!==3)Y.box?.classList.remove('live');if(!clipT0&&!g.ready&&Date.now()-t0>16000){clearInterval(t);Y.err?.();return}
     if(tried===1&&!clipT0&&ps!==1&&ps!==3){const w=Date.now()-t0;if(w>3500&&!nudged){nudged=true;p.playVideo()}if(w>9000){tried=2;p.mute();silent(true);p.playVideo()}}if(!clipT0&&p.getPlayerState?.()===1)clipT0=Date.now();if(!g.ready&&(p.getCurrentTime()>=c.stop||(clipT0&&Date.now()-clipT0>10000+lead*1000))){tried=3;p.pauseVideo();g.open()}},120)});
-  return()=>{live=false;clearInterval(t);Y.cb=null;try{Y.p?.pauseVideo();if(Y.box){Y.box.style.display='none';Y.box.classList.remove('tap','live')}}catch{}}},[c.id]);
+  return()=>{live=false;clearInterval(t);Y.cb=null;try{Y.p?.pauseVideo();if(Y.box){Y.box.style.display='none';document.documentElement.classList.remove('vidon');Y.box.classList.remove('tap','live')}}catch{}}},[c.id]);
  useEffect(()=>{snd.music('lobby');if(!muted)snd.duck(true);return()=>snd.duck(false)},[muted]);
  useEffect(()=>{if(g.phase==='reveal')try{Y.p?.playVideo()}catch{}},[g.phase]);
  const sound=()=>{try{Y.sound=true;Y.p.unMute();Y.p.setVolume(70);Y.p.playVideo();setM(false)}catch{}};
@@ -143,14 +143,14 @@ export const MEDIAG=[
 /** Filmster: visar filmens trailer i en ruta på tv:n. Börjar en bit in och hoppar tillbaka före slutet, där premiärdatumet brukar stå. */
 export function FilmClip({ids,small,tiny,top}:{ids:string[],small?:boolean,tiny?:boolean,top?:boolean}){const box=useRef<HTMLDivElement>(null);const[n,setN]=React.useState(0);const[on,setOn]=React.useState(false);const[muted,setM]=React.useState(false);const[gone,setGone]=React.useState(false);const id=ids[n];
  useEffect(()=>{if(!id){setGone(true);return}let live=true,t:any,t0=Date.now(),started=0;setOn(false);const bad=()=>{if(!live)return;live=false;setN(x=>x+1)};Y.err=bad;
-  const place=()=>{if(!Y.box||!box.current)return;const r=box.current.getBoundingClientRect();Object.assign(Y.box.style,{display:'block',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});const f=Y.box.querySelector('iframe') as HTMLIFrameElement|null;if(f&&!Y.box.classList.contains('gatehit')){const H=r.height+190,W=Math.max(r.width,H*16/9);Object.assign(f.style,{width:W+'px',height:H+'px',left:(r.width-W)/2+'px',top:(r.height-H)/2+'px'})}};
+  const place=()=>{if(!Y.box||!box.current)return;const r=box.current.getBoundingClientRect();document.documentElement.classList.add('vidon');Object.assign(Y.box.style,{display:'block',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});const f=Y.box.querySelector('iframe') as HTMLIFrameElement|null;if(f&&!Y.box.classList.contains('gatehit')){const H=r.height+190,W=Math.max(r.width,H*16/9);Object.assign(f.style,{width:W+'px',height:H+'px',left:(r.width-W)/2+'px',top:(r.height-H)/2+'px'})}};
   yt().then(ytPlayer).then((p:any)=>{if(!live)return;place();let vol=0;const S=6;
    Y.cb=(s:number)=>{if(!live)return;setOn(s===1);if(s===1&&!started)started=Date.now();if(s===1&&p.isMuted?.()){p.unMute();setTimeout(()=>{if(live&&p.isMuted?.())setM(true)},700)}if(s===0){p.seekTo(S,true);p.playVideo()}};
    p.unMute();p.setVolume(0);p.loadVideoById({videoId:id,startSeconds:S});
    t=setInterval(()=>{if(!live)return;place();const want=hostState.talking?18:65;vol+=Math.max(-6,Math.min(6,want-vol));p.setVolume?.(Math.round(vol));const ps=p.getPlayerState?.(),ct=p.getCurrentTime?.()||0,d=p.getDuration?.()||0;
     if(ps===1&&ct>=S-.5)Y.box?.classList.add('live');else if(ps!==3)Y.box?.classList.remove('live');
     if(d>40&&ct>d-22){p.seekTo(S,true)}if(!started&&Date.now()-t0>4000&&ps!==1&&ps!==3)p.playVideo();if(!started&&Date.now()-t0>14000){clearInterval(t);bad()}},150)}).catch(()=>setGone(true));
-  return()=>{live=false;clearInterval(t);Y.cb=null;Y.err=null;try{Y.p?.pauseVideo();if(Y.box){Y.box.style.display='none';Y.box.classList.remove('tap','live')}}catch{}}},[id]);
+  return()=>{live=false;clearInterval(t);Y.cb=null;Y.err=null;try{Y.p?.pauseVideo();if(Y.box){Y.box.style.display='none';document.documentElement.classList.remove('vidon');Y.box.classList.remove('tap','live')}}catch{}}},[id]);
  useEffect(()=>{if(gone)return;snd.duck(true);return()=>snd.duck(false)},[gone]);
  useEffect(()=>{if(!muted)return;const f=()=>{try{Y.p.unMute();Y.p.setVolume(65);Y.p.playVideo();setM(false)}catch{}};window.addEventListener('pointerdown',f);window.addEventListener('keydown',f);return()=>{window.removeEventListener('pointerdown',f);window.removeEventListener('keydown',f)}},[muted]);
  if(gone)return null;
