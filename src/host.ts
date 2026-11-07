@@ -1,4 +1,4 @@
-import {snd} from './audio';import {songDuck} from './games/songs';import voices from './content/voice.json';
+import {snd} from './audio';import {onBg,isBg} from './bg';import {songDuck} from './games/songs';import voices from './content/voice.json';
 // Programledaren Sixten. Allt som sägs är inspelat. Saknas en replik visas den bara som text, så att ingen robotröst hörs.
 export const hostState={text:'',talking:false,level:0,sub:new Set<()=>void>()};
 const emit=()=>hostState.sub.forEach(f=>f());
@@ -15,10 +15,11 @@ function browser(text:string,n:number){try{const s=window.speechSynthesis;if(!s)
 function file(src:string,text:string,n:number,next:()=>void){let moved=false;const go=()=>{if(moved||n!==token)return;moved=true;next()};const to=setTimeout(go,src.startsWith('/voice')?2500:7000);au.oncanplay=()=>{clearTimeout(to);if(n!==token||moved)return;moved=true;wire();au.play().catch(()=>{moved=false;go()})};au.onended=()=>done(n);au.onerror=()=>{clearTimeout(to);go()};au.src=src;au.load()}
 export function unlockVoice(){try{au.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';au.play().catch(()=>{});const s=window.speechSynthesis;if(s){const u=new SpeechSynthesisUtterance(' ');u.volume=0;s.speak(u)}}catch{}}
 /** text visas i pratbubblan. spoken är det som läses upp; utan namn kan det spelas in i förväg. */
-export function say(text:string,spoken=text){if(new URLSearchParams(location.search).has('fast'))return;const n=++token;hostState.text=text;hostState.talking=true;emit();meter();snd.duck(true);songDuck(true);try{au?.pause();window.speechSynthesis?.cancel()}catch{}
+export function say(text:string,spoken=text){if(new URLSearchParams(location.search).has('fast')||isBg())return;const n=++token;hostState.text=text;hostState.talking=true;emit();meter();snd.duck(true);songDuck(true);try{au?.pause();window.speechSynthesis?.cancel()}catch{}
   setTimeout(()=>done(n),30000);if(have.has(hash(spoken)))file(`/voice/${hash(spoken)}.mp3`,spoken,n,()=>done(n));else setTimeout(()=>done(n),Math.min(6000,1200+text.length*55))}
 /** Tystar Sixten direkt, till exempel när spelledaren hoppar över introt. */
 export function hush(){const n=++token;try{au?.pause();window.speechSynthesis?.cancel()}catch{}hostState.talking=false;hostState.text='';emit();snd.duck(false);songDuck(false);void n}
+onBg(h=>{if(h)hush()});
 export const LINES={
   welcome:()=>pick(['God kväll och välkomna till Kvällsshowen! Jag heter Sixten, och i kväll ska vi ta reda på vem som är smartast, snabbast och minst pinsam.','God kväll och välkomna! Skanna koden, ta något gott i glaset och gör er redo.']),
   join:()=>pick(['Ny spelare! Modigt.','Välkommen in, det finns gott om plats för förlorare.','Där kom det en till. Bra!']),
