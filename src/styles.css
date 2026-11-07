@@ -449,3 +449,8 @@ html.vidon *{animation-iteration-count:1!important}html.vidon .ytcover i{animati
 .tvpause{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(14,6,30,.82);text-align:center;animation:pzin .3s ease}
 .tvpause b{font-size:16vh;line-height:1;color:var(--gold);animation:pop .5s var(--ease)}.tvpause h2{font-size:9vh;margin:2vh 0 1vh}.tvpause p{font-size:3.4vh;opacity:.8;margin:0}
 @keyframes pzin{from{opacity:0}}
+
+/* Charader */
+.mteams{display:flex;gap:2.4vw;justify-content:center;flex-wrap:wrap;margin-top:3vh}.mteam{min-width:22vw;max-width:30vw;border:.4vh solid;border-radius:2vh;padding:2vh 2vw;background:#0005;animation:pop .5s var(--ease) both}
+.mteam b{display:block;font-size:4vh;margin-bottom:1.2vh}.mteam div{display:flex;flex-wrap:wrap;gap:.8vh 1.4vw;font-size:3vh}
+.mscore{display:flex;gap:1.6vw;justify-content:center;margin-top:3vh;flex-wrap:wrap}.mscore span{border:.35vh solid;border-radius:99px;padding:.8vh 2vw;font-size:3.2vh;font-weight:800;background:#0006;opacity:.75}.mscore span.on{opacity:1;transform:scale(1.08)}

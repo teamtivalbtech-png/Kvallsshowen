@@ -37,14 +37,46 @@ class Spy{stage='talk';word='';spy='';votes:any={};guess:string|null=null;opts:s
   if(this.stage==='vote')return{k:'choice',key:'v'+this.r,prompt:'Vem är spionen?',opts:this.api.online().filter((x:any)=>x.id!==p).map((x:any)=>({id:x.id,label:x.name,icon:x.avatar})),sel:this.votes[p]};
   if(this.stage==='guess')return sp?{k:'choice',key:'g'+this.r,prompt:'Sista chansen: vilket var ordet?',opts:this.opts.map(o=>({id:o,label:o}))}:{k:'wait',msg:'Spionen gissar',big:'🕵️'};return{k:'wait',msg:this.word,sub:'Var det hemliga ordet',key:'r'+this.r}}}
 const SpyTv=({g,show}:any)=>{const s=nameOf(show,g.spy);return <Stage kicker={`Spyfall · runda ${g.r+1}/${g.rounds}`} title={{talk:'Säg ett ord var, högt',vote:'Vem är spionen?',guess:g.caught?'Spionen är avslöjad!':'Spionen klarade sig',rev:`$<Av p={s}/> ${s?.name} var spionen`}[g.stage]}>{g.stage==='rev'&&<div className="bignum">{g.word}</div>}{g.stage==='vote'&&<div className="ansrow">{show.players.map((p:any)=><span key={p.id} className={p.id in g.votes?'in':''} style={{borderColor:p.color}}><Av p={p}/></span>)}</div>}{g.stage==='guess'&&<p className="lead">Nu får spionen gissa ordet för bonuspoäng.</p>}</Stage>};
-class Mime{idx=0;word='';teams:any[]=[];team=0;n=0;score:any={};cur:any=null;w=0;constructor(public api:any){}
- start(){this.api.music('action');const t=this.api.teams();this.teams=t.length>1?t:(()=>{const s=shuffle(this.api.online());const a=s.filter((_:any,i:number)=>i%2===0),b=s.filter((_:any,i:number)=>i%2);return[{id:0,name:'Lag Guld',color:'#ffc23d',members:a},{id:1,name:'Lag Korall',color:'#ff5d5d',members:b}]})();this.turns=this.teams.flatMap((t:any)=>t.members.filter((m:any)=>!m.bot).slice(0,2).map((m:any)=>({t,m})));this.turns=shuffle(this.turns);this.next()}
- turns:any[]=[];next(){if(this.idx>=Math.min(this.turns.length,6))return this.api.end();this.cur=this.turns[this.idx];this.w=0;this.pick();this.ready=true;this.api.stopCountdown();this.api.refresh()}ready=true;
- pick(){this.word=MIME[this.api.used('mime',1,MIME.length)[0]]}
- onInput(p:string,d:any){if(p!==this.cur.m.id)return;if(this.ready&&d.a==='go'){this.ready=false;this.api.countdown(45000,()=>{this.idx++;this.next()})}else if(d.a==='ok'){this.w++;this.api.sfx('correct');this.cur.t.members.forEach((m:any)=>this.api.award(m.id,400));this.pick()}else if(d.a==='pass')this.pick();this.api.refresh()}
- phone(p:string){const me=p===this.cur?.m.id;if(me)return this.ready?{k:'actions',key:'rd'+this.idx,title:'Din tur att mima',btns:[{id:'go',label:'Starta'}]}:{k:'actions',key:'w'+this.word,title:this.word,body:'Mima utan ljud. Tryck Rätt när ditt lag säger ordet.',btns:[{id:'ok',label:'Rätt'},{id:'pass',label:'Pass'}]};
-  return{k:'wait',msg:this.cur?.t.members.some((m:any)=>m.id===p)?'Gissa högt!':'Tyst, motståndare',big:'🎭'}}}
-const MimeTv=({g}:any)=><Stage kicker={`Mimkampen · ${g.cur?.t.name}`} title={g.ready?`${g.cur?.m.avatar} ${g.cur?.m.name} mimar snart`:`${g.cur?.m.avatar} ${g.cur?.m.name} mimar`}><div className="bignum">{g.w} rätt</div></Stage>;
+const MCOL=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
+const MSECS=[30,45,60,90,120],MROUNDS=[1,2,3,4];
+/** Charader. Spelledaren väljer tid per tur, antal rundor och lag. Den som mimar eller någon i laget trycker Rätt. */
+class Mime{set=true;secs=60;rounds=1;n=2;teams:any[]=[];turns:any[]=[];idx=0;word='';wi=0;cur:any=null;w=0;ready=true;constructor(public api:any){}
+ start(){this.api.music('action');const t=this.api.teams();if(t.length>1){this.teams=t.map((x:any,i:number)=>({id:i,name:x.name||MCOL[i%4].name,color:x.color||MCOL[i%4].color,members:x.members.map((m:any)=>m.id),w:0}));this.n=this.teams.length}else this.deal(2);
+  const h=this.api.host();if(!h||!this.api.online().some((m:any)=>m.id===h&&!m.bot))return this.begin();this.api.refresh()}
+ humans(){return this.api.online().filter((m:any)=>!m.bot)}
+ deal(n:number){const pl=shuffle(this.api.online());this.n=n;this.teams=MCOL.slice(0,n).map((c:any,i:number)=>({id:i,...c,members:[],w:0}));
+  // Människorna fördelas först så att varje lag får någon som kan mima.
+  const hs=pl.filter((m:any)=>!m.bot),bs=pl.filter((m:any)=>m.bot);[...hs,...bs].forEach((p:any,i:number)=>this.teams[i%n].members.push(p.id))}
+ maxTeams(){return Math.max(2,Math.min(4,this.humans().length))}
+ begin(){if(!this.set)return;this.set=false;const pl=this.api.players();const per=this.teams.map((t:any)=>t.members.map((id:string)=>pl.find((p:any)=>p.id===id)).filter((m:any)=>m&&!m.bot));
+  this.turns=[];for(let r=0;r<this.rounds;r++){const L=Math.max(...per.map((x:any[])=>x.length));for(let i=0;i<L;i++)this.teams.forEach((t:any,k:number)=>{const h=per[k];if(h.length)this.turns.push({t,m:h[(i+r*L)%h.length],r})})}
+  if(!this.turns.length)return this.api.end();this.idx=0;this.next()}
+ skip(){if(this.set)this.begin()}
+ timeUp(){if(this.set)this.begin()}
+ next(){if(this.idx>=this.turns.length)return this.api.end();this.cur=this.turns[this.idx];this.w=0;this.pick();this.ready=true;this.api.stopCountdown();this.api.refresh()}
+ pick(){this.word=MIME[this.api.used('mime',1,MIME.length)[0]];this.wi++}
+ onInput(p:string,d:any){
+  if(this.set){if(p!==this.api.host())return;const a=d?.a;
+   if(a==='deal'){this.deal(this.n);return this.api.refresh()}
+   if(Number.isInteger(d.teams)&&d.teams>=2&&d.teams<=this.maxTeams()){this.deal(d.teams);return this.api.refresh()}
+   if(MSECS.includes(d.secs)){this.secs=d.secs;return this.api.refresh()}
+   if(MROUNDS.includes(d.rounds)){this.rounds=d.rounds;return this.api.refresh()}
+   if(d.move){const f=this.teams.find((t:any)=>t.members.includes(d.move));if(!f||f.members.length<2)return;f.members=f.members.filter((x:string)=>x!==d.move);this.teams[(f.id+1)%this.teams.length].members.push(d.move);return this.api.refresh()}
+   if(a==='start')return this.begin();return}
+  const c=this.cur;if(!c)return;const mime=p===c.m.id,mate=c.t.members.includes(p);
+  if(mime&&this.ready&&d.a==='go'){this.ready=false;this.api.countdown(this.secs*1000,()=>{this.idx++;this.next()});return this.api.refresh()}
+  if(this.ready)return;
+  // Rätt räknas en gång per ord, oavsett om det är den som mimar eller någon i laget som trycker.
+  if(d.a==='ok'+this.wi&&(mime||mate)){this.w++;c.t.w++;this.api.sfx('correct');c.t.members.forEach((m:any)=>this.api.award(m,400));this.pick();return this.api.refresh()}
+  if(d.a==='pass'&&mime){this.pick();this.api.refresh()}}
+ phone(p:string){if(this.set){if(p!==this.api.host())return{k:'wait',msg:'Spelledaren ställer in tid, rundor och lag',big:'🎭'};const pl=this.api.players();
+   return{k:'mimeset',key:'set',n:this.n,max:this.maxTeams(),secs:this.secs,rounds:this.rounds,teams:this.teams.map((t:any)=>({id:t.id,name:t.name,color:t.color,members:t.members.map((id:string)=>{const m=pl.find((x:any)=>x.id===id);return{id,name:(m?.bot?'🤖 ':'')+(m?.name||'?')}})}))}}
+  const c=this.cur,me=p===c?.m.id;if(me)return this.ready?{k:'actions',key:'rd'+this.idx,title:'Din tur att mima',body:`Du har ${this.secs} sekunder. Visa inte ordet för någon.`,btns:[{id:'go',label:'Starta'}]}:{k:'actions',key:'w'+this.wi,title:this.word,body:'Mima utan ljud. Tryck Rätt när ditt lag säger ordet.',btns:[{id:'ok'+this.wi,label:'Rätt'},{id:'pass',label:'Pass'}]};
+  if(c?.t.members.includes(p))return this.ready?{k:'wait',msg:`${c.m.name} mimar snart. Gissa högt!`,big:'🎭'}:{k:'actions',key:'g'+this.wi,title:'Gissa högt!',body:`Tryck när ${c.m.name} säger att ni har rätt.`,btns:[{id:'ok'+this.wi,label:'✅ Rätt!'}]};
+  return{k:'wait',msg:'Tyst, motståndare',big:'🤫'}}}
+const MimeTv=({g}:any)=>{const pl=g.api.players();const nm=(id:string)=>pl.find((x:any)=>x.id===id);
+ if(g.set)return <Stage kicker="Charader" title="Spelledaren ställer in spelet"><div className="mteams">{g.teams.map((t:any)=><div key={t.id} className="mteam" style={{borderColor:t.color}}><b style={{color:t.color}}>{t.name}</b><div>{t.members.map((id:string)=>{const m=nm(id);return <span key={id}>{m?.avatar} {m?.name}</span>})}</div></div>)}</div><p className="sub">{g.secs} sekunder per tur · {g.rounds} {g.rounds===1?'runda':'rundor'}</p></Stage>;
+ const c=g.cur;return <Stage kicker={`Charader · Runda ${(c?.r||0)+1} av ${g.rounds} · ${c?.t.name}`} title={g.ready?`${c?.m.avatar} ${c?.m.name} mimar snart`:`${c?.m.avatar} ${c?.m.name} mimar`}><div className="bignum" key={g.w}>{g.w} rätt</div><div className="mscore">{g.teams.map((t:any)=><span key={t.id} className={t.id===c?.t.id?'on':''} style={{borderColor:t.color,color:t.color}}>{t.name}: {t.w}</span>)}</div></Stage>};
 class Stop extends RB{qms=30000;revealMs=6500;rows:any[]=[];onInput(p:string,d:any){if(typeof d?.a==='number'&&isFinite(d.a))super.onInput(p,d)}setup(){this.items=[10,7.5,13].map(t=>({t}))}
  ask(p:string){return{k:'stopwatch',prompt:`Stoppa på exakt ${this.cur.t} sekunder`,target:this.cur.t,sel:this.sel(p)}}
  score(){this.rows=Object.entries(this.ans).map(([id,a]:any)=>({id,v:a.v,d:Math.abs(a.v-this.cur.t)})).sort((a,b)=>a.d-b.d);this.rows.forEach((r,i)=>{r.p=r.d<.02?1500:[1000,600,300][i]||0;this.api.award(r.id,r.p)})}
@@ -63,7 +95,7 @@ export const SOCIALG=[
 {id:'who',title:'Vem av oss?',tag:'Gruppen dömer',how:'Rösta på den i gruppen som passar bäst. Poäng om du röstar med majoriteten.',cat:'Socialt',icon:'👉',mins:4,make:(a:any)=>new Who(a),Tv:WhoTv,min:3},
 {id:'like',title:'Tänk likadant',tag:'Tänk som de andra',how:'Skriv ett svar. Poäng om andra skriver samma.',cat:'Socialt',icon:'🧩',mins:5,make:(a:any)=>new Like(a),Tv:LikeTv,min:3},
 {id:'spy',title:'Spyfall',tag:'Vem vet inte ordet?',how:'Alla utom en får samma hemliga plats. Avslöja spionen.',cat:'Socialt',icon:'🕵️',mins:7,make:(a:any)=>new Spy(a),Tv:SpyTv,min:3,humans:2},
-{id:'mime',title:'Charader',tag:'Utan ett ljud',how:'En mimar, laget gissar. 45 sekunder per person.',cat:'Socialt',icon:'🎭',mins:6,make:(a:any)=>new Mime(a),Tv:MimeTv,min:4,humans:2,even:true},
+{id:'mime',title:'Charader',tag:'Utan ett ljud',how:'En mimar, laget gissar. Spelledaren väljer tid, rundor och lag.',cat:'Socialt',icon:'🎭',mins:6,make:(a:any)=>new Mime(a),Tv:MimeTv,min:4,humans:2,even:true},
 {id:'stop',title:'Stoppa klockan',tag:'Exakt tidskänsla',how:'Stoppa utan att se klockan.',cat:'Tajming',icon:'⏱️',mins:3,make:(a:any)=>new Stop(a),Tv:StopTv},
 {id:'selfie',title:'Selfieuppdraget',tag:'Rösta fram bästa bilden',how:'Ta en bild efter uppdraget. Alla röstar.',cat:'Kamera',icon:'📸',mins:5,needs:'camera',make:(a:any)=>new Selfie(a),Tv:SelfieTv,min:3},
 ];

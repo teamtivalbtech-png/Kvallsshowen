@@ -149,7 +149,7 @@ export class Show{
   setCd(ms:number,f:()=>void){this.dl=Date.now()+ms/FAST;this.dlFn=f}
   safe(f:()=>void){return()=>{try{f();this.bump()}catch(e){this.fail(e)}}}
   api():Api{const s=this;return{
-    players:()=>s.players,online:()=>s.players.filter(p=>p.connected),refresh:()=>s.bump(),award:(p,n)=>{if(Number.isFinite(n))s.rawS[p]=(s.rawS[p]||0)+n},raw:p=>s.rawS[p]||0,
+    players:()=>s.players,host:()=>s.vip()?.id,online:()=>s.players.filter(p=>p.connected),refresh:()=>s.bump(),award:(p,n)=>{if(Number.isFinite(n))s.rawS[p]=(s.rawS[p]||0)+n},raw:p=>s.rawS[p]||0,
     after:(ms,f)=>{const p:any={at:Date.now()+ms/FAST,f:s.safe(f)};p.h=setTimeout(()=>{s.pend=s.pend.filter(x=>x!==p);p.f()},ms/FAST);s.pend.push(p);s.timers.push(p.h)},every:(ms,f)=>{const g=s.safe(f);s.timers.push(setInterval(()=>{if(!s.paused)g()},ms/FAST))},clearTimers:()=>s.clear(),
     countdown:(ms,f)=>s.setCd(ms,f),deadline:()=>s.dl,stopCountdown:()=>{s.dl=0;s.dlFn=null},now:()=>(s.paused||Date.now())-s.pAcc,stat:(p,k,n)=>s.stat(p,k,n),keep:(src,cap)=>{if(s.album.length<24)s.album.push({src,cap})},custom:()=>s.customQ.splice(0,3),mission:p=>s.missions[p],say:(t,x)=>say(t,x),quip:ok=>{if(Math.random()<.45){const l=s.gameLine(s.def?.id||'',ok);say(l||(ok?LINES.right():LINES.wrong()))}},sfx:n=>snd.sfx(n),music:n=>snd.music(n),end:()=>s.endGame(),
     code:()=>s.code,mode:()=>s.mode,teams:()=>s.teamList(),isFinal:()=>s.match,total:p=>s.total[p]||0,
