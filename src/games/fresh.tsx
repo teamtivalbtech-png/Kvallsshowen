@@ -14,7 +14,7 @@ const RevTv=({g,show}:any)=><Stage kicker={`Baklängeslåten ${g.idx+1}/${g.item
 // Reklamkampen: reklamfilm i tio sekunder, gissa märket.
 class Ads extends Next{kick='Reklamkampen';spare:any[]=[];get pr(){return 'Vilket märke är det?'}
  item(r:any){const w=shuffle(BRANDS.filter(b=>b!==r.b)).slice(0,3);return{id:r.id,start:0,stop:8,after:5,t:'Vilket märke?',a:r.b,w}}
- setup(){const a=this.api.used('ads',8,ADS.length).map((i:number)=>ADS[i]);this.items=a.slice(0,5).map((r:any)=>this.item(r));this.spare=a.slice(5)}
+ setup(){const seen=new Set();const a=this.api.used('ads',10,ADS.length).map((i:number)=>ADS[i]).filter((r:any)=>!seen.has(r.b)&&seen.add(r.b));this.items=a.slice(0,5).map((r:any)=>this.item(r));this.spare=a.slice(5)}
  badClip(){const r=this.spare.shift();if(!r)return false;this.items[this.idx]=this.item(r);this.begin();this.api.refresh();return true}
  result(p:string){const ok=this.ans[p]?.v===this.cur.a;return{k:'wait',msg:ok?'Rätt!':'Fel',big:ok?'📺':'😵',sub:this.cur.a,key:'r'+this.idx}}}
 // Tidsresan: ledtrådar och en låt från samma år.
