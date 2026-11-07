@@ -2,7 +2,7 @@ export interface Player{id:string;name:string;avatar:string;photo?:string;color:
 export type PV=any;
 export interface Api{
   code():string;
-  players():Player[]; online():Player[]; refresh():void; award(pid:string,pts:number):void; raw(pid:string):number;
+  players():Player[]; online():Player[]; /** Spelledarens id */ host():string|undefined; refresh():void; award(pid:string,pts:number):void; raw(pid:string):number;
   after(ms:number,fn:()=>void):void; every(ms:number,fn:()=>void):void; clearTimers():void;
   countdown(ms:number,fn:()=>void):void; deadline():number; stopCountdown():void;
   now():number; stat(p:string,k:string,n:number):void; keep(src:string,cap:string):void; custom():any[]; mission(p:string):string|undefined; say(t:string,s?:string):void; quip(ok:boolean):void; sfx(n:string):void; music(n:string|null):void; end():void;
