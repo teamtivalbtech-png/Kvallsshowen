@@ -399,3 +399,38 @@ html.app .ytbox.live .ytcover{display:none}
 .lchal b{color:var(--c)}
 .lchal .ok{outline:2px solid #7dffb0}.lchal .bad{outline:2px solid #ffb0b0}
 .lchal b{font:inherit;font-weight:900}.lverdict{max-width:84vw;padding:2.4vh 3vw}
+/* Låtväljaren på telefonen */
+.spick{display:flex;flex-direction:column;gap:10px;padding-bottom:16px}
+.spick h3{margin:0;text-align:center}
+.slist{display:flex;flex-direction:column;gap:8px}
+.slist button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border-radius:14px;background:#ffffff14;color:var(--cream);text-align:left;min-height:56px}
+.slist button:active{transform:scale(.98);background:#ffffff26}
+.slist b{font-size:17px;line-height:1.2}.slist span{font-size:14px;opacity:.75}
+/* DJ-duellen och Topp eller flopp */
+.djduel{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:4vw;width:min(86vw,1500px);margin:2vh 0}
+.djside{position:relative;display:flex;flex-direction:column;align-items:center;gap:.8vh;padding:3vh 2vw;border-radius:3vh;background:#16081fcc;box-shadow:inset 0 0 0 .35vh #ffffff22;text-align:center;transition:transform .35s var(--ease),box-shadow .35s,opacity .35s;min-height:24vh;justify-content:center}
+.djside.c0{--c:var(--gold)}.djside.c1{--c:var(--coral)}
+.djside .av{width:9vh;height:9vh;font-size:6vh;line-height:9vh}
+.djside>b{font-size:3vh;color:var(--c)}
+.djside h3{margin:0;font-size:4.2vh;line-height:1.1}.djside p{margin:0;font-size:2.8vh;opacity:.85}
+.djside em{font-style:normal;font-weight:900;font-size:4vh;color:var(--c);animation:pop .4s var(--ease) both}
+.djside.on{transform:scale(1.05);box-shadow:inset 0 0 0 .5vh var(--c),0 0 6vh var(--c)}
+.djside.win{transform:scale(1.07);box-shadow:inset 0 0 0 .6vh #7dffb0,0 0 7vh #2bd66f}
+.djside.lose{opacity:.5;transform:scale(.95)}
+.djside .eq{height:7vh;margin-top:1vh}
+.djvs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-style:normal;font-family:'Bowlby One',serif;font-size:6vh;color:var(--cream);text-shadow:0 0 3vh #000}
+/* Vem valde låten? */
+.whorev{display:flex;flex-direction:column;align-items:center;gap:1vh}
+.whobig{display:flex;flex-direction:column;align-items:center;gap:1vh;animation:pop .6s var(--ease) both}
+.whobig .av{width:22vh;height:22vh;font-size:15vh;line-height:22vh;box-shadow:0 0 0 .6vh var(--gold),0 0 8vh #ffc23d88;border-radius:50%}
+.whobig b{font-size:5vh;color:var(--gold)}
+/* Filmster */
+.lfilm{position:absolute;left:50%;top:100%;z-index:6;transform:translateX(-50%);display:flex;align-items:center;gap:1.2vw;margin-top:.8vh;padding:1.2vh 2.4vw;border-radius:99px;background:#16081ff2;box-shadow:0 0 0 .4vh var(--gold),0 1vh 4vh #0008;white-space:nowrap;animation:pop .5s var(--ease) both;max-width:80vw}
+.lfilm i{font-style:normal;font-size:5vh}.lfilm b{font-size:4.2vh;overflow:hidden;text-overflow:ellipsis}
+.lhead{position:relative}
+.djside .eq p{display:none}
+.slist button:disabled{opacity:.4}
+.lfilm{position:static;transform:none;margin:0;padding:.5vh 1.6vw;font-size:inherit;flex:0 1 auto;min-width:0}
+.lfilm i{font-size:3.4vh}.lfilm b{font-size:3.2vh;white-space:nowrap}
+.lcard span{font-size:min(1.1vw,2vh)}
+.gm-filmster .lat{background:linear-gradient(#000b,#000c),url(/art/filmster.jpg) center/cover,#150a22}
