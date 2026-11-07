@@ -10,4 +10,4 @@ export interface Api{
   used(key:string,n:number,pool:number,only?:(i:number)=>boolean):number[]; isFinal():boolean; total(pid:string):number;
 }
 export interface Inst{start():void;onInput?(pid:string,d:any):void;onStream?(pid:string,d:any):void;tick?(dt:number):void;phone(pid:string):PV;onLeave?(pid:string):void}
-export interface GameDef{id:string;title:string;tag:string;how:string;cat:string;icon:string;min?:number;max?:number;humans?:number;even?:boolean;mins:number;long?:boolean;needs?:string;make:(a:Api)=>Inst;Tv:any;finalOnly?:boolean;direct?:boolean}
+export interface GameDef{id:string;title:string;tag:string;how:string;cat:string;icon:string;min?:number;max?:number;humans?:number;mins:number;long?:boolean;needs?:string;make:(a:Api)=>Inst;Tv:any;finalOnly?:boolean;direct?:boolean}
