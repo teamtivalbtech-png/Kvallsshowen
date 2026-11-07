@@ -433,3 +433,4 @@ html.app .ytbox.live .ytcover{display:none}
 .lfilm{position:static;transform:none;margin:0;padding:.5vh 1.6vw;font-size:inherit;flex:0 1 auto;min-width:0}
 .lfilm i{font-size:3.4vh}.lfilm b{font-size:3.2vh;white-space:nowrap}
 .lcard span{font-size:min(1.1vw,2vh)}
+.gm-filmster .lat{background:linear-gradient(#000b,#000c),url(/art/filmster.jpg) center/cover,#150a22}
