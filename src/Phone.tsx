@@ -1,4 +1,4 @@
-import {rs} from './rand';import {GeoPick} from './ui/map';import {MafPhone} from './ui/maf';import {LatSet,LatTurn,LatChal,LatType} from './ui/lat';import {KodP,WaveP,ViskDesc} from './ui/classics';import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake,LOCAL} from './net';import {recordPcm,buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {Aim} from './ui/aim';import {Guard} from './ui/guard';
+import {rs} from './rand';import {GeoPick} from './ui/map';import {MafPhone} from './ui/maf';import {LatSet,LatTurn,LatChal,LatType,LatYear} from './ui/lat';import {SongPick} from './ui/songpick';import {KodP,WaveP,ViskDesc} from './ui/classics';import React,{useEffect,useMemo,useRef,useState} from 'react';import {openPipe,wake,LOCAL} from './net';import {recordPcm,buzz,keepAwake,askMotion,tilt,motion,getCam,getMic,micCtx,stopCam,pitch,isIOS} from './devices';import {Aim} from './ui/aim';import {Guard} from './ui/guard';
 const AV='🦊 🐸 🦉 🐙 🦄 🐯 🐼 🐵 🦁 🐧 🦖 🐢 🦩 🐝 👽 🤖 👻 🌶️ 🍕 🍷'.split(' ');
 let inId=Date.now()%1e6;
 // Spellistan drar med allt innehåll, så den hämtas bara när den behövs (spelvalet).
@@ -120,6 +120,8 @@ const WID:any={
  viskdesc:(p:any)=><ViskDesc {...p} send={send}/>,
  latset:(p:any)=><LatSet {...p} send={send}/>,
  latturn:(p:any)=><LatTurn {...p} send={send}/>,
+ latyear:(p:any)=><LatYear {...p} send={send}/>,
+ songpick:(p:any)=><SongPick {...p} send={send}/>,
  lattype:(p:any)=><LatType {...p} send={send}/>,
  latchal:(p:any)=><LatChal {...p} send={send}/>,
  aim:(p:any)=><Aim {...p} link={L()} rate={p.rate}/>,
