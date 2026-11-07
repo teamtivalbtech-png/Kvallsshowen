@@ -58,7 +58,7 @@ const BombTv=({g}:any)=>{const[,f]=useState(0);useEffect(()=>{const i=setInterva
 export const MINDG=[
 {id:'memory',title:'Simon',tag:'En till, och en till',how:'Se sekvensen på tv:n och upprepa den på telefonen.',cat:'Tajming',icon:'🧠',mins:4,make:(a:any)=>new Memory(a),Tv:MemoryTv},
 {id:'auction',title:'Auktionen',tag:'Skatt eller skräp',how:'Bjud på mystiska lådor. Pengarna kvar blir dina poäng.',cat:'Strategi',icon:'🔨',mins:6,make:(a:any)=>new Auction(a),Tv:AuctionTv},
-{id:'ships',title:'Sänka skepp',tag:'Hemliga flottor',how:'Placera flottan och sänk motståndarna, tur för tur.',cat:'Strategi',icon:'🚢',mins:8,even:true,make:(a:any)=>new Ships(a),Tv:ShipsTv},
+{id:'ships',title:'Sänka skepp',tag:'Hemliga flottor',how:'Placera flottan och sänk motståndarna, tur för tur.',cat:'Strategi',icon:'🚢',mins:8,make:(a:any)=>new Ships(a),Tv:ShipsTv},
 {id:'hunt',title:'Boggle',tag:'Hitta orden',how:'Tryck ihop bokstäver i rad på telefonen.',cat:'Strategi',icon:'🔤',mins:4,make:(a:any)=>new Hunt(a),Tv:HuntTv},
 {id:'bomb',title:'Keep Talking',tag:'Prata med varandra',how:'Alla ser olika ledtrådar. Samarbeta innan tiden tar slut.',cat:'Samarbete',icon:'💣',mins:4,make:(a:any)=>new Bomb(a),Tv:BombTv,min:2},
 ];

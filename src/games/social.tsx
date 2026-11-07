@@ -95,7 +95,7 @@ export const SOCIALG=[
 {id:'who',title:'Vem av oss?',tag:'Gruppen dömer',how:'Rösta på den i gruppen som passar bäst. Poäng om du röstar med majoriteten.',cat:'Socialt',icon:'👉',mins:4,make:(a:any)=>new Who(a),Tv:WhoTv,min:3},
 {id:'like',title:'Tänk likadant',tag:'Tänk som de andra',how:'Skriv ett svar. Poäng om andra skriver samma.',cat:'Socialt',icon:'🧩',mins:5,make:(a:any)=>new Like(a),Tv:LikeTv,min:3},
 {id:'spy',title:'Spyfall',tag:'Vem vet inte ordet?',how:'Alla utom en får samma hemliga plats. Avslöja spionen.',cat:'Socialt',icon:'🕵️',mins:7,make:(a:any)=>new Spy(a),Tv:SpyTv,min:3,humans:2},
-{id:'mime',title:'Charader',tag:'Utan ett ljud',how:'En mimar, laget gissar. Spelledaren väljer tid, rundor och lag.',cat:'Socialt',icon:'🎭',mins:6,make:(a:any)=>new Mime(a),Tv:MimeTv,min:4,humans:2,even:true},
+{id:'mime',title:'Charader',tag:'Utan ett ljud',how:'En mimar, laget gissar. Spelledaren väljer tid, rundor och lag.',cat:'Socialt',icon:'🎭',mins:6,make:(a:any)=>new Mime(a),Tv:MimeTv,min:4,humans:2},
 {id:'stop',title:'Stoppa klockan',tag:'Exakt tidskänsla',how:'Stoppa utan att se klockan.',cat:'Tajming',icon:'⏱️',mins:3,make:(a:any)=>new Stop(a),Tv:StopTv},
 {id:'selfie',title:'Selfieuppdraget',tag:'Rösta fram bästa bilden',how:'Ta en bild efter uppdraget. Alla röstar.',cat:'Kamera',icon:'📸',mins:5,needs:'camera',make:(a:any)=>new Selfie(a),Tv:SelfieTv,min:3},
 ];
