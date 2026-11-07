@@ -11,7 +11,11 @@ public class MainActivity extends Activity{
   void hide(){getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
   @Override public void onWindowFocusChanged(boolean f){super.onWindowFocusChanged(f);if(f)hide();}
   @Override protected void onSaveInstanceState(Bundle o){super.onSaveInstanceState(o);w.saveState(o);}
-  @Override protected void onPause(){super.onPause();w.onPause();}
-  @Override protected void onResume(){super.onResume();w.onResume();}
+  /** Hemknappen eller en annan app: sidan tystnar direkt och fortsätter när man kommer tillbaka. */
+  void bg(boolean on){try{w.evaluateJavascript("window.__bg&&window.__bg("+(on?1:0)+")",null);}catch(Exception e){}}
+  @Override protected void onPause(){bg(true);super.onPause();w.onPause();}
+  @Override protected void onStop(){bg(true);super.onStop();}
+  @Override protected void onResume(){super.onResume();w.onResume();bg(false);}
+  @Override protected void onDestroy(){if(w!=null){bg(true);w.loadUrl("about:blank");w.destroy();w=null;}super.onDestroy();}
   @Override public boolean onKeyDown(int k,KeyEvent e){if(k==KeyEvent.KEYCODE_BACK&&w.canGoBack()){w.goBack();return true;}return super.onKeyDown(k,e);}
 }
