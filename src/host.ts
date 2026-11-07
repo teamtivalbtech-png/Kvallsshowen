@@ -17,6 +17,8 @@ export function unlockVoice(){try{au.src='data:audio/wav;base64,UklGRiQAAABXQVZF
 /** text visas i pratbubblan. spoken är det som läses upp; utan namn kan det spelas in i förväg. */
 export function say(text:string,spoken=text){if(new URLSearchParams(location.search).has('fast'))return;const n=++token;hostState.text=text;hostState.talking=true;emit();meter();snd.duck(true);songDuck(true);try{au?.pause();window.speechSynthesis?.cancel()}catch{}
   setTimeout(()=>done(n),30000);if(have.has(hash(spoken)))file(`/voice/${hash(spoken)}.mp3`,spoken,n,()=>done(n));else setTimeout(()=>done(n),Math.min(6000,1200+text.length*55))}
+/** Tystar Sixten direkt, till exempel när spelledaren hoppar över introt. */
+export function hush(){const n=++token;try{au?.pause();window.speechSynthesis?.cancel()}catch{}hostState.talking=false;hostState.text='';emit();snd.duck(false);songDuck(false);void n}
 export const LINES={
   welcome:()=>pick(['God kväll och välkomna till Kvällsshowen! Jag heter Sixten, och i kväll ska vi ta reda på vem som är smartast, snabbast och minst pinsam.','God kväll och välkomna! Skanna koden, ta något gott i glaset och gör er redo.']),
   join:()=>pick(['Ny spelare! Modigt.','Välkommen in, det finns gott om plats för förlorare.','Där kom det en till. Bra!']),

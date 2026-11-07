@@ -1,4 +1,4 @@
-import {QUIPS} from './content/quips';import {rs} from './rand';import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {stopBuf} from './games/rev';import {say,hasVoice,LINES} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';import {MISSIONS,ROASTS} from './games/extras';import {wake} from './net';import {keepAwake} from './devices';
+import {QUIPS} from './content/quips';import {rs} from './rand';import {openPipe,Pipe} from './net';import {Player,Inst,GameDef,Api} from './types';import {GAMES,byId} from './games';import {snd} from './audio';import {stopBuf} from './games/rev';import {say,hasVoice,LINES,hush} from './host';import {stopSong} from './games/songs';import {botAct,botInfo,resetBots} from './games/bots';import {MISSIONS,ROASTS} from './games/extras';import {wake} from './net';import {keepAwake} from './devices';
 const TEAM=[{name:'Lag Guld',color:'#ffc23d'},{name:'Lag Korall',color:'#ff5d5d'},{name:'Lag Is',color:'#4fd1ff'},{name:'Lag Lime',color:'#a6e84a'}];
 const COL=['#ffc23d','#ff5d5d','#4fd1ff','#a6e84a','#ff8bd2','#b794ff','#ff9b42','#3ee6b8','#f2f2f2','#7da2ff','#e6e04d','#d07bff'];
 const KEY='ks-host-v1';const FAST=+(new URLSearchParams(location.search).get('fast')||1);const rnd=(s:string)=>Array.from({length:4},()=>s[Math.random()*s.length|0]).join('');
@@ -123,7 +123,7 @@ export class Show{
     const before=this.players.length;this.fit(d);
     {const t=d.title.replace(/[!?]+$/,'')+'!',full=`${t} ${d.how}`;say(LINES.intro(d.title,d.how),hasVoice(full)?full:t)}if(this.players.length>before)setTimeout(()=>{},0);this.setCd(this.match?15000:20000,()=>this.beginGame());this.bump();
   }
-  beginGame(){
+  beginGame(){if(this.stage==='intro')hush();
     if(!this.def)return;this.clear();resetBots();this.rawS={};this.players.forEach(p=>this.rawS[p.id]=0);this.stage='game';
     try{this.inst=this.def.make(this.api());this.inst.start()}catch(e){this.fail(e)}this.bump();
   }
